@@ -1,25 +1,12 @@
-require('dotenv').config();
-const express = require('express');
-const OpenAI = require('openai');
+# Prompt v1: Two-Step Approach
+## Current version - scores ~5-6/10 on AVGO
 
-const app = express();
-const port = process.env.PORT || 3000;
+---
 
-app.use(express.json());
-app.use(express.static('public'));
+## Step 1: Thesis Identification
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-app.post('/api/generate-report', async (req, res) => {
-  const { ticker } = req.body;
-
-  if (!ticker) {
-    return res.status(400).json({ error: 'Ticker is required' });
-  }
-
-  try {
-    // STEP 1: Identify the core thesis like a real analyst would
-    const thesisPrompt = `You are a hedge fund analyst researching ${ticker.toUpperCase()}. Your job is to figure out what ACTUALLY matters for this stock right now.
+```
+You are a hedge fund analyst researching [TICKER]. Your job is to figure out what ACTUALLY matters for this stock right now.
 
 Think like an analyst doing real research:
 - What is the fastest-growing or most important business segment?
@@ -43,18 +30,15 @@ Answer these questions:
 4. KEY DEBATES: What are 4-5 specific debates that hedge fund PMs argue about this stock? Not generic risks — the actual controversies.
    - Example for AVGO: "Will custom ASICs displace GPUs?" / "How concentrated is AI revenue?" / "Is Apple insourcing a real threat?"
 
-Be specific. Name products, programs, and customers. No generic descriptions.`;
+Be specific. Name products, programs, and customers. No generic descriptions.
+```
 
-    const thesisResponse = await client.chat.completions.create({
-      model: 'gpt-4o',
-      max_tokens: 1500,
-      messages: [{ role: 'user', content: thesisPrompt }]
-    });
+---
 
-    const thesis = thesisResponse.choices[0].message.content;
+## Step 2: System Prompt
 
-    // STEP 2: Write the memo using the thesis
-    const systemPrompt = `You are a senior hedge fund analyst writing initiation memos. Your memos are dense and insight-rich. Every sentence must teach something non-obvious.
+```
+You are a senior hedge fund analyst writing initiation memos. Your memos are dense and insight-rich. Every sentence must teach something non-obvious.
 
 BANNED PHRASES (never use):
 - "global technology leader" / "industry leader"
@@ -65,12 +49,18 @@ BANNED PHRASES (never use):
 - "digital transformation"
 - Any phrase that could describe any company
 
-Delete filler. Replace with specific facts.`;
+Delete filler. Replace with specific facts.
+```
 
-    const memoPrompt = `Write an initiation memo on ${ticker.toUpperCase()}.
+---
+
+## Step 2: User Prompt
+
+```
+Write an initiation memo on [TICKER].
 
 YOUR RESEARCH IDENTIFIED THIS THESIS:
-${thesis}
+[OUTPUT FROM STEP 1]
 
 WRITING INSTRUCTIONS:
 
@@ -107,25 +97,26 @@ QUALITY RULES:
 - "Broadcom's evolution has been unusually deliberate" = GARBAGE. Delete.
 - "Broadcom co-designed Google's TPU starting with v1" = GOOD. Teaches something.
 - Dense and informative. No wasted words.
-- NO introduction. NO conclusion. Start and end with substance.`;
+- NO introduction. NO conclusion. Start and end with substance.
+```
 
-    const message = await client.chat.completions.create({
-      model: 'gpt-4o',
-      max_tokens: 4096,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: memoPrompt }
-      ]
-    });
+---
 
-    const report = message.choices[0].message.content;
-    res.json({ report });
-  } catch (error) {
-    console.error('Error generating report:', error);
-    res.status(500).json({ error: 'Failed to generate report' });
-  }
-});
+## Results
 
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
+- **AVGO reference memo**: 8.5/10
+- **AVGO vCurrent (old prompt)**: 2/10
+- **AVGO with this prompt**: 5-6/10
+
+## What's Working
+- Gets the core thesis right (TPU co-design, AI ASICs)
+- Names correct customers (Google, AWS, Apple)
+- Mentions Marvell as competitor
+- Key debates are relevant
+
+## What's Not Working
+- Still has filler phrases ("epitomized by", "strategic engagement")
+- Missing section headers
+- Still includes Intel as competitor (wrong)
+- Missing Meta, ByteDance from customer list
+- Debates use "proponents/pessimists" instead of bull/bear

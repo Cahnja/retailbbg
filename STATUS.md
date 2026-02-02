@@ -3,59 +3,64 @@
 ## Live URL
 **https://retailbbg.onrender.com**
 
-Share this with your team. First request after idle may take ~30 seconds (free tier cold start).
-
 ## What We Built
 A web app that generates hedge fund-style initiation of coverage memos for any stock ticker.
 
 - **Stack**: Node.js + Express + OpenAI GPT-4o
-- **Hosting**: Render (free tier)
+- **Hosting**: Render (free tier, auto-deploys on push)
 - **Repo**: https://github.com/Cahnja/retailbbg
 
+## Current Prompt Version
+**v1_two_step** (see `prompts/v1_two_step.md`)
+
+Two-step approach:
+1. Step 1: Identify the core thesis (what really matters for the stock)
+2. Step 2: Write the memo using that thesis
+
+Current score on AVGO: **5-6/10** (up from 2/10)
+
 ## Files
-- `server.js` — Express server with OpenAI API integration and the prompt
-- `public/index.html` — Web interface
-- `.env` — Local environment (OPENAI_API_KEY, not committed)
-- `.env.example` — Template for API key
+```
+retailbbg/
+├── server.js              # Express server with prompt logic
+├── public/index.html      # Web interface
+├── prompts/
+│   └── v1_two_step.md     # Current prompt (documented)
+├── examples/
+│   ├── AVGO_reference.md  # Target quality (8.5/10)
+│   ├── AVGO_vCurrent.md   # Old output (2/10)
+│   └── GRADING.md         # Scoring methodology
+├── .env                   # API key (not committed)
+└── .env.example           # Template
+```
 
-## Current Prompt
-Located in `server.js` lines 21-57. Generates structured PM-grade memos with:
-- What the company does in its core theme
-- Why market shifts favor the business
-- Demand visibility and scale
-- Secondary business segments
-- Competitive positioning (names specific competitors and why they're weaker)
-- Key debates on the stock (numbered, with bull/bear framing)
-
-Style: analytical, skeptical, factual. Density over length.
+## Grading Methodology
+See `examples/GRADING.md`
+- Wrong thesis = capped at 3
+- Filler language = severe penalty
+- Insight density is #1 priority
 
 ## To Resume Development
 1. `npm start` — Run locally at http://localhost:3000
-2. Edit `server.js` to refine the prompt
-3. Test locally, then push to deploy:
-   ```
-   git add -A && git commit -m "your message" && git push
-   ```
-   Render auto-deploys on push.
+2. Edit prompt in `server.js` or reference `prompts/v1_two_step.md`
+3. Test with: `curl -X POST http://localhost:3000/api/generate-report -H "Content-Type: application/json" -d '{"ticker":"AVGO"}'`
+4. Push to deploy: `git add -A && git commit -m "message" && git push`
 
 ## What's Done
-- [x] Basic web app with ticker input
+- [x] Basic web app
 - [x] OpenAI GPT-4o integration
-- [x] PM-grade prompt based on user's AVGO example
+- [x] Two-step prompt (thesis → memo)
 - [x] Deployed to Render
-- [x] GitHub repo created
+- [x] Grading methodology documented
+- [x] Reference memo saved
 
-## Next Steps (if continuing)
-- Test prompt quality across different tickers
-- Add few-shot examples to prompt for more consistent output
-- Integrate real-time stock data via API (Yahoo Finance, etc.)
-- Add PDF export
-- Add authentication if needed for team access
+## Next Steps
+- [ ] Push prompt further to eliminate filler (target 7+/10)
+- [ ] Test on other tickers (NFLX, MSFT, etc.) to check generalization
+- [ ] Consider trying Claude API for comparison
 
-## Reference
-User provided a high-quality AVGO memo as the target output style. Key qualities:
-- Dense, every sentence adds information
-- Names specific customers, products, competitors
-- Explains switching costs and structural advantages
-- Key Debates section with bull/bear framing
-- No valuation or price targets
+## Key Learnings
+- Model doesn't naturally find the "real story" — needs explicit guidance
+- Few-shot examples in prompt help but aren't enough
+- Two-step approach (research → write) works better than one-shot
+- User had to inject thesis ("Broadcom created Google TPU") when creating reference memo manually
