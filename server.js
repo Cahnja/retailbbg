@@ -232,7 +232,7 @@ function saveEarningsToCache(ticker, data) {
   }
 }
 
-async function fetchEarningsTranscript(ticker) {
+async function fetchEarningsTranscripts(ticker) {
   // Check cache first
   const cached = getCachedEarningsData(ticker);
   if (cached) {
@@ -240,34 +240,68 @@ async function fetchEarningsTranscript(ticker) {
   }
 
   try {
-    const response = await fetch(
-      `https://api.api-ninjas.com/v1/earningstranscript?ticker=${ticker}`,
-      {
-        headers: { 'X-Api-Key': API_NINJAS_KEY }
-      }
-    );
+    // Calculate last 4 quarters
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentQuarter = Math.ceil((now.getMonth() + 1) / 3);
 
-    if (!response.ok) {
-      console.log(`No earnings transcript found for ${ticker}: ${response.status}`);
-      return null;
+    const quarters = [];
+    let year = currentYear;
+    let quarter = currentQuarter;
+
+    for (let i = 0; i < 4; i++) {
+      quarters.push({ year, quarter });
+      quarter--;
+      if (quarter === 0) {
+        quarter = 4;
+        year--;
+      }
     }
 
-    const data = await response.json();
+    // Fetch all 4 quarters in parallel
+    const transcriptPromises = quarters.map(async ({ year, quarter }) => {
+      try {
+        const response = await fetch(
+          `https://api.api-ninjas.com/v1/earningstranscript?ticker=${ticker}&year=${year}&quarter=${quarter}`,
+          {
+            headers: { 'X-Api-Key': API_NINJAS_KEY }
+          }
+        );
 
-    if (!data || !data.transcript) {
-      console.log(`No transcript data for ${ticker}`);
+        if (!response.ok) {
+          return null;
+        }
+
+        const data = await response.json();
+        if (!data || !data.transcript) {
+          return null;
+        }
+
+        return {
+          year: data.year,
+          quarter: data.quarter,
+          // Limit each transcript to ~3000 chars (4 transcripts = ~12000 total)
+          transcript: data.transcript.substring(0, 3000)
+        };
+      } catch (err) {
+        return null;
+      }
+    });
+
+    const results = await Promise.all(transcriptPromises);
+    const transcripts = results.filter(t => t !== null);
+
+    if (transcripts.length === 0) {
+      console.log(`No earnings transcripts found for ${ticker}`);
       return null;
     }
 
     const earningsData = {
       ticker: ticker.toUpperCase(),
-      year: data.year,
-      quarter: data.quarter,
-      // Limit transcript to ~6000 chars to avoid token limits
-      transcript: data.transcript.substring(0, 6000)
+      transcripts: transcripts
     };
 
-    console.log(`Fetched earnings transcript for ${ticker}: Q${data.quarter} ${data.year}, ${data.transcript.length} chars`);
+    console.log(`Fetched ${transcripts.length} earnings transcripts for ${ticker}`);
 
     // Cache the data
     saveEarningsToCache(ticker, earningsData);
@@ -374,7 +408,7 @@ app.post('/api/generate-report', async (req, res) => {
     // STEP 1a: Fetch 10-K data and earnings transcript (run in parallel with web search)
     console.log(`Fetching 10-K and earnings transcript for ${ticker.toUpperCase()}...`);
     const secDataPromise = fetch10KData(ticker.toUpperCase());
-    const earningsPromise = fetchEarningsTranscript(ticker.toUpperCase());
+    const earningsPromise = fetchEarningsTranscripts(ticker.toUpperCase());
 
     // STEP 1b: Research with web search (using Responses API for web search)
     const researchPrompt = `You are a hedge fund analyst researching ${ticker.toUpperCase()}.
@@ -419,12 +453,13 @@ Only include verified facts. Cite sources.`;
       }
     }
 
-    // Format earnings transcript for the prompt
+    // Format earnings transcripts for the prompt
     let earningsContext = '';
-    if (earningsData) {
-      earningsContext = `\n\n--- EARNINGS CALL TRANSCRIPT (Q${earningsData.quarter} ${earningsData.year}) ---\n`;
-      earningsContext += earningsData.transcript;
-      earningsContext += '\n';
+    if (earningsData && earningsData.transcripts) {
+      earningsContext = `\n\n--- EARNINGS CALL TRANSCRIPTS (Last ${earningsData.transcripts.length} Quarters) ---\n`;
+      for (const t of earningsData.transcripts) {
+        earningsContext += `\n**Q${t.quarter} ${t.year}:**\n${t.transcript}\n`;
+      }
     }
 
     // STEP 2: Generate first draft using Chat Completions API with few-shot example
