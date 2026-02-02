@@ -324,8 +324,27 @@
       html = html.replace(/<em>Bear Case:<\/em>(.*?)(?=<\/div>|<\/p>|<strong>|<em>)/gs,
         '<p class="bear-case"><strong>Bear Case:</strong>$1</p>');
 
-      // Close debate boxes before next debate, h2, h3, or end of content
-      html = html.replace(/(<div class="debate-box">[\s\S]*?)(<div class="debate-box">|<h[23]>|$)/g, '$1</div>$2');
+      // Close debate boxes: split on opening tag, add closing tag before each subsequent opening
+      const debateParts = html.split('<div class="debate-box">');
+      if (debateParts.length > 1) {
+        html = debateParts[0]; // Part before first debate box
+        for (let i = 1; i < debateParts.length; i++) {
+          html += '<div class="debate-box">' + debateParts[i];
+          // Add closing div before next debate box or at end
+          if (i < debateParts.length - 1) {
+            // Not the last one - will close when we add the next
+          }
+        }
+        // Close all debate boxes by counting opens and adding closes at end
+        const openCount = (html.match(/<div class="debate-box">/g) || []).length;
+        const closeCount = (html.match(/<\/div>/g) || []).length;
+        // Actually, let's do this properly: close each box before the next opens
+        html = html.replace(/<div class="debate-box">/g, '</div><div class="debate-box">');
+        // Remove the first errant </div>
+        html = html.replace('</div><div class="debate-box">', '<div class="debate-box">');
+        // Add final closing div
+        html += '</div>';
+      }
 
       // Close customer boxes
       html = html.replace(/(<div class="customer-box">.*?)(<\/p><p>|<div class="customer-box">|<h[23]>)/g,
