@@ -1,8 +1,61 @@
 require('dotenv').config();
 const express = require('express');
 const OpenAI = require('openai');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
+
+// Cache configuration
+const CACHE_DIR = path.join(__dirname, 'cache');
+const CACHE_MAX_AGE_DAYS = 30;
+
+// Ensure cache directory exists
+if (!fs.existsSync(CACHE_DIR)) {
+  fs.mkdirSync(CACHE_DIR, { recursive: true });
+}
+
+// Cache helper functions
+function getCachePath(ticker) {
+  return path.join(CACHE_DIR, `${ticker.toUpperCase()}.json`);
+}
+
+function getCachedReport(ticker) {
+  const cachePath = getCachePath(ticker);
+  if (!fs.existsSync(cachePath)) {
+    return null;
+  }
+
+  try {
+    const cached = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
+    const ageMs = Date.now() - cached.timestamp;
+    const ageDays = ageMs / (1000 * 60 * 60 * 24);
+
+    if (ageDays <= CACHE_MAX_AGE_DAYS) {
+      return cached;
+    }
+    return null; // Cache expired
+  } catch (error) {
+    console.error('Error reading cache:', error);
+    return null;
+  }
+}
+
+function saveToCache(ticker, report) {
+  const cachePath = getCachePath(ticker);
+  const cacheData = {
+    ticker: ticker.toUpperCase(),
+    report,
+    timestamp: Date.now(),
+    generatedAt: new Date().toISOString()
+  };
+
+  try {
+    fs.writeFileSync(cachePath, JSON.stringify(cacheData, null, 2));
+  } catch (error) {
+    console.error('Error writing cache:', error);
+  }
+}
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
@@ -75,10 +128,23 @@ Broadcom lacks the headline visibility of GPU-centric AI names. The debate is wh
 `;
 
 app.post('/api/generate-report', async (req, res) => {
-  const { ticker } = req.body;
+  const { ticker, forceRefresh } = req.body;
 
   if (!ticker) {
     return res.status(400).json({ error: 'Ticker is required' });
+  }
+
+  // Check cache first (unless forceRefresh is requested)
+  if (!forceRefresh) {
+    const cached = getCachedReport(ticker);
+    if (cached) {
+      console.log(`Returning cached report for ${ticker.toUpperCase()} (generated ${cached.generatedAt})`);
+      return res.json({
+        report: cached.report,
+        cached: true,
+        generatedAt: cached.generatedAt
+      });
+    }
   }
 
   try {
@@ -235,7 +301,12 @@ Rewrite the memo fixing ALL of these problems. Match the quality and density of 
     });
 
     const report = finalDraft.choices[0].message.content;
-    res.json({ report });
+
+    // Save to cache
+    saveToCache(ticker, report);
+    console.log(`Generated and cached new report for ${ticker.toUpperCase()}`);
+
+    res.json({ report, cached: false, generatedAt: new Date().toISOString() });
   } catch (error) {
     console.error('Error generating report:', error);
     res.status(500).json({ error: 'Failed to generate report' });

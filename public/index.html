@@ -169,6 +169,35 @@
       text-align: center;
       padding: 20px;
     }
+    .cache-indicator {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 20px;
+      padding: 10px;
+      border-radius: 6px;
+      display: none;
+    }
+    .cache-indicator.visible {
+      display: block;
+    }
+    .cache-indicator.cached {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    .cache-indicator.fresh {
+      background: #e3f2fd;
+      color: #1565c0;
+    }
+    .refresh-link {
+      margin-left: 10px;
+      color: #1a1a2e;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .refresh-link:hover {
+      color: #2d2d4a;
+    }
   </style>
 </head>
 <body>
@@ -182,6 +211,8 @@
     <button id="generate">Generate Report</button>
   </div>
 
+  <div class="cache-indicator" id="cacheIndicator"></div>
+
   <div class="report-container" id="reportContainer">
     <div class="report-content" id="reportContent"></div>
   </div>
@@ -191,39 +222,68 @@
     const generateBtn = document.getElementById('generate');
     const reportContainer = document.getElementById('reportContainer');
     const reportContent = document.getElementById('reportContent');
+    const cacheIndicator = document.getElementById('cacheIndicator');
 
-    generateBtn.addEventListener('click', generateReport);
+    let currentTicker = '';
+
+    generateBtn.addEventListener('click', () => generateReport(false));
     tickerInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') generateReport();
+      if (e.key === 'Enter') generateReport(false);
     });
 
-    async function generateReport() {
+    async function generateReport(forceRefresh = false) {
       const ticker = tickerInput.value.trim().toUpperCase();
       if (!ticker) return;
 
+      currentTicker = ticker;
       generateBtn.disabled = true;
       reportContainer.classList.add('visible');
-      reportContent.innerHTML = '<div class="loading">Generating report for ' + ticker + '</div>';
+      cacheIndicator.classList.remove('visible', 'cached', 'fresh');
+
+      const loadingMsg = forceRefresh
+        ? 'Generating fresh report for ' + ticker
+        : 'Loading report for ' + ticker;
+      reportContent.innerHTML = '<div class="loading">' + loadingMsg + '</div>';
 
       try {
         const response = await fetch('/api/generate-report', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ticker })
+          body: JSON.stringify({ ticker, forceRefresh })
         });
 
         const data = await response.json();
 
         if (data.error) {
           reportContent.innerHTML = '<div class="error">Error: ' + data.error + '</div>';
+          cacheIndicator.classList.remove('visible');
         } else {
           reportContent.innerHTML = formatReport(data.report);
+          showCacheStatus(data.cached, data.generatedAt);
         }
       } catch (error) {
         reportContent.innerHTML = '<div class="error">Failed to generate report. Please try again.</div>';
+        cacheIndicator.classList.remove('visible');
       }
 
       generateBtn.disabled = false;
+    }
+
+    function showCacheStatus(isCached, generatedAt) {
+      const date = new Date(generatedAt);
+      const dateStr = date.toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric'
+      });
+
+      if (isCached) {
+        cacheIndicator.innerHTML = `📋 Cached report from ${dateStr} <span class="refresh-link" onclick="generateReport(true)">Generate fresh report</span>`;
+        cacheIndicator.classList.add('visible', 'cached');
+        cacheIndicator.classList.remove('fresh');
+      } else {
+        cacheIndicator.innerHTML = `✨ Freshly generated on ${dateStr}`;
+        cacheIndicator.classList.add('visible', 'fresh');
+        cacheIndicator.classList.remove('cached');
+      }
     }
 
     function formatReport(text) {
