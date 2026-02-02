@@ -301,13 +301,13 @@
               <span class="loading-step" id="step4">4. Final</span>
             </div>
             <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 5%"></div></div>
-            <div class="loading-time">Estimated time: <span id="timeRemaining">~90 seconds</span></div>
+            <div class="loading-time">Estimated time: <span id="timeRemaining">~2 minutes</span></div>
           </div>
         `;
 
         let elapsed = 0;
-        const totalTime = 90; // estimated seconds
-        const stepTimes = [20, 45, 60, 90]; // when each step completes
+        const totalTime = 120; // estimated seconds
+        const stepTimes = [25, 55, 70, 120]; // when each step completes (final step is longest)
 
         progressInterval = setInterval(() => {
           elapsed++;
@@ -317,7 +317,14 @@
           const progressFill = document.getElementById('progressFill');
           const timeRemaining = document.getElementById('timeRemaining');
           if (progressFill) progressFill.style.width = progress + '%';
-          if (timeRemaining) timeRemaining.textContent = '~' + remaining + ' seconds';
+          if (timeRemaining) {
+            if (remaining >= 60) {
+              const mins = Math.ceil(remaining / 60);
+              timeRemaining.textContent = '~' + mins + ' minute' + (mins > 1 ? 's' : '');
+            } else {
+              timeRemaining.textContent = '~' + remaining + ' seconds';
+            }
+          }
 
           // Update step indicators
           stepTimes.forEach((time, i) => {
