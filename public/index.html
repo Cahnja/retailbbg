@@ -324,8 +324,8 @@
       html = html.replace(/<em>Bear Case:<\/em>(.*?)(?=<\/div>|<\/p>|<strong>|<em>)/gs,
         '<p class="bear-case"><strong>Bear Case:</strong>$1</p>');
 
-      // Close debate boxes (heuristic: close before next h2 or h3)
-      html = html.replace(/(<div class="debate-box">[\s\S]*?)(<h[23]>)/g, '$1</div>$2');
+      // Close debate boxes before next debate, h2, h3, or end of content
+      html = html.replace(/(<div class="debate-box">[\s\S]*?)(<div class="debate-box">|<h[23]>|$)/g, '$1</div>$2');
 
       // Close customer boxes
       html = html.replace(/(<div class="customer-box">.*?)(<\/p><p>|<div class="customer-box">|<h[23]>)/g,
