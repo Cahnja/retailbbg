@@ -299,13 +299,13 @@
               <span class="loading-step" id="step2">2. Generate</span>
             </div>
             <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 5%"></div></div>
-            <div class="loading-time">Estimated time: <span id="timeRemaining">~45 seconds</span></div>
+            <div class="loading-time">Estimated time: <span id="timeRemaining">~60 seconds</span></div>
           </div>
         `;
 
         let elapsed = 0;
-        const totalTime = 45; // estimated seconds
-        const stepTimes = [20, 45]; // when each step completes
+        const totalTime = 60; // estimated seconds
+        const stepTimes = [20, 60]; // when each step completes
 
         progressInterval = setInterval(() => {
           elapsed++;
