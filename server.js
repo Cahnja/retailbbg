@@ -206,6 +206,7 @@ Requirements:
 - No filler, no generic language
 - NO conclusion section
 - 3000-5000 words
+- **Bold the 1-2 most important sentences in each section** — the key insight or critical data point that readers must not miss
 
 KEY DEBATES SECTION (required format):
 Include a "**Key Debates on the Stock**" section with 4-5 numbered debates. For each debate:
