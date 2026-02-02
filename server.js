@@ -287,7 +287,7 @@ async function fetchEarningsTranscripts(ticker) {
     let year = currentYear;
     let quarter = currentQuarter;
 
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 2; i++) {
       quarters.push({ year, quarter });
       quarter--;
       if (quarter === 0) {
