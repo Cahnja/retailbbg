@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 const SEC_API_KEY = process.env.SEC_API_KEY;
-const API_NINJAS_KEY = process.env.API_NINJAS_KEY;
+const EARNINGSCALL_API_KEY = process.env.EARNINGSCALL_API_KEY;
 
 const app = express();
 
@@ -277,53 +277,79 @@ async function fetchEarningsTranscripts(ticker) {
     return cached;
   }
 
+  const EARNINGSCALL_BASE = 'https://v2.api.earningscall.biz';
+  const exchanges = ['NASDAQ', 'NYSE', 'AMEX']; // Try these exchanges in order
+
   try {
-    // Calculate last 4 quarters
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentQuarter = Math.ceil((now.getMonth() + 1) / 3);
+    // Step 1: Find available earnings events for this ticker
+    let eventsData = null;
+    let workingExchange = null;
 
-    const quarters = [];
-    let year = currentYear;
-    let quarter = currentQuarter;
+    for (const exchange of exchanges) {
+      try {
+        const eventsUrl = `${EARNINGSCALL_BASE}/events?apikey=${EARNINGSCALL_API_KEY}&exchange=${exchange}&symbol=${ticker}`;
+        const eventsResponse = await fetch(eventsUrl);
 
-    for (let i = 0; i < 2; i++) {
-      quarters.push({ year, quarter });
-      quarter--;
-      if (quarter === 0) {
-        quarter = 4;
-        year--;
+        if (eventsResponse.ok) {
+          const data = await eventsResponse.json();
+          if (data && data.events && data.events.length > 0) {
+            eventsData = data;
+            workingExchange = exchange;
+            console.log(`Found ${ticker} on ${exchange} with ${data.events.length} earnings events`);
+            break;
+          }
+        }
+      } catch (err) {
+        // Try next exchange
       }
     }
 
-    // Fetch all 4 quarters in parallel
-    const transcriptPromises = quarters.map(async ({ year, quarter }) => {
+    if (!eventsData || !workingExchange) {
+      console.log(`No earnings events found for ${ticker}`);
+      return null;
+    }
+
+    // Step 2: Get the 2 most recent published events
+    const publishedEvents = eventsData.events
+      .filter(e => e.is_published)
+      .sort((a, b) => {
+        // Sort by year desc, then quarter desc
+        if (b.year !== a.year) return b.year - a.year;
+        return b.quarter - a.quarter;
+      })
+      .slice(0, 2);
+
+    if (publishedEvents.length === 0) {
+      console.log(`No published transcripts available for ${ticker}`);
+      return null;
+    }
+
+    // Step 3: Fetch transcripts for these events
+    const transcriptPromises = publishedEvents.map(async (event) => {
       try {
-        const response = await fetch(
-          `https://api.api-ninjas.com/v1/earningstranscript?ticker=${ticker}&year=${year}&quarter=${quarter}`,
-          {
-            headers: { 'X-Api-Key': API_NINJAS_KEY }
-          }
-        );
+        const transcriptUrl = `${EARNINGSCALL_BASE}/transcript?apikey=${EARNINGSCALL_API_KEY}&exchange=${workingExchange}&symbol=${ticker}&year=${event.year}&quarter=${event.quarter}&level=1`;
+        const response = await fetch(transcriptUrl);
 
         if (!response.ok) {
+          console.log(`Transcript fetch failed for ${ticker} Q${event.quarter} ${event.year}: ${response.status}`);
           return null;
         }
 
         const data = await response.json();
-        if (!data || !data.transcript) {
+        if (!data || !data.text) {
           return null;
         }
 
         // Extract Q&A section only
-        const qaSection = extractQASection(data.transcript);
+        const qaSection = extractQASection(data.text);
 
         return {
-          year: data.year,
-          quarter: data.quarter,
+          year: event.year,
+          quarter: event.quarter,
           transcript: qaSection
         };
       } catch (err) {
+        console.log(`Error fetching transcript for ${ticker} Q${event.quarter} ${event.year}:`, err.message);
         return null;
       }
     });
@@ -332,23 +358,24 @@ async function fetchEarningsTranscripts(ticker) {
     const transcripts = results.filter(t => t !== null);
 
     if (transcripts.length === 0) {
-      console.log(`No earnings transcripts found for ${ticker}`);
+      console.log(`No earnings transcripts could be fetched for ${ticker}`);
       return null;
     }
 
     const earningsData = {
       ticker: ticker.toUpperCase(),
+      companyName: eventsData.company_name,
       transcripts: transcripts
     };
 
-    console.log(`Fetched ${transcripts.length} earnings transcripts for ${ticker}`);
+    console.log(`Fetched ${transcripts.length} earnings transcripts for ${ticker} via EarningsCall.biz`);
 
     // Cache the data
     saveEarningsToCache(ticker, earningsData);
 
     return earningsData;
   } catch (error) {
-    console.error('API Ninjas error:', error);
+    console.error('EarningsCall.biz API error:', error);
     return null;
   }
 }
@@ -360,68 +387,75 @@ app.use(express.static('public'));
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// Reference memo as few-shot example
-const REFERENCE_MEMO = `
-**Broadcom (AVGO) — Initiation of Coverage**
+// Memo template with section instructions
+const MEMO_TEMPLATE = `
+## Investment Thesis
+Synthesize the key reason or reasons to buy the stock in a short overview. Stylistically, this should be very aggressively written (short sentences, not verbose, straight to the point).
 
-**What Broadcom Does in AI**
+## History & Business Overview
+- When was the company founded and how has it evolved since then to get us to where we are today?
+- What are the key products that the company sells?
+- This section should be 3-4 detailed paragraphs covering:
+  - Founding story and early history
+  - Major pivots, acquisitions, or transformations over time
+  - Current business segments and revenue breakdown
+  - Key products/services in each segment with specific details
 
-Broadcom is the leading merchant partner for custom AI accelerators (ASICs) designed and deployed by hyperscalers. These chips are co-designed with customers to run specific training and inference workloads at scale, optimizing for power efficiency, cost per compute, and tight integration with data center infrastructure. Unlike GPUs, these ASICs eliminate excess programmability and scale economically once volumes reach hyperscale levels.
+## Thesis Details
+This is the MOST IMPORTANT and LONGEST section - it should be 40-50% of the entire memo.
+- Go into detail on the key reasons to buy the stock
+- Divide into 4-5 numbered sub-sections (e.g., "### 1. First Reason", "### 2. Second Reason")
+- Each sub-section should be 2-3 substantial paragraphs with:
+  - Specific facts, numbers, and evidence
+  - Customer names, market sizes, growth rates
+  - Why this matters for the stock
 
-Broadcom co-designed Google's Tensor Processing Unit (TPU) starting with TPU v1 and continuing through multiple generations. This was the first large-scale, production deployment of custom AI silicon and remains the most mature non-GPU AI accelerator platform in operation. The TPU program established Broadcom as the default external partner for hyperscalers seeking to internalize AI compute.
+## Competitive Landscape
+- List the company's competitors and what makes them better/worse vs. our company
+- Separate the competitors into separate paragraphs for each
+- Are there threats from new entrants? Who are new entrants in this category?
 
-Since Google, Broadcom has expanded this model across additional hyperscalers. Industry disclosures, supply-chain data, and customer behavior point to active custom AI silicon programs with Google, Meta, ByteDance, and Apple, among others. These engagements are multi-year and multi-generation. Once deployed, switching vendors requires re-architecting software stacks, retraining models, and redesigning data center infrastructure, creating very high switching costs.
+## Differentiation
+What makes the company's products differentiated vs. the competition?
 
-Broadcom's role extends beyond logic design. It delivers full silicon platforms, including high-speed SerDes, advanced packaging, memory interfaces, power optimization, and co-optimized networking. This breadth reduces execution risk for customers and materially limits the number of viable competitors.
+## Key Debates
+What are the key debates on the stock? Use the Q&A from the earnings transcripts to see what questions analysts are asking and how management is answering those questions. Format as numbered debates with Bull Case and Bear Case for each.
 
-**Why Hyperscalers Are Moving to Custom AI Silicon**
+## Key Risks
+What are the biggest risks going forward? Use the Risk Factors section from the 10-K to help lay out some of the key risks.
 
-At scale, AI workloads are dominated by a narrow set of operations. GPUs carry flexibility that hyperscalers do not fully utilize but still pay for in power consumption and unit cost. Custom ASICs can deliver materially better performance per watt and cost per inference once volumes justify development.
+## Management Quality (A/B/C/D/F)
+- Who is the CEO and how long has he/she been at the company?
+- How would you rate the CEO (scale of A, B, C, D, F) and why?
+- Put the grade in the section header like "## Management Quality (B)"
+- GRADING SCALE (be critical - A's should be rare):
+  - A = Exceptional, top-decile CEO (e.g., Jensen Huang, Mark Zuckerberg turnaround). Reserved for proven multi-year track records of outstanding execution, capital allocation, and value creation.
+  - B = Good, above-average management. Solid execution, meets expectations, no major missteps.
+  - C = Average, nothing special. Adequate but uninspiring, or too new to judge.
+  - D = Below average. Notable missteps, poor capital allocation, or questionable decisions.
+  - F = Poor. Significant value destruction, major strategic errors, or integrity concerns.
 
-As AI moves from experimentation to persistent production workloads, these economics become decisive. Hyperscalers with sustained demand benefit from internal silicon roadmaps, while GPUs remain optimal for flexibility, smaller-scale deployments, and rapidly evolving workloads. Broadcom is the primary merchant enabler of this shift.
+## Retail Sentiment (X/10)
+- Summarize what retail investors on Reddit are saying about this stock
+- Include the sentiment score (1-10) in the section header
+- What are the main bull/bear arguments retail investors are making?
+- SCORING SCALE (use the full range):
+  - 1-2 = Extremely bearish, retail hates this stock
+  - 3-4 = Bearish, more negative than positive sentiment
+  - 5 = Neutral/mixed, no clear consensus
+  - 6-7 = Moderately bullish, generally positive but with reservations
+  - 8-9 = Very bullish, strong retail enthusiasm
+  - 10 = Extreme euphoria (meme stock level hype)
+- IMPORTANT: Only include this section if Reddit data is available. Skip entirely if no Reddit discussions found.
 
-**Demand Visibility and Scale**
-
-Broadcom serves a limited number of AI customers with long-term capacity commitments extending multiple years forward. Management has described AI demand as infrastructure build-out rather than cyclical spending, with visibility measured in tens of billions of dollars of backlog.
-
-This level of forward visibility is rare in semiconductors and reflects the planning horizons associated with hyperscale data center construction and AI platform deployment. AI-related revenue is growing materially faster than the rest of Broadcom's semiconductor portfolio and represents a disproportionate share of incremental growth.
-
-**Networking: The Binding Constraint in AI Scaling**
-
-Broadcom is the dominant supplier of Ethernet switching silicon inside hyperscale data centers. Its switches connect AI accelerators across large clusters, enabling distributed training and inference at scale.
-
-As clusters grow from thousands to tens of thousands of accelerators, networking becomes a primary constraint. Model parallelism and distributed workloads drive exponential increases in east-west traffic. Regardless of whether compute is powered by GPUs or custom ASICs, traffic flows through Broadcom networking silicon.
-
-This gives Broadcom dual exposure: it benefits both from overall AI compute growth and from the shift toward internal accelerators.
-
-**Competitive Positioning**
-
-In custom AI silicon, Broadcom has very few credible peers.
-
-Marvell is the most frequently cited alternative but is structurally weaker. Its AI business is overwhelmingly concentrated in a single customer: Amazon (AWS), supporting internal accelerators such as Trainium and Inferentia. AWS is a price-setter rather than a collaborative partner, resulting in lower-margin, narrower-scope engagements. Marvell lacks Broadcom's depth in end-to-end platforms, particularly across networking, advanced packaging, and system-level co-design. Its AI revenue remains highly customer-concentrated and more easily displaced.
-
-MediaTek operates primarily in cost-optimized SoCs and consumer-scale silicon. While capable in integration and volume manufacturing, it lacks relevance in high-performance AI training and large-scale data center inference and does not meaningfully compete in hyperscale AI platforms or networking.
-
-Beyond these names, competition thins rapidly. Sustaining custom AI silicon programs at hyperscale requires advanced process expertise, high-speed I/O, packaging, software co-design, and the balance sheet to support multi-generation commitments. Hyperscalers rarely dual-source early-stage AI ASICs, reinforcing concentration once a design enters production.
-
-In networking, Broadcom remains the clear leader in high-end Ethernet switching for AI data centers. Ethernet's cost structure, ecosystem maturity, and software compatibility continue to favor Broadcom as clusters scale.
-
-**Key Debates on the Stock**
-
-1. Will Custom ASICs Meaningfully Displace GPUs?
-The debate is not full displacement but incremental adoption. Even partial migration of hyperscale workloads represents very large dollar volumes. Broadcom does not need GPUs to lose relevance to win.
-
-2. How Concentrated Is AI Revenue?
-AI revenue is driven by a small number of hyperscalers. Bulls argue this increases visibility and switching costs. Bears worry about negotiating leverage. In practice, internal silicon programs tend to persist once deployed.
-
-3. Does Networking Growth Fully Offset Compute Volatility?
-AI networking demand scales with cluster size, not accelerator vendor. As long as AI compute grows, Broadcom's networking exposure provides a stabilizing second engine.
-
-4. Is VMware a Distraction or a Stabilizer?
-VMware is not an AI driver. It matters for valuation and cash flow stability, but the AI thesis stands independently.
-
-5. Is Broadcom Fully Priced?
-Broadcom lacks the headline visibility of GPU-centric AI names. The debate is whether the durability and visibility of its AI revenue are fully reflected in expectations.
+## Appendix: Key Earnings Call Q&A
+- Select 3-5 of the most important/revealing questions from the earnings call transcripts
+- Include direct quotes from analysts and management
+- Format each as (no extra spacing between Q and A):
+  **Q: [Analyst question - direct quote or close paraphrase]**
+  A: [Management's response - direct quote or close paraphrase]
+- Focus on questions that reveal key debates, growth drivers, or risks
+- IMPORTANT: Only include this section if earnings transcript data is available. Skip if no transcripts.
 `;
 
 app.post('/api/generate-report', async (req, res) => {
@@ -457,8 +491,7 @@ Search for INVESTOR-FOCUSED content:
 1. "${ticker.toUpperCase()} bull case bear case" — what are investors debating?
 2. "${ticker.toUpperCase()} investment thesis" or "${ticker.toUpperCase()} stock thesis"
 3. "${ticker.toUpperCase()} earnings call key takeaways" — what did management emphasize?
-4. "reddit ${ticker.toUpperCase()} stock" — what are investors saying?
-5. "${ticker.toUpperCase()} analyst report"
+4. "${ticker.toUpperCase()} analyst report"
 
 Find:
 - The PRIMARY narrative driving this stock (not generic description)
@@ -468,13 +501,40 @@ Find:
 
 Only include verified facts. Cite sources.`;
 
-    const researchResponse = await client.responses.create({
-      model: 'gpt-4o',
-      tools: [{ type: 'web_search' }],
-      input: researchPrompt
-    });
+    // STEP 1c: Reddit sentiment search (separate search for retail investor views)
+    const redditPrompt = `Search Reddit for discussions about ${ticker.toUpperCase()} stock.
+
+Search these specific queries:
+1. "site:reddit.com ${ticker.toUpperCase()} stock"
+2. "site:reddit.com/r/wallstreetbets ${ticker.toUpperCase()}"
+3. "site:reddit.com/r/stocks ${ticker.toUpperCase()}"
+4. "site:reddit.com/r/investing ${ticker.toUpperCase()}"
+
+Find and summarize:
+- What are retail investors saying about this stock?
+- What is the general sentiment (bullish/bearish/mixed)?
+- What specific bull and bear arguments are retail investors making?
+- Are there any popular posts or discussions about this stock?
+- What price targets or expectations do retail investors have?
+
+If you cannot find any Reddit discussions about this stock, say "NO_REDDIT_DATA".`;
+
+    // Run research and Reddit search in parallel
+    const [researchResponse, redditResponse] = await Promise.all([
+      client.responses.create({
+        model: 'gpt-4o',
+        tools: [{ type: 'web_search' }],
+        input: researchPrompt
+      }),
+      client.responses.create({
+        model: 'gpt-4o',
+        tools: [{ type: 'web_search' }],
+        input: redditPrompt
+      })
+    ]);
 
     const research = researchResponse.output_text;
+    const redditSentiment = redditResponse.output_text;
 
     // Wait for SEC data and earnings transcript
     const [secData, earningsData] = await Promise.all([secDataPromise, earningsPromise]);
@@ -502,7 +562,7 @@ Only include verified facts. Cite sources.`;
       }
     }
 
-    // STEP 2: Generate first draft using Chat Completions API with few-shot example
+    // STEP 2: Generate memo using Chat Completions API with template
     const firstDraftMessages = [
       {
         role: 'system',
@@ -510,44 +570,48 @@ Only include verified facts. Cite sources.`;
 
 BANNED PHRASES: "global technology leader", "cutting-edge", "well-positioned", "comprehensive portfolio", "digital transformation", or any generic phrase that could describe any company.
 
-Write in narrative form with bold section headers. Target 3000-5000 words.`
+Write in narrative form with bold section headers (use ## for main sections, ### for sub-sections). Target 3000-5000 words.`
       },
       {
         role: 'user',
-        content: `Here is an example of an excellent initiation memo. Study its style, density, and structure:
+        content: `Write an initiation of coverage memo for ${ticker.toUpperCase()} following this EXACT template structure:
 
-${REFERENCE_MEMO}
+${MEMO_TEMPLATE}
 
 ---
 
-Now write a similar quality memo for ${ticker.toUpperCase()}.
+Here is the research data to use:
 
-Here is research on ${ticker.toUpperCase()}:
+**WEB RESEARCH:**
 ${research}
+
 ${secContext}
+
 ${earningsContext}
 
-Requirements:
-- Match the density and style of the example memo above
-- Bold section headers
-- Lead with the core thesis (what actually matters for the stock)
-- Name specific customers, competitors, and products
-- Every sentence must convey concrete information
-- No filler, no generic language
-- NO conclusion section
-- 3000-5000 words
-- **Bold the 1-2 most important sentences in each section** — just bold the sentence itself, do NOT add labels like "Key Insight:" or "Important:" before it
+**REDDIT SENTIMENT DATA:**
+${redditSentiment}
 
-KEY DEBATES SECTION (required format):
-Include a "**Key Debates on the Stock**" section with 4-5 numbered debates. For each debate:
-1. State the question clearly
-2. **Bull Case:** 2-3 sentences
-3. **Bear Case:** 2-3 sentences
+---
 
-Example format:
-**1. Will Custom ASICs Meaningfully Displace GPUs?**
-**Bull Case:** Even partial migration of hyperscale workloads represents large dollar volumes. Broadcom doesn't need GPUs to lose relevance to win.
-**Bear Case:** GPU flexibility remains valuable for rapidly evolving AI workloads. Custom ASICs lock customers into specific architectures.`
+IMPORTANT INSTRUCTIONS:
+1. Follow the template sections EXACTLY in order
+2. Use ## for main section headers, ### for numbered sub-sections within Thesis Details (e.g., "### 1. Reason Title")
+3. For "Investment Thesis" - write AGGRESSIVELY: short sentences, not verbose, straight to the point
+4. For "Competitive Landscape" - give each competitor its own paragraph, and discuss new entrant threats
+5. For "Key Debates" - look at the earnings Q&A to see what analysts are asking. Format each debate with ### headers:
+   ### 1. [Question]
+   **Bull Case:** 2-3 sentences
+   **Bear Case:** 2-3 sentences
+   (Use ### for each numbered debate question, NOT bold text)
+6. For "Key Risks" - use the 10-K Risk Factors section as your primary source
+7. For "Management Quality" - put the letter grade in the header. BE CRITICAL: A's are rare (top 10% CEOs only), B is good, C is average. Most CEOs should be B or C.
+8. For "Retail Sentiment" - use the Reddit data above. USE THE FULL 1-10 RANGE: 5 is neutral, below 5 is bearish, above 5 is bullish. Don't default to 7+. If Reddit data says "NO_REDDIT_DATA", skip this section entirely.
+9. For "Appendix: Key Earnings Call Q&A" - pull 3-5 direct quotes from the earnings transcripts showing important analyst questions and management answers. Skip if no transcript data.
+10. **Bold the 1-2 most important sentences in each section** — just bold the sentence, no labels
+11. Every sentence must convey concrete information - no filler
+12. NO conclusion section
+13. IMPORTANT: Target 3000-4000 words total. "History & Business Overview" should be 3-4 paragraphs. "Thesis Details" should be the longest section (40-50% of memo) with 4-5 detailed sub-sections.`
       }
     ];
 
@@ -567,6 +631,61 @@ Example format:
   } catch (error) {
     console.error('Error generating report:', error);
     res.status(500).json({ error: 'Failed to generate report' });
+  }
+});
+
+// Chat endpoint for follow-up questions
+app.post('/api/chat', async (req, res) => {
+  const { ticker, question, report, chatHistory } = req.body;
+
+  if (!ticker || !question || !report) {
+    return res.status(400).json({ error: 'Ticker, question, and report are required' });
+  }
+
+  try {
+    const messages = [
+      {
+        role: 'system',
+        content: `You are a helpful equity research analyst assistant. You have access to the initiation of coverage report for ${ticker.toUpperCase()} below. Answer the user's questions based on this report and your knowledge. Be concise but thorough.
+
+REPORT:
+${report}
+
+Guidelines:
+- Answer based on the report content when possible
+- If the question is about something not in the report, use your general knowledge but note that it's not from the report
+- Keep answers focused and relevant
+- If asked for opinions, base them on the facts in the report`
+      }
+    ];
+
+    // Add chat history if provided
+    if (chatHistory && chatHistory.length > 0) {
+      for (const msg of chatHistory) {
+        messages.push({
+          role: msg.role,
+          content: msg.content
+        });
+      }
+    }
+
+    // Add current question
+    messages.push({
+      role: 'user',
+      content: question
+    });
+
+    const response = await client.chat.completions.create({
+      model: 'gpt-4o',
+      max_tokens: 1000,
+      messages: messages
+    });
+
+    const answer = response.choices[0].message.content;
+    res.json({ answer });
+  } catch (error) {
+    console.error('Chat error:', error);
+    res.status(500).json({ error: 'Failed to process question' });
   }
 });
 
