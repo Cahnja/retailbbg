@@ -295,18 +295,19 @@
           <div class="loading-container">
             <div class="loading-title">Generating report for <strong>${ticker}</strong></div>
             <div class="loading-steps">
-              <span class="loading-step active" id="step1">1. SEC + Earnings</span>
-              <span class="loading-step" id="step2">2. Research</span>
-              <span class="loading-step" id="step3">3. Generate</span>
+              <span class="loading-step active" id="step1">1. Research</span>
+              <span class="loading-step" id="step2">2. Draft</span>
+              <span class="loading-step" id="step3">3. PM Review</span>
+              <span class="loading-step" id="step4">4. Final</span>
             </div>
             <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 5%"></div></div>
-            <div class="loading-time">Estimated time: <span id="timeRemaining">~75 seconds</span></div>
+            <div class="loading-time">Estimated time: <span id="timeRemaining">~90 seconds</span></div>
           </div>
         `;
 
         let elapsed = 0;
-        const totalTime = 75; // estimated seconds
-        const stepTimes = [15, 35, 75]; // when each step completes
+        const totalTime = 90; // estimated seconds
+        const stepTimes = [25, 50, 70, 90]; // when each step completes
 
         progressInterval = setInterval(() => {
           elapsed++;
