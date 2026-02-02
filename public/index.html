@@ -305,6 +305,12 @@
       // Wrap in paragraph
       html = '<p>' + html + '</p>';
 
+      // Convert first bold-only paragraph to h1 (the title)
+      html = html.replace(/^<p><strong>(.*?(?:Initiation|Coverage|—|-).*?)<\/strong><\/p>/, '<h1>$1</h1>');
+
+      // Convert standalone bold paragraphs to h2 (section headers)
+      html = html.replace(/<p><strong>([^<]+)<\/strong><\/p>/g, '<h2>$1</h2>');
+
       // Style numbered customer/partner lists
       html = html.replace(/<p><strong>(\d+)\.\s*(.*?):<\/strong>/g,
         '<div class="customer-box"><strong>$1. $2:</strong>');
