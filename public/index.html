@@ -296,18 +296,16 @@
             <div class="loading-title">Generating report for <strong>${ticker}</strong></div>
             <div class="loading-steps">
               <span class="loading-step active" id="step1">1. Research</span>
-              <span class="loading-step" id="step2">2. Draft</span>
-              <span class="loading-step" id="step3">3. Critique</span>
-              <span class="loading-step" id="step4">4. Final</span>
+              <span class="loading-step" id="step2">2. Generate</span>
             </div>
             <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 5%"></div></div>
-            <div class="loading-time">Estimated time: <span id="timeRemaining">~2 minutes</span></div>
+            <div class="loading-time">Estimated time: <span id="timeRemaining">~45 seconds</span></div>
           </div>
         `;
 
         let elapsed = 0;
-        const totalTime = 120; // estimated seconds
-        const stepTimes = [25, 55, 70, 120]; // when each step completes (final step is longest)
+        const totalTime = 45; // estimated seconds
+        const stepTimes = [20, 45]; // when each step completes
 
         progressInterval = setInterval(() => {
           elapsed++;
