@@ -280,8 +280,7 @@ async function fetchEarningsTranscripts(ticker) {
         return {
           year: data.year,
           quarter: data.quarter,
-          // Limit each transcript to ~3000 chars (4 transcripts = ~12000 total)
-          transcript: data.transcript.substring(0, 3000)
+          transcript: data.transcript
         };
       } catch (err) {
         return null;
