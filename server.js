@@ -4,6 +4,8 @@ const OpenAI = require('openai');
 const fs = require('fs');
 const path = require('path');
 
+const SEC_API_KEY = process.env.SEC_API_KEY;
+
 const app = express();
 
 // Cache configuration
@@ -56,6 +58,69 @@ function saveToCache(ticker, report) {
     console.error('Error writing cache:', error);
   }
 }
+
+// SEC API functions
+async function fetch10KData(ticker) {
+  try {
+    // Step 1: Query API to find the latest 10-K filing
+    const queryResponse = await fetch('https://api.sec-api.io?token=' + SEC_API_KEY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: {
+          query_string: {
+            query: `ticker:${ticker} AND formType:"10-K"`
+          }
+        },
+        from: "0",
+        size: "1",
+        sort: [{ filedAt: { order: "desc" } }]
+      })
+    });
+
+    const queryData = await queryResponse.json();
+
+    if (!queryData.filings || queryData.filings.length === 0) {
+      console.log(`No 10-K found for ${ticker}`);
+      return null;
+    }
+
+    const filing = queryData.filings[0];
+    const filingUrl = filing.linkToFilingDetails;
+    console.log(`Found 10-K for ${ticker}: ${filing.filedAt}`);
+
+    // Step 2: Use Extractor API to get key sections
+    const sections = ['1', '1A', '7']; // Business, Risk Factors, MD&A
+    const sectionNames = ['Business Description', 'Risk Factors', 'Management Discussion & Analysis'];
+
+    let extractedData = {
+      companyName: filing.companyName,
+      filedAt: filing.filedAt,
+      fiscalYear: filing.periodOfReport,
+      sections: {}
+    };
+
+    for (let i = 0; i < sections.length; i++) {
+      try {
+        const extractorUrl = `https://api.sec-api.io/extractor?url=${encodeURIComponent(filingUrl)}&item=${sections[i]}&type=text&token=${SEC_API_KEY}`;
+        const sectionResponse = await fetch(extractorUrl);
+        const sectionText = await sectionResponse.text();
+
+        // Limit each section to ~4000 chars to avoid token limits
+        extractedData.sections[sectionNames[i]] = sectionText.substring(0, 4000);
+        console.log(`Extracted ${sectionNames[i]}: ${sectionText.length} chars`);
+      } catch (err) {
+        console.log(`Failed to extract section ${sections[i]}:`, err.message);
+      }
+    }
+
+    return extractedData;
+  } catch (error) {
+    console.error('SEC API error:', error);
+    return null;
+  }
+}
+
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
@@ -148,7 +213,11 @@ app.post('/api/generate-report', async (req, res) => {
   }
 
   try {
-    // STEP 1: Research with web search (using Responses API for web search)
+    // STEP 1a: Fetch 10-K data from SEC API (run in parallel with web search)
+    console.log(`Fetching 10-K for ${ticker.toUpperCase()}...`);
+    const secDataPromise = fetch10KData(ticker.toUpperCase());
+
+    // STEP 1b: Research with web search (using Responses API for web search)
     const researchPrompt = `You are a hedge fund analyst researching ${ticker.toUpperCase()}.
 
 Search for INVESTOR-FOCUSED content:
@@ -174,6 +243,23 @@ Only include verified facts. Cite sources.`;
 
     const research = researchResponse.output_text;
 
+    // Wait for SEC data
+    const secData = await secDataPromise;
+
+    // Format SEC data for the prompt
+    let secContext = '';
+    if (secData) {
+      secContext = `\n\n--- 10-K FILING DATA (${secData.fiscalYear}) ---\n`;
+      secContext += `Company: ${secData.companyName}\n`;
+      secContext += `Filed: ${secData.filedAt}\n\n`;
+
+      for (const [sectionName, content] of Object.entries(secData.sections)) {
+        if (content) {
+          secContext += `**${sectionName}:**\n${content}\n\n`;
+        }
+      }
+    }
+
     // STEP 2: Generate first draft using Chat Completions API with few-shot example
     const firstDraftMessages = [
       {
@@ -196,6 +282,7 @@ Now write a similar quality memo for ${ticker.toUpperCase()}.
 
 Here is research on ${ticker.toUpperCase()}:
 ${research}
+${secContext}
 
 Requirements:
 - Match the density and style of the example memo above
