@@ -301,13 +301,13 @@
               <span class="loading-step" id="step4">4. Final</span>
             </div>
             <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 5%"></div></div>
-            <div class="loading-time">Estimated time: <span id="timeRemaining">~90 seconds</span></div>
+            <div class="loading-time">Estimated time: <span id="timeRemaining">~2 minutes</span></div>
           </div>
         `;
 
         let elapsed = 0;
-        const totalTime = 90; // estimated seconds
-        const stepTimes = [25, 50, 70, 90]; // when each step completes
+        const totalTime = 120; // estimated seconds
+        const stepTimes = [50, 75, 95, 120]; // when each step completes
 
         progressInterval = setInterval(() => {
           elapsed++;
