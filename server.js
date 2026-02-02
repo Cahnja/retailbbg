@@ -10,6 +10,70 @@ app.use(express.static('public'));
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// Reference memo as few-shot example
+const REFERENCE_MEMO = `
+**Broadcom (AVGO) — Initiation of Coverage**
+
+**What Broadcom Does in AI**
+
+Broadcom is the leading merchant partner for custom AI accelerators (ASICs) designed and deployed by hyperscalers. These chips are co-designed with customers to run specific training and inference workloads at scale, optimizing for power efficiency, cost per compute, and tight integration with data center infrastructure. Unlike GPUs, these ASICs eliminate excess programmability and scale economically once volumes reach hyperscale levels.
+
+Broadcom co-designed Google's Tensor Processing Unit (TPU) starting with TPU v1 and continuing through multiple generations. This was the first large-scale, production deployment of custom AI silicon and remains the most mature non-GPU AI accelerator platform in operation. The TPU program established Broadcom as the default external partner for hyperscalers seeking to internalize AI compute.
+
+Since Google, Broadcom has expanded this model across additional hyperscalers. Industry disclosures, supply-chain data, and customer behavior point to active custom AI silicon programs with Google, Meta, ByteDance, and Apple, among others. These engagements are multi-year and multi-generation. Once deployed, switching vendors requires re-architecting software stacks, retraining models, and redesigning data center infrastructure, creating very high switching costs.
+
+Broadcom's role extends beyond logic design. It delivers full silicon platforms, including high-speed SerDes, advanced packaging, memory interfaces, power optimization, and co-optimized networking. This breadth reduces execution risk for customers and materially limits the number of viable competitors.
+
+**Why Hyperscalers Are Moving to Custom AI Silicon**
+
+At scale, AI workloads are dominated by a narrow set of operations. GPUs carry flexibility that hyperscalers do not fully utilize but still pay for in power consumption and unit cost. Custom ASICs can deliver materially better performance per watt and cost per inference once volumes justify development.
+
+As AI moves from experimentation to persistent production workloads, these economics become decisive. Hyperscalers with sustained demand benefit from internal silicon roadmaps, while GPUs remain optimal for flexibility, smaller-scale deployments, and rapidly evolving workloads. Broadcom is the primary merchant enabler of this shift.
+
+**Demand Visibility and Scale**
+
+Broadcom serves a limited number of AI customers with long-term capacity commitments extending multiple years forward. Management has described AI demand as infrastructure build-out rather than cyclical spending, with visibility measured in tens of billions of dollars of backlog.
+
+This level of forward visibility is rare in semiconductors and reflects the planning horizons associated with hyperscale data center construction and AI platform deployment. AI-related revenue is growing materially faster than the rest of Broadcom's semiconductor portfolio and represents a disproportionate share of incremental growth.
+
+**Networking: The Binding Constraint in AI Scaling**
+
+Broadcom is the dominant supplier of Ethernet switching silicon inside hyperscale data centers. Its switches connect AI accelerators across large clusters, enabling distributed training and inference at scale.
+
+As clusters grow from thousands to tens of thousands of accelerators, networking becomes a primary constraint. Model parallelism and distributed workloads drive exponential increases in east-west traffic. Regardless of whether compute is powered by GPUs or custom ASICs, traffic flows through Broadcom networking silicon.
+
+This gives Broadcom dual exposure: it benefits both from overall AI compute growth and from the shift toward internal accelerators.
+
+**Competitive Positioning**
+
+In custom AI silicon, Broadcom has very few credible peers.
+
+Marvell is the most frequently cited alternative but is structurally weaker. Its AI business is overwhelmingly concentrated in a single customer: Amazon (AWS), supporting internal accelerators such as Trainium and Inferentia. AWS is a price-setter rather than a collaborative partner, resulting in lower-margin, narrower-scope engagements. Marvell lacks Broadcom's depth in end-to-end platforms, particularly across networking, advanced packaging, and system-level co-design. Its AI revenue remains highly customer-concentrated and more easily displaced.
+
+MediaTek operates primarily in cost-optimized SoCs and consumer-scale silicon. While capable in integration and volume manufacturing, it lacks relevance in high-performance AI training and large-scale data center inference and does not meaningfully compete in hyperscale AI platforms or networking.
+
+Beyond these names, competition thins rapidly. Sustaining custom AI silicon programs at hyperscale requires advanced process expertise, high-speed I/O, packaging, software co-design, and the balance sheet to support multi-generation commitments. Hyperscalers rarely dual-source early-stage AI ASICs, reinforcing concentration once a design enters production.
+
+In networking, Broadcom remains the clear leader in high-end Ethernet switching for AI data centers. Ethernet's cost structure, ecosystem maturity, and software compatibility continue to favor Broadcom as clusters scale.
+
+**Key Debates on the Stock**
+
+1. Will Custom ASICs Meaningfully Displace GPUs?
+The debate is not full displacement but incremental adoption. Even partial migration of hyperscale workloads represents very large dollar volumes. Broadcom does not need GPUs to lose relevance to win.
+
+2. How Concentrated Is AI Revenue?
+AI revenue is driven by a small number of hyperscalers. Bulls argue this increases visibility and switching costs. Bears worry about negotiating leverage. In practice, internal silicon programs tend to persist once deployed.
+
+3. Does Networking Growth Fully Offset Compute Volatility?
+AI networking demand scales with cluster size, not accelerator vendor. As long as AI compute grows, Broadcom's networking exposure provides a stabilizing second engine.
+
+4. Is VMware a Distraction or a Stabilizer?
+VMware is not an AI driver. It matters for valuation and cash flow stability, but the AI thesis stands independently.
+
+5. Is Broadcom Fully Priced?
+Broadcom lacks the headline visibility of GPU-centric AI names. The debate is whether the durability and visibility of its AI revenue are fully reflected in expectations.
+`;
+
 app.post('/api/generate-report', async (req, res) => {
   const { ticker } = req.body;
 
@@ -18,107 +82,159 @@ app.post('/api/generate-report', async (req, res) => {
   }
 
   try {
-    // STEP 1: Identify the core thesis like a real analyst would
-    const thesisPrompt = `You are a hedge fund analyst researching ${ticker.toUpperCase()}. Your job is to figure out what ACTUALLY matters for this stock right now.
+    // STEP 1: Research with web search (using Responses API for web search)
+    const researchPrompt = `You are a hedge fund analyst researching ${ticker.toUpperCase()}.
 
-Think like an analyst doing real research:
-- What is the fastest-growing or most important business segment?
-- What does management emphasize on earnings calls?
-- What is the market narrative around this stock?
-- What makes this company hard to replicate?
+Search for INVESTOR-FOCUSED content:
+1. "${ticker.toUpperCase()} bull case bear case" — what are investors debating?
+2. "${ticker.toUpperCase()} investment thesis" or "${ticker.toUpperCase()} stock thesis"
+3. "${ticker.toUpperCase()} earnings call key takeaways" — what did management emphasize?
+4. "reddit ${ticker.toUpperCase()} stock" — what are investors saying?
+5. "${ticker.toUpperCase()} analyst report"
 
-Answer these questions:
+Find:
+- The PRIMARY narrative driving this stock (not generic description)
+- Key customers (with evidence)
+- Direct competitors (for the main growth driver)
+- Bull/bear debates investors actually have
 
-1. THE REAL STORY: What is the single most important thing driving this stock RIGHT NOW? Not a generic business description — the specific catalyst or structural advantage that investors are focused on.
-   - Example: For AVGO, it's not "semiconductors" — it's that Broadcom co-designed Google's TPU and is the leading merchant partner for custom AI ASICs for hyperscalers.
-   - Example: For NFLX, it's not "streaming" — it's the password-sharing crackdown driving subscriber growth and the ads tier.
-   - Go specific or go home.
+Only include verified facts. Cite sources.`;
 
-2. KEY CUSTOMERS: Name 3-5 specific customers by name. What exactly do they buy? What would they have to rebuild to switch away? Be concrete about switching costs.
-
-3. REAL COMPETITORS: Name 2-3 companies competing for THE SAME dollars. Not adjacent markets.
-   - Example: For Broadcom's AI ASIC business, the comp is Marvell (which does custom silicon for AWS), NOT Nvidia (which sells GPUs, a different product).
-   - For each competitor, explain specifically why they are structurally weaker.
-
-4. KEY DEBATES: What are 4-5 specific debates that hedge fund PMs argue about this stock? Not generic risks — the actual controversies.
-   - Example for AVGO: "Will custom ASICs displace GPUs?" / "How concentrated is AI revenue?" / "Is Apple insourcing a real threat?"
-
-Be specific. Name products, programs, and customers. No generic descriptions.`;
-
-    const thesisResponse = await client.chat.completions.create({
+    const researchResponse = await client.responses.create({
       model: 'gpt-4o',
-      max_tokens: 1500,
-      messages: [{ role: 'user', content: thesisPrompt }]
+      tools: [{ type: 'web_search' }],
+      input: researchPrompt
     });
 
-    const thesis = thesisResponse.choices[0].message.content;
+    const research = researchResponse.output_text;
 
-    // STEP 2: Write the memo using the thesis
-    const systemPrompt = `You are a senior hedge fund analyst writing initiation memos. Your memos are dense and insight-rich. Every sentence must teach something non-obvious.
+    // STEP 2: Generate first draft using Chat Completions API with few-shot example
+    const firstDraftMessages = [
+      {
+        role: 'system',
+        content: `You are a senior hedge fund analyst writing initiation memos. Your memos are dense, factual, and insight-rich. Every sentence should teach something.
 
-BANNED PHRASES (never use):
-- "global technology leader" / "industry leader"
-- "cutting-edge" / "state-of-the-art" / "best-in-class"
-- "unprecedented" / "explosive growth"
-- "well-positioned" / "uniquely positioned"
-- "comprehensive portfolio" / "broad range of solutions"
-- "digital transformation"
-- Any phrase that could describe any company
+BANNED PHRASES: "global technology leader", "cutting-edge", "well-positioned", "comprehensive portfolio", "digital transformation", or any generic phrase that could describe any company.
 
-Delete filler. Replace with specific facts.`;
+Write in narrative form with bold section headers. Target 3000-5000 words.`
+      },
+      {
+        role: 'user',
+        content: `Here is an example of an excellent initiation memo. Study its style, density, and structure:
 
-    const memoPrompt = `Write an initiation memo on ${ticker.toUpperCase()}.
+${REFERENCE_MEMO}
 
-YOUR RESEARCH IDENTIFIED THIS THESIS:
-${thesis}
+---
 
-WRITING INSTRUCTIONS:
+Now write a similar quality memo for ${ticker.toUpperCase()}.
 
-Write in narrative form — tell a story about this business. But every sentence must teach something. No filler, no "blah blah blah."
+Here is research on ${ticker.toUpperCase()}:
+${research}
 
-Start directly with substance. NO introductory paragraph. Kill any sentence like "[Company] is a leading provider of..." — go straight to what matters.
+Requirements:
+- Match the density and style of the example memo above
+- Bold section headers
+- Lead with the core thesis (what actually matters for the stock)
+- Name specific customers, competitors, and products
+- Every sentence must convey concrete information
+- No filler, no generic language
+- NO conclusion section
+- 3000-5000 words
 
-STRUCTURE:
+KEY DEBATES SECTION (required format):
+Include a "**Key Debates on the Stock**" section with 4-5 numbered debates. For each debate:
+1. State the question clearly
+2. **Bull Case:** 2-3 sentences
+3. **Bear Case:** 2-3 sentences
 
-1. **What [Company] Does in [THE REAL STORY from thesis]**
-Lead with the specific value driver identified above. Tell the story of how this business works — how money flows from customers to the company. Name specific customers, products, and programs from the thesis. Explain switching costs concretely (what would they have to rebuild?).
+Example format:
+**1. Will Custom ASICs Meaningfully Displace GPUs?**
+**Bull Case:** Even partial migration of hyperscale workloads represents large dollar volumes. Broadcom doesn't need GPUs to lose relevance to win.
+**Bear Case:** GPU flexibility remains valuable for rapidly evolving AI workloads. Custom ASICs lock customers into specific architectures.`
+      }
+    ];
 
-2. **Why [Structural Trend] Favors This Business**
-What is changing that makes this company more valuable? Be specific about the economics or technical shift.
-
-3. **Demand Visibility and Scale**
-Contract structure, backlog, multi-year commitments. Is this cyclical or infrastructure-like spending?
-
-4. **[Secondary Segment]: Why It Matters**
-Only include if material. How does it interact with the core thesis?
-
-5. **Competitive Positioning**
-Use the competitors from the thesis. For each, explain specifically why they are structurally weaker. Name actual products, customers, capabilities they lack.
-
-6. **Key Debates on the Stock**
-Use the debates from the thesis. For each:
-- The question
-- Bull case (1-2 sentences)
-- Bear case (1-2 sentences)
-No "resolution" — leave the tension.
-
-QUALITY RULES:
-- Every sentence must offer a fact or non-obvious inference. If it doesn't teach anything, delete it.
-- "Broadcom's evolution has been unusually deliberate" = GARBAGE. Delete.
-- "Broadcom co-designed Google's TPU starting with v1" = GOOD. Teaches something.
-- Dense and informative. No wasted words.
-- NO introduction. NO conclusion. Start and end with substance.`;
-
-    const message = await client.chat.completions.create({
+    const firstDraft = await client.chat.completions.create({
       model: 'gpt-4o',
-      max_tokens: 4096,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: memoPrompt }
-      ]
+      max_tokens: 8000,
+      messages: firstDraftMessages
     });
 
-    const report = message.choices[0].message.content;
+    const draft1 = firstDraft.choices[0].message.content;
+
+    // STEP 3: Critique the draft
+    const critiqueMessages = [
+      {
+        role: 'system',
+        content: 'You are a senior PM reviewing an analyst\'s initiation memo. Be critical and specific.'
+      },
+      {
+        role: 'user',
+        content: `Review this draft memo and identify problems:
+
+${draft1}
+
+Check for:
+1. Does it lead with the RIGHT thesis? (the specific thing driving the stock, not generic business description)
+2. Any filler phrases or generic language? ("well-positioned", "leading provider", etc.)
+3. Are the competitors correct? (companies competing for same customer dollars)
+4. Are the customers verified and specific?
+5. Is the Key Debates section covering what investors actually argue about?
+6. Is it dense enough? Every sentence should teach something.
+
+List the specific problems that need fixing.`
+      }
+    ];
+
+    const critique = await client.chat.completions.create({
+      model: 'gpt-4o',
+      max_tokens: 2000,
+      messages: critiqueMessages
+    });
+
+    const problems = critique.choices[0].message.content;
+
+    // STEP 4: Regenerate with fixes
+    const finalMessages = [
+      {
+        role: 'system',
+        content: `You are a senior hedge fund analyst writing initiation memos. Your memos are dense, factual, and insight-rich.
+
+BANNED PHRASES: "global technology leader", "cutting-edge", "well-positioned", "comprehensive portfolio", "digital transformation", or any generic phrase.
+
+Write in narrative form with bold section headers. Target 3000-5000 words.`
+      },
+      {
+        role: 'user',
+        content: `Here is an example of an excellent memo:
+
+${REFERENCE_MEMO}
+
+---
+
+Here is a draft memo for ${ticker.toUpperCase()}:
+
+${draft1}
+
+---
+
+Here are problems identified by a senior PM:
+
+${problems}
+
+---
+
+Rewrite the memo fixing ALL of these problems. Match the quality and density of the example memo. Keep what's working, fix what's not.`
+      }
+    ];
+
+    const finalDraft = await client.chat.completions.create({
+      model: 'gpt-4o',
+      max_tokens: 10000,
+      messages: finalMessages
+    });
+
+    const report = finalDraft.choices[0].message.content;
     res.json({ report });
   } catch (error) {
     console.error('Error generating report:', error);

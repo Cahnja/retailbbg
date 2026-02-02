@@ -28,7 +28,7 @@ Answer these questions:
    - For each competitor, explain specifically why they are structurally weaker.
 
 4. KEY DEBATES: What are 4-5 specific debates that hedge fund PMs argue about this stock? Not generic risks — the actual controversies.
-   - Example for AVGO: "Will custom ASICs displace GPUs?" / "How concentrated is AI revenue?" / "Is Apple insourcing a real threat?"
+   - Example for AVGO: "Will custom ASICs displace GPUs?" / "How concentrated is AI revenue?"
 
 Be specific. Name products, programs, and customers. No generic descriptions.
 ```
