@@ -295,7 +295,7 @@
           <div class="loading-container">
             <div class="loading-title">Generating report for <strong>${ticker}</strong></div>
             <div class="loading-steps">
-              <span class="loading-step active" id="step1">1. SEC Filing</span>
+              <span class="loading-step active" id="step1">1. SEC + Earnings</span>
               <span class="loading-step" id="step2">2. Research</span>
               <span class="loading-step" id="step3">3. Generate</span>
             </div>
@@ -306,7 +306,7 @@
 
         let elapsed = 0;
         const totalTime = 75; // estimated seconds
-        const stepTimes = [10, 30, 75]; // when each step completes
+        const stepTimes = [15, 35, 75]; // when each step completes
 
         progressInterval = setInterval(() => {
           elapsed++;

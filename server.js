@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 const SEC_API_KEY = process.env.SEC_API_KEY;
+const API_NINJAS_KEY = process.env.API_NINJAS_KEY;
 
 const app = express();
 
@@ -180,6 +181,104 @@ async function fetch10KData(ticker) {
   }
 }
 
+// API Ninjas - Earnings Call Transcripts
+const EARNINGS_CACHE_DIR = path.join(__dirname, 'cache', 'earnings');
+const EARNINGS_CACHE_MAX_AGE_DAYS = 30; // Cache for 30 days
+
+// Ensure earnings cache directory exists
+if (!fs.existsSync(EARNINGS_CACHE_DIR)) {
+  fs.mkdirSync(EARNINGS_CACHE_DIR, { recursive: true });
+}
+
+function getEarningsCachePath(ticker) {
+  return path.join(EARNINGS_CACHE_DIR, `${ticker.toUpperCase()}_earnings.json`);
+}
+
+function getCachedEarningsData(ticker) {
+  const cachePath = getEarningsCachePath(ticker);
+  if (!fs.existsSync(cachePath)) {
+    return null;
+  }
+
+  try {
+    const cached = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
+    const ageMs = Date.now() - cached.cachedAt;
+    const ageDays = ageMs / (1000 * 60 * 60 * 24);
+
+    if (ageDays <= EARNINGS_CACHE_MAX_AGE_DAYS) {
+      console.log(`Using cached earnings transcript for ${ticker} (cached ${ageDays.toFixed(1)} days ago)`);
+      return cached.data;
+    }
+    return null; // Cache expired
+  } catch (error) {
+    console.error('Error reading earnings cache:', error);
+    return null;
+  }
+}
+
+function saveEarningsToCache(ticker, data) {
+  const cachePath = getEarningsCachePath(ticker);
+  const cacheData = {
+    ticker: ticker.toUpperCase(),
+    data,
+    cachedAt: Date.now()
+  };
+
+  try {
+    fs.writeFileSync(cachePath, JSON.stringify(cacheData, null, 2));
+    console.log(`Cached earnings transcript for ${ticker}`);
+  } catch (error) {
+    console.error('Error writing earnings cache:', error);
+  }
+}
+
+async function fetchEarningsTranscript(ticker) {
+  // Check cache first
+  const cached = getCachedEarningsData(ticker);
+  if (cached) {
+    return cached;
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.api-ninjas.com/v1/earningstranscript?ticker=${ticker}`,
+      {
+        headers: { 'X-Api-Key': API_NINJAS_KEY }
+      }
+    );
+
+    if (!response.ok) {
+      console.log(`No earnings transcript found for ${ticker}: ${response.status}`);
+      return null;
+    }
+
+    const data = await response.json();
+
+    if (!data || !data.transcript) {
+      console.log(`No transcript data for ${ticker}`);
+      return null;
+    }
+
+    const earningsData = {
+      ticker: ticker.toUpperCase(),
+      year: data.year,
+      quarter: data.quarter,
+      // Limit transcript to ~6000 chars to avoid token limits
+      transcript: data.transcript.substring(0, 6000)
+    };
+
+    console.log(`Fetched earnings transcript for ${ticker}: Q${data.quarter} ${data.year}, ${data.transcript.length} chars`);
+
+    // Cache the data
+    saveEarningsToCache(ticker, earningsData);
+
+    return earningsData;
+  } catch (error) {
+    console.error('API Ninjas error:', error);
+    return null;
+  }
+}
+
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
@@ -272,9 +371,10 @@ app.post('/api/generate-report', async (req, res) => {
   }
 
   try {
-    // STEP 1a: Fetch 10-K data from SEC API (run in parallel with web search)
-    console.log(`Fetching 10-K for ${ticker.toUpperCase()}...`);
+    // STEP 1a: Fetch 10-K data and earnings transcript (run in parallel with web search)
+    console.log(`Fetching 10-K and earnings transcript for ${ticker.toUpperCase()}...`);
     const secDataPromise = fetch10KData(ticker.toUpperCase());
+    const earningsPromise = fetchEarningsTranscript(ticker.toUpperCase());
 
     // STEP 1b: Research with web search (using Responses API for web search)
     const researchPrompt = `You are a hedge fund analyst researching ${ticker.toUpperCase()}.
@@ -302,8 +402,8 @@ Only include verified facts. Cite sources.`;
 
     const research = researchResponse.output_text;
 
-    // Wait for SEC data
-    const secData = await secDataPromise;
+    // Wait for SEC data and earnings transcript
+    const [secData, earningsData] = await Promise.all([secDataPromise, earningsPromise]);
 
     // Format SEC data for the prompt
     let secContext = '';
@@ -317,6 +417,14 @@ Only include verified facts. Cite sources.`;
           secContext += `**${sectionName}:**\n${content}\n\n`;
         }
       }
+    }
+
+    // Format earnings transcript for the prompt
+    let earningsContext = '';
+    if (earningsData) {
+      earningsContext = `\n\n--- EARNINGS CALL TRANSCRIPT (Q${earningsData.quarter} ${earningsData.year}) ---\n`;
+      earningsContext += earningsData.transcript;
+      earningsContext += '\n';
     }
 
     // STEP 2: Generate first draft using Chat Completions API with few-shot example
@@ -342,6 +450,7 @@ Now write a similar quality memo for ${ticker.toUpperCase()}.
 Here is research on ${ticker.toUpperCase()}:
 ${research}
 ${secContext}
+${earningsContext}
 
 Requirements:
 - Match the density and style of the example memo above
