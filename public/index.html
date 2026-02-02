@@ -293,8 +293,10 @@
         .replace(/^### (.*$)/gm, '<h3>$1</h3>')
         .replace(/^## (.*$)/gm, '<h2>$1</h2>')
         .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-        // Bold text
+        // Bold text (must come before italic)
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        // Italic text
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
         // Convert lines to paragraphs
         .replace(/\n\n/g, '</p><p>')
         .replace(/\n/g, '<br>');
@@ -306,14 +308,20 @@
       html = html.replace(/<p><strong>(\d+)\.\s*(.*?):<\/strong>/g,
         '<div class="customer-box"><strong>$1. $2:</strong>');
 
-      // Style Key Debates section items
+      // Style Key Debates section items (handle both bold and italic numbered questions)
       html = html.replace(/<p><strong>(\d+)\.\s*(.*?)\?<\/strong>/g,
         '<div class="debate-box"><h4>$1. $2?</h4>');
+      html = html.replace(/<p><em>(\d+)\.\s*(.*?)\?<\/em>/g,
+        '<div class="debate-box"><h4>$1. $2?</h4>');
 
-      // Style Bull Case / Bear Case
-      html = html.replace(/<strong>Bull Case:<\/strong>(.*?)(?=<strong>Bear|<\/div>|<\/p>)/gs,
+      // Style Bull Case / Bear Case (handle both bold and italic)
+      html = html.replace(/<strong>Bull Case:<\/strong>(.*?)(?=<strong>Bear|<em>Bear|<\/div>|<\/p>)/gs,
         '<p class="bull-case"><strong>Bull Case:</strong>$1</p>');
-      html = html.replace(/<strong>Bear Case:<\/strong>(.*?)(?=<\/div>|<\/p>|<strong>)/gs,
+      html = html.replace(/<em>Bull Case:<\/em>(.*?)(?=<strong>Bear|<em>Bear|<\/div>|<\/p>)/gs,
+        '<p class="bull-case"><strong>Bull Case:</strong>$1</p>');
+      html = html.replace(/<strong>Bear Case:<\/strong>(.*?)(?=<\/div>|<\/p>|<strong>|<em>)/gs,
+        '<p class="bear-case"><strong>Bear Case:</strong>$1</p>');
+      html = html.replace(/<em>Bear Case:<\/em>(.*?)(?=<\/div>|<\/p>|<strong>|<em>)/gs,
         '<p class="bear-case"><strong>Bear Case:</strong>$1</p>');
 
       // Close debate boxes (heuristic: close before next h2 or h3)
