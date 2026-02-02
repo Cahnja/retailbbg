@@ -148,21 +148,62 @@
       border-left: 4px solid #ff9800;
     }
 
-    .loading {
+    .loading-container {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       text-align: center;
-      padding: 60px;
+      padding: 60px 20px;
       color: #666;
     }
-    .loading::after {
-      content: '';
-      animation: dots 1.5s infinite;
+    .loading-title {
+      font-size: 18px;
+      margin-bottom: 30px;
+      color: #333;
     }
-    @keyframes dots {
-      0%, 20% { content: ''; }
-      40% { content: '.'; }
-      60% { content: '..'; }
-      80%, 100% { content: '...'; }
+    .loading-steps {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    .loading-step {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      background: #eee;
+      color: #999;
+      transition: all 0.3s;
+    }
+    .loading-step.active {
+      background: #1a1a2e;
+      color: white;
+    }
+    .loading-step.done {
+      background: #4caf50;
+      color: white;
+    }
+    .progress-bar {
+      width: 100%;
+      max-width: 400px;
+      height: 6px;
+      background: #eee;
+      border-radius: 3px;
+      margin: 0 auto 20px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #1a1a2e, #2d2d4a);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+    .loading-time {
+      font-size: 14px;
+      color: #888;
+    }
+    .loading-time span {
+      font-weight: 600;
+      color: #666;
     }
     .error {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -241,10 +282,60 @@
       reportContainer.classList.add('visible');
       cacheIndicator.classList.remove('visible', 'cached', 'fresh');
 
-      const loadingMsg = forceRefresh
-        ? 'Generating fresh report for ' + ticker
-        : 'Loading report for ' + ticker;
-      reportContent.innerHTML = '<div class="loading">' + loadingMsg + '</div>';
+      // Show loading UI - simple for cache check, detailed for generation
+      let progressInterval = null;
+      reportContent.innerHTML = `
+        <div class="loading-container">
+          <div class="loading-title">Loading report for <strong>${ticker}</strong>...</div>
+        </div>
+      `;
+
+      const showDetailedLoading = () => {
+        reportContent.innerHTML = `
+          <div class="loading-container">
+            <div class="loading-title">Generating report for <strong>${ticker}</strong></div>
+            <div class="loading-steps">
+              <span class="loading-step active" id="step1">1. Research</span>
+              <span class="loading-step" id="step2">2. Draft</span>
+              <span class="loading-step" id="step3">3. Critique</span>
+              <span class="loading-step" id="step4">4. Final</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 5%"></div></div>
+            <div class="loading-time">Estimated time: <span id="timeRemaining">~90 seconds</span></div>
+          </div>
+        `;
+
+        let elapsed = 0;
+        const totalTime = 90; // estimated seconds
+        const stepTimes = [20, 45, 60, 90]; // when each step completes
+
+        progressInterval = setInterval(() => {
+          elapsed++;
+          const progress = Math.min((elapsed / totalTime) * 100, 95);
+          const remaining = Math.max(totalTime - elapsed, 5);
+
+          const progressFill = document.getElementById('progressFill');
+          const timeRemaining = document.getElementById('timeRemaining');
+          if (progressFill) progressFill.style.width = progress + '%';
+          if (timeRemaining) timeRemaining.textContent = '~' + remaining + ' seconds';
+
+          // Update step indicators
+          stepTimes.forEach((time, i) => {
+            const step = document.getElementById('step' + (i + 1));
+            if (step) {
+              if (elapsed >= time) {
+                step.classList.remove('active');
+                step.classList.add('done');
+              } else if (elapsed >= (stepTimes[i - 1] || 0)) {
+                step.classList.add('active');
+              }
+            }
+          });
+        }, 1000);
+      };
+
+      // Show detailed progress after 1 second (if not cached, it takes longer)
+      const detailedTimeout = setTimeout(showDetailedLoading, 1000);
 
       try {
         const response = await fetch('/api/generate-report', {
@@ -253,6 +344,8 @@
           body: JSON.stringify({ ticker, forceRefresh })
         });
 
+        clearTimeout(detailedTimeout);
+        clearInterval(progressInterval);
         const data = await response.json();
 
         if (data.error) {
@@ -263,6 +356,8 @@
           showCacheStatus(data.cached, data.generatedAt);
         }
       } catch (error) {
+        clearTimeout(detailedTimeout);
+        clearInterval(progressInterval);
         reportContent.innerHTML = '<div class="error">Failed to generate report. Please try again.</div>';
         cacheIndicator.classList.remove('visible');
       }
