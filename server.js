@@ -181,6 +181,44 @@ async function fetch10KData(ticker) {
   }
 }
 
+// Extract Q&A section from earnings transcript
+function extractQASection(transcript) {
+  if (!transcript) return '';
+
+  // Common markers for Q&A section start
+  const qaMarkers = [
+    'Question-and-Answer Session',
+    'Questions and Answers',
+    'Q&A Session',
+    'Operator: Our first question',
+    'Operator: Thank you. Our first question',
+    'Operator: We will now begin the question-and-answer',
+    'And our first question',
+    'We\'ll now open the call for questions'
+  ];
+
+  let qaStart = -1;
+  let markerUsed = '';
+
+  // Find where Q&A section starts
+  for (const marker of qaMarkers) {
+    const index = transcript.toLowerCase().indexOf(marker.toLowerCase());
+    if (index !== -1 && (qaStart === -1 || index < qaStart)) {
+      qaStart = index;
+      markerUsed = marker;
+    }
+  }
+
+  if (qaStart === -1) {
+    // No Q&A section found, return last portion of transcript (likely contains Q&A)
+    console.log('No Q&A marker found, using last 8000 chars');
+    return transcript.slice(-8000);
+  }
+
+  console.log(`Found Q&A section starting with: "${markerUsed}"`);
+  return transcript.substring(qaStart);
+}
+
 // API Ninjas - Earnings Call Transcripts
 const EARNINGS_CACHE_DIR = path.join(__dirname, 'cache', 'earnings');
 const EARNINGS_CACHE_MAX_AGE_DAYS = 30; // Cache for 30 days
@@ -277,10 +315,13 @@ async function fetchEarningsTranscripts(ticker) {
           return null;
         }
 
+        // Extract Q&A section only
+        const qaSection = extractQASection(data.transcript);
+
         return {
           year: data.year,
           quarter: data.quarter,
-          transcript: data.transcript
+          transcript: qaSection
         };
       } catch (err) {
         return null;
