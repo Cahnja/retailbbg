@@ -60,7 +60,63 @@ function saveToCache(ticker, report) {
 }
 
 // SEC API functions
+const SEC_CACHE_DIR = path.join(__dirname, 'cache', 'sec');
+const SEC_CACHE_MAX_AGE_DAYS = 90; // 10-Ks are annual, cache for 90 days
+
+// Ensure SEC cache directory exists
+if (!fs.existsSync(SEC_CACHE_DIR)) {
+  fs.mkdirSync(SEC_CACHE_DIR, { recursive: true });
+}
+
+function getSecCachePath(ticker) {
+  return path.join(SEC_CACHE_DIR, `${ticker.toUpperCase()}_10K.json`);
+}
+
+function getCachedSecData(ticker) {
+  const cachePath = getSecCachePath(ticker);
+  if (!fs.existsSync(cachePath)) {
+    return null;
+  }
+
+  try {
+    const cached = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
+    const ageMs = Date.now() - cached.cachedAt;
+    const ageDays = ageMs / (1000 * 60 * 60 * 24);
+
+    if (ageDays <= SEC_CACHE_MAX_AGE_DAYS) {
+      console.log(`Using cached 10-K for ${ticker} (cached ${ageDays.toFixed(1)} days ago)`);
+      return cached.data;
+    }
+    return null; // Cache expired
+  } catch (error) {
+    console.error('Error reading SEC cache:', error);
+    return null;
+  }
+}
+
+function saveSecToCache(ticker, data) {
+  const cachePath = getSecCachePath(ticker);
+  const cacheData = {
+    ticker: ticker.toUpperCase(),
+    data,
+    cachedAt: Date.now()
+  };
+
+  try {
+    fs.writeFileSync(cachePath, JSON.stringify(cacheData, null, 2));
+    console.log(`Cached 10-K for ${ticker}`);
+  } catch (error) {
+    console.error('Error writing SEC cache:', error);
+  }
+}
+
 async function fetch10KData(ticker) {
+  // Check cache first
+  const cached = getCachedSecData(ticker);
+  if (cached) {
+    return cached;
+  }
+
   try {
     // Step 1: Query API to find the latest 10-K filing
     const queryResponse = await fetch('https://api.sec-api.io?token=' + SEC_API_KEY, {
@@ -113,6 +169,9 @@ async function fetch10KData(ticker) {
         console.log(`Failed to extract section ${sections[i]}:`, err.message);
       }
     }
+
+    // Cache the extracted data
+    saveSecToCache(ticker, extractedData);
 
     return extractedData;
   } catch (error) {
