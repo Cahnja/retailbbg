@@ -424,28 +424,14 @@ What are the key debates on the stock? Use the Q&A from the earnings transcripts
 ## Key Risks
 What are the biggest risks going forward? Use the Risk Factors section from the 10-K to help lay out some of the key risks.
 
-## Management Quality (A/B/C/D/F)
+## Management Quality
 - Who is the CEO and how long has he/she been at the company?
-- How would you rate the CEO (scale of A, B, C, D, F) and why?
-- Put the grade in the section header like "## Management Quality (B)"
-- GRADING SCALE (be critical - A's should be rare):
-  - A = Exceptional, top-decile CEO (e.g., Jensen Huang, Mark Zuckerberg turnaround). Reserved for proven multi-year track records of outstanding execution, capital allocation, and value creation.
-  - B = Good, above-average management. Solid execution, meets expectations, no major missteps.
-  - C = Average, nothing special. Adequate but uninspiring, or too new to judge.
-  - D = Below average. Notable missteps, poor capital allocation, or questionable decisions.
-  - F = Poor. Significant value destruction, major strategic errors, or integrity concerns.
+- What is their track record? Have they executed well?
+- Any notable achievements or missteps?
 
-## Retail Sentiment (X/10)
+## Retail Sentiment
 - Summarize what retail investors on Reddit are saying about this stock
-- Include the sentiment score (1-10) in the section header
 - What are the main bull/bear arguments retail investors are making?
-- SCORING SCALE (use the full range):
-  - 1-2 = Extremely bearish, retail hates this stock
-  - 3-4 = Bearish, more negative than positive sentiment
-  - 5 = Neutral/mixed, no clear consensus
-  - 6-7 = Moderately bullish, generally positive but with reservations
-  - 8-9 = Very bullish, strong retail enthusiasm
-  - 10 = Extreme euphoria (meme stock level hype)
 - IMPORTANT: Only include this section if Reddit data is available. Skip entirely if no Reddit discussions found.
 
 ## Appendix: Key Earnings Call Q&A
@@ -605,8 +591,8 @@ IMPORTANT INSTRUCTIONS:
    **Bear Case:** 2-3 sentences
    (Use ### for each numbered debate question, NOT bold text)
 6. For "Key Risks" - use the 10-K Risk Factors section as your primary source
-7. For "Management Quality" - put the letter grade in the header. BE CRITICAL: A's are rare (top 10% CEOs only), B is good, C is average. Most CEOs should be B or C.
-8. For "Retail Sentiment" - use the Reddit data above. USE THE FULL 1-10 RANGE: 5 is neutral, below 5 is bearish, above 5 is bullish. Don't default to 7+. If Reddit data says "NO_REDDIT_DATA", skip this section entirely.
+7. For "Management Quality" - discuss the CEO's background and track record. No letter grade needed.
+8. For "Retail Sentiment" - summarize Reddit discussions. No numeric score needed. If Reddit data says "NO_REDDIT_DATA", skip this section entirely.
 9. For "Appendix: Key Earnings Call Q&A" - pull 3-5 direct quotes from the earnings transcripts showing important analyst questions and management answers. Skip if no transcript data.
 10. **Bold the 1-2 most important sentences in each section** — just bold the sentence, no labels
 11. Every sentence must convey concrete information - no filler
