@@ -1,0 +1,50 @@
+{
+  "SMTC": {
+    "ceo": "Hong Hou",
+    "since": "July 2023",
+    "cfo": "Mark Lin",
+    "background": "Hong Hou previously served as President of Semtech's Signal Integrity Products Group"
+  },
+  "AAPL": {
+    "ceo": "Tim Cook",
+    "since": "August 2011",
+    "cfo": "Luca Maestri",
+    "background": "Tim Cook served as COO before becoming CEO, joined Apple in 1998"
+  },
+  "MSFT": {
+    "ceo": "Satya Nadella",
+    "since": "February 2014",
+    "cfo": "Amy Hood",
+    "background": "Satya Nadella previously led Microsoft's Cloud and Enterprise group"
+  },
+  "GOOGL": {
+    "ceo": "Sundar Pichai",
+    "since": "December 2019",
+    "cfo": "Ruth Porat",
+    "background": "Sundar Pichai became Alphabet CEO in 2019, was Google CEO since 2015"
+  },
+  "AMZN": {
+    "ceo": "Andy Jassy",
+    "since": "July 2021",
+    "cfo": "Brian Olsavsky",
+    "background": "Andy Jassy founded and led AWS before becoming Amazon CEO"
+  },
+  "NVDA": {
+    "ceo": "Jensen Huang",
+    "since": "1993",
+    "cfo": "Colette Kress",
+    "background": "Jensen Huang co-founded NVIDIA and has been CEO since inception"
+  },
+  "META": {
+    "ceo": "Mark Zuckerberg",
+    "since": "2004",
+    "cfo": "Susan Li",
+    "background": "Mark Zuckerberg founded Facebook and has led the company since inception"
+  },
+  "TSLA": {
+    "ceo": "Elon Musk",
+    "since": "2008",
+    "cfo": "Vaibhav Taneja",
+    "background": "Elon Musk joined Tesla as chairman in 2004, became CEO in 2008"
+  }
+}

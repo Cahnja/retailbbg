@@ -16,6 +16,8 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "openai": "^6.17.0",
+    "puppeteer": "^24.36.1",
+    "yahoo-finance2": "^3.13.0",
     "zod": "^4.3.6"
   }
 }

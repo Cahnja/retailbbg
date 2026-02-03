@@ -1,0 +1,108 @@
+## Investment Thesis
+Synthesize the key reason or reasons to buy the stock in a short overview. Stylistically, this should be very aggressively written (short sentences, not verbose, straight to the point).
+- Start with a bold statement
+
+## History & Business Overview
+- When was the company founded and how has it evolved since then to get us to where we are today?
+- What are the key products that the company sells?
+- What are the company's business segments and what % of revenue does each represent?
+- This section should be 6-7 detailed paragraphs covering:
+  - Founding story and early history
+  - Major pivots, acquisitions, or transformations over time
+  - Current business segments and revenue breakdown
+  - Key products/services in each segment with specific details
+- Include a "**Key Insight:** [insight text]" callout with an important fact or metric
+
+## Thesis Details
+This is the MOST IMPORTANT and LONGEST section - it should be 40-50% of the entire memo.
+- Go into detail on the key reasons to buy the stock
+- Divide into 4-5 numbered sub-sections (e.g., "### 1. First Reason", "### 2. Second Reason")
+- Each sub-section should be 3-4 substantial paragraphs with:
+  - Specific facts, numbers, and evidence
+  - Customer names, market sizes, growth rates
+  - Why this matters for the stock
+
+## Key Customers & Partnerships
+- Who are the company's most important customers?
+- What % of revenue do top customers represent?
+- Are there any strategic partnerships that are critical to the business?
+- Include 3-4 key customers/partners, each formatted as a numbered item
+- Example format:
+  **1. Customer Name**
+  Description of relationship, % of revenue, contract details, strategic importance. 2-3 sentences.
+
+  **2. Another Customer**
+  Description...
+
+## Competitive Landscape
+- List 3-4 major competitors, each in a numbered format
+- For each competitor, describe how they compete and their strengths/weaknesses vs. our company
+- Example format:
+  **1. Competitor Name**
+  Description of this competitor, how they compete with us, their strengths and weaknesses...
+
+  **2. Another Competitor**
+  Description...
+
+## Differentiation
+What makes the company's products differentiated vs. the competition?
+
+## Key Debates
+This should be a ROBUST section with 4-5 numbered debates that investors are actively discussing.
+- Use the earnings Q&A to identify what analysts are questioning
+- IMPORTANT: Each debate title MUST be a question that ENDS WITH A QUESTION MARK (?) - do NOT omit it (e.g., "Can the company maintain 25% margins as competition increases?")
+- Bull Case: 4-5 sentences with specific numbers, metrics, and evidence
+- Bear Case: 4-5 sentences with specific numbers, metrics, and evidence
+- Format each as: ### 1. [Debate Question]
+
+## Key Risks
+What are the biggest risks going forward? Use the Risk Factors section from the 10-K to help lay out some of the key risks.
+- Format each risk as: "**1. Risk Name:** Description of the risk and why it matters"
+- Include 4-5 key risks, each as a separate paragraph
+- Don't just regurgitate the 10K - re-write each risk in your own words
+
+## Management Quality
+- Who is the CEO and how long has he/she been at the company?
+- What is their track record? Have they executed well?
+- Any notable achievements or missteps?
+- What is the CEO's history (prior work experience)
+- Second paragraph about the broader management team, operational excellence, and capital allocation philosophy
+- Include a **Key Insight:** callout with specific insight about management compensation, incentives, or alignment with shareholders
+
+## Financial Analysis
+- Just show the table, no additional text or commentary
+- Use the FINANCIAL DATA PROVIDED (from Alpha Vantage)
+- Show last 5 years of data
+- Use this format:
+
+| Metric | FY2021 | FY2022 | FY2023 | FY2024 | FY2025 |
+|--------|-------:|-------:|-------:|-------:|-------:|
+| Revenue | $XM | $XM | $XM | $XM | $XM |
+| YoY Growth | X% | X% | X% | X% | X% |
+| Gross Profit | $XM | $XM | $XM | $XM | $XM |
+| Gross Margin | X% | X% | X% | X% | X% |
+| EBITDA | $XM | $XM | $XM | $XM | $XM |
+| EBITDA Margin | X% | X% | X% | X% | X% |
+| Net Income | $XM | $XM | $XM | $XM | $XM |
+| Net Margin | X% | X% | X% | X% | X% |
+| EPS | $X.XX | $X.XX | $X.XX | $X.XX |
+
+## Valuation
+- State whether the stock is expensive or cheap relative to peers
+- Compare current P/E, EV/Revenue, EV/EBITDA to peer group averages
+- Be objective - do NOT justify the valuation ("premium is warranted because...")
+- Just state: "Trading at X multiple vs peers at Y" - let the reader draw conclusions
+
+## Conclusion
+- Summarize the investment case in 2-3 paragraphs
+- Restate the key reasons to own the stock
+- Acknowledge the main risks but explain why the opportunity is compelling
+
+## Appendix: Key Earnings Call Q&A
+- Select 3-5 of the most important/revealing questions from the earnings call transcripts
+- Include direct quotes from analysts and management
+- Format each as (no extra spacing between Q and A):
+  **Q: [Analyst question - direct quote or close paraphrase]**
+  A: [Management's response - direct quote or close paraphrase]
+- Focus on questions that reveal key debates, growth drivers, or risks
+- IMPORTANT: Only include this section if earnings transcript data is available. Skip if no transcripts.

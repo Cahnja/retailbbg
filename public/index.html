@@ -5,155 +5,189 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Initiation of Coverage Report Generator</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: Georgia, 'Times New Roman', serif;
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 40px 20px;
+      font-family: 'Times New Roman', Georgia, serif;
       background: #fafafa;
-      color: #333;
+      color: #1a1a1a;
+      line-height: 1.7;
     }
-    .header {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+    /* Landing Page */
+    .landing {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+    }
+    .landing-content {
       text-align: center;
-      margin-bottom: 40px;
+      margin-top: -80px;
     }
-    .header h1 {
+    .logo {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 42px;
+      font-weight: 700;
       color: #1a1a2e;
-      margin-bottom: 10px;
+      margin-bottom: 40px;
+      letter-spacing: -1px;
+    }
+    .search-box {
+      display: flex;
+      align-items: center;
+      width: 520px;
+      max-width: 90vw;
+      padding: 8px 8px 8px 24px;
+      border: none;
+      border-radius: 32px;
+      background: #fff;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      margin: 0 auto;
+    }
+    .search-box input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 18px;
+      text-transform: uppercase;
+      font-weight: 500;
+      letter-spacing: 1px;
+      background: transparent;
+    }
+    .search-box input::placeholder {
+      text-transform: none;
+      color: #aaa;
+      font-weight: 400;
+      letter-spacing: 0;
+    }
+    .search-box button {
+      background: #1a1a2e;
+      border: none;
+      cursor: pointer;
+      padding: 14px 28px;
+      color: white;
+      border-radius: 24px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .search-box button:hover {
+      background: #2d2d4a;
+      transform: scale(1.02);
+    }
+    .search-box button:disabled {
+      background: #999;
+      transform: none;
+      cursor: not-allowed;
     }
     .subtitle {
+      margin-top: 28px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 15px;
       color: #666;
     }
-    .input-section {
+    .portfolio-link {
+      display: inline-block;
+      margin-top: 20px;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      color: #00205b;
+      text-decoration: none;
+      padding: 8px 16px;
+      border: 1px solid #00205b;
+      border-radius: 20px;
+      transition: background 0.2s, color 0.2s;
+    }
+    .portfolio-link:hover {
+      background: #00205b;
+      color: white;
+    }
+
+    /* Report Wrapper */
+    .report-wrapper {
+      display: none;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .report-wrapper.visible {
+      display: block;
+    }
+    .report-toolbar {
       display: flex;
-      gap: 10px;
-      margin-bottom: 40px;
-      justify-content: center;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
     }
-    input[type="text"] {
-      padding: 12px 20px;
-      font-size: 18px;
-      border: 2px solid #ddd;
-      border-radius: 8px;
-      width: 200px;
-      text-transform: uppercase;
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
     }
-    input[type="text"]:focus {
-      outline: none;
-      border-color: #1a1a2e;
+    .regenerate-link {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      color: #00205b;
+      text-decoration: none;
     }
-    button {
-      padding: 12px 30px;
-      font-size: 16px;
-      background: #1a1a2e;
+    .regenerate-link:hover {
+      text-decoration: underline;
+    }
+    .back-link {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #00205b;
+      text-decoration: none;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+    .download-pdf-btn {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #00205b;
       color: white;
       border: none;
-      border-radius: 8px;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       transition: background 0.2s;
     }
-    button:hover {
-      background: #2d2d4a;
+    .download-pdf-btn:hover {
+      background: #003087;
     }
-    button:disabled {
+    .download-pdf-btn:disabled {
       background: #999;
       cursor: not-allowed;
     }
-
-    /* Report Styling */
-    .report-container {
-      display: none;
+    .download-pdf-btn svg {
+      width: 16px;
+      height: 16px;
     }
-    .report-container.visible {
-      display: block;
-    }
-    .report-content {
-      line-height: 1.8;
-    }
-    .report-content h1 {
-      font-size: 36px;
-      color: #1a1a2e;
-      border-bottom: 2px solid #1a1a2e;
-      padding-bottom: 12px;
-      margin-top: 0;
-      margin-bottom: 30px;
-    }
-    .report-content h2 {
-      font-size: 26px;
-      color: #1a1a2e;
-      margin-top: 45px;
-      margin-bottom: 22px;
-    }
-    .report-content h3 {
-      font-size: 20px;
-      color: #444;
-      margin-top: 35px;
-      margin-bottom: 16px;
-    }
-    .report-content h4 {
-      font-size: 17px;
-      color: #333;
-      margin-top: 22px;
-      margin-bottom: 12px;
-    }
-    .report-content p {
-      margin: 15px 0;
-      text-align: justify;
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
 
-    /* Customer/Partner boxes */
-    .customer-box {
-      background: #e8f4fd;
-      padding: 15px 20px;
-      margin: 12px 0;
-      border-radius: 6px;
-      border-left: 4px solid #2196f3;
-    }
-    .customer-box strong {
-      color: #1565c0;
-    }
-
-    /* Key Debates styling */
-    .debate-box {
-      background: #f5f5f5;
-      padding: 15px 20px;
-      margin: 12px 0;
-      border-left: 4px solid #1a1a2e;
-      border-radius: 0 6px 6px 0;
-    }
-    .debate-box h4 {
-      margin-top: 0;
-      margin-bottom: 8px;
-      color: #1a1a2e;
-    }
-    .bull-case {
-      color: #2e7d32;
-      margin: 5px 0;
-    }
-    .bear-case {
-      color: #c62828;
-      margin: 5px 0;
-    }
-
-    /* Competitive positioning */
-    .competitor-section {
-      background: #fff8e1;
-      padding: 15px 20px;
-      margin: 12px 0;
-      border-radius: 6px;
-      border-left: 4px solid #ff9800;
-    }
-
+    /* Loading */
     .loading-container {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       text-align: center;
-      padding: 60px 20px;
-      color: #666;
+      padding: 100px 20px;
+      background: white;
+      box-shadow: 0 0 40px rgba(0,0,0,0.08);
     }
     .loading-title {
       font-size: 18px;
@@ -165,7 +199,6 @@
       justify-content: center;
       gap: 8px;
       margin-bottom: 30px;
-      flex-wrap: wrap;
     }
     .loading-step {
       padding: 8px 16px;
@@ -173,14 +206,10 @@
       font-size: 13px;
       background: #eee;
       color: #999;
-      transition: all 0.3s;
+      transition: background 0.3s, color 0.3s;
     }
     .loading-step.active {
-      background: #1a1a2e;
-      color: white;
-    }
-    .loading-step.done {
-      background: #4caf50;
+      background: #00205b;
       color: white;
     }
     .progress-bar {
@@ -194,52 +223,392 @@
     }
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, #1a1a2e, #2d2d4a);
+      background: #00205b;
       border-radius: 3px;
-      transition: width 0.5s ease;
+      transition: width 1s ease-out;
     }
     .loading-time {
       font-size: 14px;
       color: #888;
     }
-    .loading-time span {
-      font-weight: 600;
-      color: #666;
-    }
     .error {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       color: #c0392b;
       text-align: center;
-      padding: 20px;
-    }
-    .cache-indicator {
+      padding: 40px;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* Report Page - Exact Goldman Style from Mockup */
+    .page {
+      background: white;
+      padding: 48px 56px;
+      box-shadow: 0 0 40px rgba(0,0,0,0.08);
+    }
+
+    /* Header */
+    .report-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 3px solid #00205b;
+      padding-bottom: 20px;
+      margin-bottom: 28px;
+    }
+    .header-left {
+      flex: 1;
+    }
+    .report-type {
+      font-family: Arial, sans-serif;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #00205b;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    .company-name {
+      font-size: 38px;
+      font-weight: bold;
+      color: #00205b;
+      margin-bottom: 4px;
+    }
+    .ticker-info {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      color: #666;
+    }
+    .header-right {
+      text-align: right;
+      font-family: Arial, sans-serif;
+    }
+    .price {
+      font-size: 32px;
+      font-weight: bold;
+      color: #1a1a1a;
+    }
+    .rating-badge {
+      display: inline-block;
+      background: #00205b;
+      color: white;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin-top: 8px;
+    }
+
+    /* Investment Thesis Box */
+    .thesis-box {
+      background: #00205b;
+      color: white;
+      padding: 24px 28px;
+      margin-bottom: 32px;
+    }
+    .thesis-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .thesis-icon {
+      width: 26px;
+      height: 26px;
+      background: white;
+      color: #00205b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 15px;
+      margin-right: 12px;
+      font-family: Arial, sans-serif;
+    }
+    .thesis-label {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      opacity: 0.8;
+    }
+    .thesis-text {
+      font-size: 17px;
+      line-height: 1.6;
+    }
+    .thesis-text strong {
+      color: #7dd3fc;
+    }
+
+    /* Section Headers */
+    .page h2 {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #00205b;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 8px;
+      margin-top: 40px;
+      margin-bottom: 18px;
+    }
+
+    /* Sub-section Headers */
+    .page h3 {
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: #00205b;
+      margin-top: 28px;
+      margin-bottom: 12px;
+    }
+    .page h3 .num {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      background: #00205b;
+      color: white;
+      border-radius: 50%;
       text-align: center;
-      font-size: 14px;
-      margin-bottom: 20px;
-      padding: 10px;
-      border-radius: 6px;
-      display: none;
+      line-height: 28px;
+      font-size: 13px;
+      margin-right: 10px;
     }
-    .cache-indicator.visible {
-      display: block;
+
+    .page h4 {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: #444;
+      margin-top: 20px;
+      margin-bottom: 10px;
     }
-    .cache-indicator.cached {
-      background: #e8f5e9;
-      color: #2e7d32;
+
+    /* Appendix/Q&A styling */
+    .page .qa-item {
+      margin: 16px 0;
+      padding-left: 16px;
+      border-left: 3px solid #e0e0e0;
     }
-    .cache-indicator.fresh {
-      background: #e3f2fd;
+    .page .qa-question {
+      font-weight: 600;
+      color: #00205b;
+      margin-bottom: 8px;
+    }
+    .page .qa-answer {
+      color: #444;
+    }
+
+    /* Body Text */
+    .page p {
+      margin-bottom: 14px;
+      text-align: justify;
+      font-size: 15px;
+    }
+
+    /* Key Insight Box (light blue) */
+    .insight-box {
+      background: #f0f4f8;
+      border-left: 4px solid #00205b;
+      padding: 16px 20px;
+      margin: 24px 0;
+    }
+    .insight-label {
+      font-family: Arial, sans-serif;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #00205b;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .insight-text {
+      font-style: italic;
+      color: #333;
+      font-size: 15px;
+    }
+
+    /* Customer/Partner Boxes */
+    .customer-box {
+      background: #f0f7ff;
+      border-left: 4px solid #2196f3;
+      padding: 14px 18px;
+      margin: 14px 0;
+      border-radius: 0 4px 4px 0;
+    }
+    .customer-box strong {
       color: #1565c0;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
     }
-    .refresh-link {
-      margin-left: 10px;
-      color: #1a1a2e;
-      text-decoration: underline;
-      cursor: pointer;
+    .customer-box p {
+      margin: 8px 0 0 0;
+      font-size: 14px;
     }
-    .refresh-link:hover {
-      color: #2d2d4a;
+
+    /* Competitor Section */
+    .competitor-box {
+      background: #fff8e1;
+      border-left: 4px solid #ff9800;
+      padding: 14px 18px;
+      margin: 14px 0;
+      border-radius: 0 4px 4px 0;
+    }
+    .competitor-box strong {
+      color: #e65100;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+    .competitor-box p {
+      margin: 8px 0 0 0;
+      font-size: 14px;
+    }
+
+    /* Key Debates */
+    .debate-box {
+      background: #f5f5f5;
+      border-left: 4px solid #00205b;
+      padding: 16px 20px;
+      margin: 16px 0;
+      border-radius: 0 4px 4px 0;
+    }
+    .debate-question {
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #00205b;
+      margin-bottom: 12px;
+    }
+    .bull-case {
+      color: #2e7d32;
+      margin: 8px 0;
+      font-size: 14px;
+    }
+    .bull-case strong {
+      font-family: Arial, sans-serif;
+    }
+    .bear-case {
+      color: #c62828;
+      margin: 8px 0;
+      font-size: 14px;
+    }
+    .bear-case strong {
+      font-family: Arial, sans-serif;
+    }
+
+    /* Data Table - Goldman Sachs Style */
+    .table-container {
+      margin: 20px 0;
+    }
+    .table-title {
+      font-size: 11px;
+      font-weight: bold;
+      color: #00205b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      border-bottom: 2px solid #00205b;
+      padding-bottom: 4px;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0;
+      font-family: 'Times New Roman', Georgia, serif;
+      font-size: 12px;
+    }
+    .data-table thead tr {
+      border-bottom: 2px solid #00205b;
+    }
+    .data-table th {
+      background: transparent;
+      color: #00205b;
+      padding: 8px 12px;
+      text-align: right;
+      font-weight: bold;
+      font-size: 11px;
+      border-bottom: 2px solid #00205b;
+    }
+    .data-table th:first-child {
+      text-align: left;
+      width: 140px;
+    }
+    .data-table th.estimate {
+      color: #666;
+      font-style: italic;
+    }
+    .data-table td {
+      padding: 6px 12px;
+      border-bottom: 1px solid #e0e0e0;
+      text-align: right;
+    }
+    .data-table td:first-child {
+      text-align: left;
+      font-weight: 500;
+      color: #333;
+    }
+    .data-table tr:hover {
+      background: #f8f9fa;
+    }
+    .data-table .metric-indent {
+      padding-left: 24px;
+      font-size: 11px;
+      color: #555;
+    }
+    .data-table .negative {
+      color: #c00;
+    }
+    .data-table .positive {
+      color: #006600;
+    }
+    .data-table .estimate-col {
+      background: #fafafa;
+      color: #666;
+      font-style: italic;
+    }
+    .data-table tfoot td {
+      font-size: 9px;
+      color: #888;
+      padding-top: 12px;
+      border: none;
+      text-align: left;
+    }
+
+    /* Lists */
+    .page ul, .page ol {
+      margin: 14px 0 14px 24px;
+      font-size: 15px;
+    }
+    .page li {
+      margin-bottom: 8px;
+    }
+
+    /* Valuation Box */
+    .valuation-summary {
+      background: #e8f5e9;
+      border: 1px solid #81c784;
+      padding: 18px 22px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .valuation-summary strong {
+      color: #2e7d32;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Risk Box */
+    .risk-box {
+      background: #ffebee;
+      border-left: 4px solid #ef5350;
+      padding: 14px 18px;
+      margin: 14px 0;
+      border-radius: 0 4px 4px 0;
+    }
+    .risk-box strong {
+      color: #c62828;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+    .risk-box p {
+      margin: 8px 0 0 0;
+      font-size: 14px;
     }
 
     /* Chat Widget */
@@ -249,12 +618,17 @@
       bottom: 24px;
       right: 24px;
       z-index: 1000;
+      display: none;
+    }
+    .report-wrapper.visible .chat-widget,
+    body.show-chat .chat-widget {
+      display: block;
     }
     .chat-button {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: #1a1a2e;
+      height: 48px;
+      padding: 0 20px;
+      border-radius: 24px;
+      background: #00205b;
       color: white;
       border: none;
       cursor: pointer;
@@ -262,20 +636,13 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.2s, background 0.2s;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 500;
     }
     .chat-button:hover {
-      background: #2d2d4a;
-      transform: scale(1.05);
+      background: #003087;
     }
-    .chat-button svg {
-      width: 24px;
-      height: 24px;
-    }
-    .chat-button.open svg.chat-icon { display: none; }
-    .chat-button.open svg.close-icon { display: block; }
-    .chat-button svg.close-icon { display: none; }
-
     .chat-window {
       position: absolute;
       bottom: 70px;
@@ -293,11 +660,25 @@
       display: flex;
     }
     .chat-header {
-      background: #1a1a2e;
+      background: #00205b;
       color: white;
-      padding: 16px;
+      padding: 12px 16px;
       font-weight: 600;
       font-size: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chat-minimize {
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      padding: 4px;
+      opacity: 0.8;
+    }
+    .chat-minimize:hover {
+      opacity: 1;
     }
     .chat-messages {
       flex: 1;
@@ -324,10 +705,6 @@
       align-self: flex-start;
       border-bottom-left-radius: 4px;
     }
-    .chat-message.typing {
-      color: #888;
-      font-style: italic;
-    }
     .chat-input-area {
       padding: 12px;
       border-top: 1px solid #eee;
@@ -336,382 +713,378 @@
     }
     .chat-input {
       flex: 1;
-      padding: 10px 14px;
+      padding: 12px 16px;
       border: 1px solid #ddd;
       border-radius: 20px;
       font-size: 14px;
       outline: none;
     }
     .chat-input:focus {
-      border-color: #1a1a2e;
+      border-color: #00205b;
     }
     .chat-send {
       width: 36px;
       height: 36px;
       border-radius: 50%;
-      background: #1a1a2e;
+      background: #00205b;
       color: white;
       border: none;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 0;
     }
     .chat-send:hover {
-      background: #2d2d4a;
+      background: #003087;
     }
     .chat-send:disabled {
       background: #ccc;
-      cursor: not-allowed;
-    }
-    .chat-send svg {
-      width: 18px;
-      height: 18px;
-    }
-    .chat-empty {
-      color: #888;
-      text-align: center;
-      margin-top: 40px;
-      font-size: 14px;
-      padding: 0 20px;
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>Initiation of Coverage</h1>
-    <p class="subtitle">Generate professional equity research reports</p>
-  </div>
-
-  <div class="input-section">
-    <input type="text" id="ticker" placeholder="ticker" maxlength="5">
-    <button id="generate">Generate Report</button>
-  </div>
-
-  <div class="cache-indicator" id="cacheIndicator"></div>
-
-  <div class="report-container" id="reportContainer">
-    <div class="report-content" id="reportContent"></div>
-  </div>
-
-  <!-- Chat Widget -->
-  <div class="chat-widget" id="chatWidget" style="display: none;">
-    <div class="chat-window" id="chatWindow">
-      <div class="chat-header">Ask about this report</div>
-      <div class="chat-messages" id="chatMessages">
-        <div class="chat-empty">Ask any question about the report and I'll help you find the answer.</div>
+  <div class="landing" id="landing">
+    <div class="landing-content">
+      <div class="logo">Initiation of Coverage</div>
+      <div class="search-box">
+        <input type="text" id="ticker" placeholder="Enter ticker symbol..." maxlength="5">
+        <button id="generate">GO</button>
       </div>
+      <p class="subtitle">Generate hedge fund-style research reports</p>
+      <a href="/portfolio.html" class="portfolio-link">Portfolio Update →</a>
+    </div>
+  </div>
+
+  <div class="report-wrapper" id="report-wrapper">
+    <div class="report-toolbar">
+      <div class="toolbar-left">
+        <a href="#" class="back-link" id="back-link">← New Search</a>
+        <a href="#" class="regenerate-link" id="regenerate-link" style="display: none;">Generate New</a>
+      </div>
+      <button class="download-pdf-btn" id="download-pdf" style="display: none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+        </svg>
+        Download PDF
+      </button>
+    </div>
+
+    <div class="loading-container" id="loading" style="display: none;">
+      <div class="loading-title">Generating report for <strong id="loading-ticker"></strong></div>
+      <div class="loading-steps">
+        <span class="loading-step active">1. Research</span>
+        <span class="loading-step">2. Draft</span>
+        <span class="loading-step">3. Review</span>
+        <span class="loading-step">4. Final</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width: 15%"></div></div>
+      <div class="loading-time">This may take 1-2 minutes...</div>
+    </div>
+
+    <div class="page" id="report-page" style="display: none;"></div>
+  </div>
+
+  <div class="chat-widget" id="chat-widget">
+    <div class="chat-window" id="chatWindow">
+      <div class="chat-header">
+        <span>Follow Up Questions?</span>
+        <button class="chat-minimize" id="chatMinimize">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+      </div>
+      <div class="chat-messages" id="chatMessages"></div>
       <div class="chat-input-area">
         <input type="text" class="chat-input" id="chatInput" placeholder="Type your question...">
         <button class="chat-send" id="chatSend">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2"/>
-          </svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2"/></svg>
         </button>
       </div>
     </div>
     <button class="chat-button" id="chatButton">
-      <svg class="chat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-      </svg>
-      <svg class="close-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M18 6L6 18M6 6l12 12"/>
-      </svg>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span>Chat</span>
     </button>
   </div>
 
   <script>
     const tickerInput = document.getElementById('ticker');
     const generateBtn = document.getElementById('generate');
-    const reportContainer = document.getElementById('reportContainer');
-    const reportContent = document.getElementById('reportContent');
-    const cacheIndicator = document.getElementById('cacheIndicator');
-    const chatWidget = document.getElementById('chatWidget');
-    const chatWindow = document.getElementById('chatWindow');
-    const chatButton = document.getElementById('chatButton');
-    const chatMessages = document.getElementById('chatMessages');
-    const chatInput = document.getElementById('chatInput');
-    const chatSend = document.getElementById('chatSend');
+    const landing = document.getElementById('landing');
+    const reportWrapper = document.getElementById('report-wrapper');
+    const reportPage = document.getElementById('report-page');
+    const loadingEl = document.getElementById('loading');
+    const loadingTicker = document.getElementById('loading-ticker');
+    const backLink = document.getElementById('back-link');
+    const chatWidget = document.getElementById('chat-widget');
+    const downloadPdfBtn = document.getElementById('download-pdf');
+    const regenerateLink = document.getElementById('regenerate-link');
 
     let currentTicker = '';
     let currentReport = '';
     let chatHistory = [];
+    let loadingTimer = null;
+    let loadingStartTime = null;
+
+    // Regenerate handler
+    regenerateLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (currentTicker) {
+        generateReport(true); // force refresh
+      }
+    });
+
+    // PDF download handler
+    downloadPdfBtn.addEventListener('click', async () => {
+      if (!currentTicker) return;
+
+      downloadPdfBtn.disabled = true;
+      downloadPdfBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;">
+          <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="8"/>
+        </svg>
+        Generating...
+      `;
+
+      try {
+        const response = await fetch('/api/download-pdf', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ticker: currentTicker })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to generate PDF');
+        }
+
+        // Create blob and download
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${currentTicker}_Research_Report.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+      } catch (error) {
+        console.error('PDF download error:', error);
+        alert('Failed to download PDF: ' + error.message);
+      }
+
+      downloadPdfBtn.disabled = false;
+      downloadPdfBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+        </svg>
+        Download PDF
+      `;
+    });
 
     generateBtn.addEventListener('click', () => generateReport(false));
     tickerInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') generateReport(false);
+      if (e.key === 'Enter') generateReport();
+    });
+    backLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      showLanding();
     });
 
+    // Chat handlers
+    document.getElementById('chatButton').addEventListener('click', () => {
+      document.getElementById('chatWindow').classList.toggle('open');
+    });
+    document.getElementById('chatMinimize').addEventListener('click', () => {
+      document.getElementById('chatWindow').classList.remove('open');
+    });
+    document.getElementById('chatSend').addEventListener('click', sendChatMessage);
+    document.getElementById('chatInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendChatMessage();
+    });
+
+    function showLanding() {
+      landing.style.display = 'flex';
+      reportWrapper.classList.remove('visible');
+      chatWidget.style.display = 'none';
+      downloadPdfBtn.style.display = 'none';
+      regenerateLink.style.display = 'none';
+      document.getElementById('chatWindow').classList.remove('open');
+      stopLoadingTimer();
+    }
+
+    function startLoadingTimer() {
+      loadingStartTime = Date.now();
+      const loadingTimeEl = document.querySelector('.loading-time');
+      const progressFill = document.querySelector('.progress-fill');
+      const steps = document.querySelectorAll('.loading-step');
+
+      // Reset to initial state
+      progressFill.style.width = '5%';
+      steps.forEach((s, i) => s.classList.toggle('active', i === 0));
+
+      // Show estimated total time (v1 takes ~2 minutes with full research)
+      loadingTimeEl.textContent = 'Estimated time: ~2 minutes';
+
+      loadingTimer = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - loadingStartTime) / 1000);
+
+        // Update progress bar (estimate ~120 seconds total, cap at 95%)
+        const progress = Math.min(95, (elapsed / 120) * 100);
+        progressFill.style.width = progress + '%';
+
+        // Update active step based on elapsed time (adjusted for ~120s total)
+        if (elapsed < 30) {
+          // Step 1: Research (0-30s)
+          steps.forEach((s, i) => s.classList.toggle('active', i === 0));
+        } else if (elapsed < 60) {
+          // Step 2: Draft (30-60s)
+          steps.forEach((s, i) => s.classList.toggle('active', i <= 1));
+        } else if (elapsed < 90) {
+          // Step 3: Review (60-90s)
+          steps.forEach((s, i) => s.classList.toggle('active', i <= 2));
+        } else {
+          // Step 4: Final (90-120s)
+          steps.forEach((s, i) => s.classList.toggle('active', true));
+        }
+      }, 1000);
+    }
+
+    function stopLoadingTimer() {
+      if (loadingTimer) {
+        clearInterval(loadingTimer);
+        loadingTimer = null;
+      }
+    }
+
+    function showLoading(ticker) {
+      landing.style.display = 'none';
+      reportWrapper.classList.add('visible');
+      loadingEl.style.display = 'block';
+      reportPage.style.display = 'none';
+      loadingTicker.textContent = ticker;
+      chatWidget.style.display = 'none';
+      downloadPdfBtn.style.display = 'none';
+      startLoadingTimer();
+    }
+
+    function showReport(html) {
+      stopLoadingTimer();
+      loadingEl.style.display = 'none';
+      reportPage.style.display = 'block';
+      reportPage.innerHTML = html;
+      chatWidget.style.display = 'block';
+      downloadPdfBtn.style.display = 'inline-flex';
+    }
+
     async function generateReport(forceRefresh = false) {
-      const ticker = tickerInput.value.trim().toUpperCase();
+      const ticker = tickerInput.value.trim().toUpperCase() || currentTicker;
       if (!ticker) return;
 
+      currentTicker = ticker;
+      chatHistory = [];
+      document.getElementById('chatMessages').innerHTML = '';
+
+      showLoading(ticker);
       generateBtn.disabled = true;
-      reportContainer.classList.add('visible');
-      cacheIndicator.classList.remove('visible', 'cached', 'fresh');
-
-      // Show loading UI - simple for cache check, detailed for generation
-      let progressInterval = null;
-      reportContent.innerHTML = `
-        <div class="loading-container">
-          <div class="loading-title">Loading report for <strong>${ticker}</strong>...</div>
-        </div>
-      `;
-
-      const showDetailedLoading = () => {
-        reportContent.innerHTML = `
-          <div class="loading-container">
-            <div class="loading-title">Generating report for <strong>${ticker}</strong></div>
-            <div class="loading-steps">
-              <span class="loading-step active" id="step1">1. Research</span>
-              <span class="loading-step" id="step2">2. Draft</span>
-              <span class="loading-step" id="step3">3. PM Review</span>
-              <span class="loading-step" id="step4">4. Final</span>
-            </div>
-            <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 5%"></div></div>
-            <div class="loading-time">Estimated time: <span id="timeRemaining">~2 minutes</span></div>
-          </div>
-        `;
-
-        let elapsed = 0;
-        const totalTime = 120; // estimated seconds
-        const stepTimes = [50, 75, 95, 120]; // when each step completes
-
-        progressInterval = setInterval(() => {
-          elapsed++;
-          const progress = Math.min((elapsed / totalTime) * 100, 95);
-          const remaining = Math.max(totalTime - elapsed, 5);
-
-          const progressFill = document.getElementById('progressFill');
-          const timeRemaining = document.getElementById('timeRemaining');
-          if (progressFill) progressFill.style.width = progress + '%';
-          if (timeRemaining) {
-            if (remaining >= 60) {
-              const mins = Math.ceil(remaining / 60);
-              timeRemaining.textContent = '~' + mins + ' minute' + (mins > 1 ? 's' : '');
-            } else {
-              timeRemaining.textContent = '~' + remaining + ' seconds';
-            }
-          }
-
-          // Update step indicators
-          stepTimes.forEach((time, i) => {
-            const step = document.getElementById('step' + (i + 1));
-            if (step) {
-              if (elapsed >= time) {
-                step.classList.remove('active');
-                step.classList.add('done');
-              } else if (elapsed >= (stepTimes[i - 1] || 0)) {
-                step.classList.add('active');
-              }
-            }
-          });
-        }, 1000);
-      };
-
-      // Show detailed progress after 1 second (if not cached, it takes longer)
-      const detailedTimeout = setTimeout(showDetailedLoading, 1000);
+      regenerateLink.style.display = 'none';
 
       try {
         const response = await fetch('/api/generate-report', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ticker, forceRefresh })
+          body: JSON.stringify({ ticker, forceRefresh, version: 'v1' })
         });
 
-        clearTimeout(detailedTimeout);
-        clearInterval(progressInterval);
         const data = await response.json();
 
         if (data.error) {
-          reportContent.innerHTML = '<div class="error">Error: ' + data.error + '</div>';
-          cacheIndicator.classList.remove('visible');
-          chatWidget.style.display = 'none';
+          stopLoadingTimer();
+          loadingEl.innerHTML = '<div class="error">Error: ' + data.error + '</div>';
         } else {
-          currentTicker = ticker;
           currentReport = data.report;
-          chatHistory = [];
-          chatMessages.innerHTML = '<div class="chat-empty">Ask any question about the report and I\'ll help you find the answer.</div>';
-          reportContent.innerHTML = formatReport(data.report);
-          showCacheStatus(data.cached, data.generatedAt);
-          chatWidget.style.display = 'block';
+          showReport(data.html || convertToHTML(data.report, ticker));
+
+          // Show regenerate link (always available)
+          regenerateLink.style.display = 'inline';
         }
       } catch (error) {
-        clearTimeout(detailedTimeout);
-        clearInterval(progressInterval);
-        reportContent.innerHTML = '<div class="error">Failed to generate report. Please try again.</div>';
-        cacheIndicator.classList.remove('visible');
+        stopLoadingTimer();
+        loadingEl.innerHTML = '<div class="error">Failed to generate report. Please try again.</div>';
       }
 
       generateBtn.disabled = false;
     }
 
-    function showCacheStatus(isCached, generatedAt) {
-      const date = new Date(generatedAt);
-      const dateStr = date.toLocaleDateString('en-US', {
-        month: 'short', day: 'numeric', year: 'numeric'
-      });
-
-      if (isCached) {
-        cacheIndicator.innerHTML = `📋 Cached report from ${dateStr} <span class="refresh-link" onclick="generateReport(true)">Generate fresh report</span>`;
-        cacheIndicator.classList.add('visible', 'cached');
-        cacheIndicator.classList.remove('fresh');
-      } else {
-        cacheIndicator.innerHTML = `✨ Freshly generated on ${dateStr}`;
-        cacheIndicator.classList.add('visible', 'fresh');
-        cacheIndicator.classList.remove('cached');
-      }
-    }
-
-    function formatReport(text) {
+    function convertToHTML(text, ticker) {
+      // Basic fallback conversion if server doesn't provide HTML
       let html = text
-        // Headers
-        .replace(/^#### (.*$)/gm, '<h4>$1</h4>')
-        .replace(/^### (.*$)/gm, '<h3>$1</h3>')
         .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-        .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-        // Bold text (must come before italic)
+        .replace(/^### (\d+)\. (.*$)/gm, '<h3><span class="num">$1</span>$2</h3>')
+        .replace(/^### (.*$)/gm, '<h3>$1</h3>')
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        // Italic text
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        // Convert lines to paragraphs
         .replace(/\n\n/g, '</p><p>')
         .replace(/\n/g, '<br>');
 
-      // Wrap in paragraph
-      html = '<p>' + html + '</p>';
-
-      // Convert first bold-only paragraph to h1 (the title)
-      html = html.replace(/^<p><strong>(.*?(?:Initiation|Coverage|—|-).*?)<\/strong><\/p>/, '<h1>$1</h1>');
-
-      // Convert standalone bold paragraphs to h2 (section headers)
-      html = html.replace(/<p><strong>([^<]+)<\/strong><\/p>/g, '<h2>$1</h2>');
-
-      // Style numbered customer/partner lists
-      html = html.replace(/<p><strong>(\d+)\.\s*(.*?):<\/strong>/g,
-        '<div class="customer-box"><strong>$1. $2:</strong>');
-
-      // Style Key Debates section items (handle both bold and italic numbered questions)
-      html = html.replace(/<p><strong>(\d+)\.\s*(.*?)\?<\/strong>/g,
-        '<div class="debate-box"><h4>$1. $2?</h4>');
-      html = html.replace(/<p><em>(\d+)\.\s*(.*?)\?<\/em>/g,
-        '<div class="debate-box"><h4>$1. $2?</h4>');
-
-      // Style Bull Case / Bear Case (handle both bold and italic)
-      html = html.replace(/<strong>Bull Case:<\/strong>(.*?)(?=<strong>Bear|<em>Bear|<\/div>|<\/p>)/gs,
-        '<p class="bull-case"><strong>Bull Case:</strong>$1</p>');
-      html = html.replace(/<em>Bull Case:<\/em>(.*?)(?=<strong>Bear|<em>Bear|<\/div>|<\/p>)/gs,
-        '<p class="bull-case"><strong>Bull Case:</strong>$1</p>');
-      html = html.replace(/<strong>Bear Case:<\/strong>(.*?)(?=<\/div>|<\/p>|<strong>|<em>)/gs,
-        '<p class="bear-case"><strong>Bear Case:</strong>$1</p>');
-      html = html.replace(/<em>Bear Case:<\/em>(.*?)(?=<\/div>|<\/p>|<strong>|<em>)/gs,
-        '<p class="bear-case"><strong>Bear Case:</strong>$1</p>');
-
-      // Close debate boxes: split on opening tag, add closing tag before each subsequent opening
-      const debateParts = html.split('<div class="debate-box">');
-      if (debateParts.length > 1) {
-        html = debateParts[0]; // Part before first debate box
-        for (let i = 1; i < debateParts.length; i++) {
-          html += '<div class="debate-box">' + debateParts[i];
-          // Add closing div before next debate box or at end
-          if (i < debateParts.length - 1) {
-            // Not the last one - will close when we add the next
-          }
-        }
-        // Close all debate boxes by counting opens and adding closes at end
-        const openCount = (html.match(/<div class="debate-box">/g) || []).length;
-        const closeCount = (html.match(/<\/div>/g) || []).length;
-        // Actually, let's do this properly: close each box before the next opens
-        html = html.replace(/<div class="debate-box">/g, '</div><div class="debate-box">');
-        // Remove the first errant </div>
-        html = html.replace('</div><div class="debate-box">', '<div class="debate-box">');
-        // Add final closing div
-        html += '</div>';
-      }
-
-      // Close customer boxes
-      html = html.replace(/(<div class="customer-box">.*?)(<\/p><p>|<div class="customer-box">|<h[23]>)/g,
-        '$1</div>$2');
-
-      // Clean up empty paragraphs
-      html = html.replace(/<p>\s*<\/p>/g, '');
-      html = html.replace(/<p><br><\/p>/g, '');
-
-      return html;
+      return `
+        <div class="report-header">
+          <div class="header-left">
+            <div class="report-type">Initiation of Coverage</div>
+            <div class="company-name">${ticker}</div>
+            <div class="ticker-info">${ticker}</div>
+          </div>
+          <div class="header-right">
+            <div class="rating-badge">BUY</div>
+          </div>
+        </div>
+        <p>${html}</p>
+      `;
     }
 
-    // Chat functionality
-    chatButton.addEventListener('click', () => {
-      chatWindow.classList.toggle('open');
-      chatButton.classList.toggle('open');
-      if (chatWindow.classList.contains('open')) {
-        chatInput.focus();
-      }
-    });
+    async function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const question = input.value.trim();
+      if (!question) return;
 
-    chatSend.addEventListener('click', sendMessage);
-    chatInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') sendMessage();
-    });
+      addChatMessage('user', question);
+      input.value = '';
+      document.getElementById('chatSend').disabled = true;
 
-    async function sendMessage() {
-      const question = chatInput.value.trim();
-      if (!question || !currentReport) return;
-
-      // Clear empty state if present
-      const emptyState = chatMessages.querySelector('.chat-empty');
-      if (emptyState) emptyState.remove();
-
-      // Add user message
-      addMessage('user', question);
-      chatInput.value = '';
-      chatSend.disabled = true;
-
-      // Add typing indicator
       const typingDiv = document.createElement('div');
-      typingDiv.className = 'chat-message assistant typing';
+      typingDiv.className = 'chat-message assistant';
+      typingDiv.style.color = '#888';
+      typingDiv.style.fontStyle = 'italic';
       typingDiv.textContent = 'Thinking...';
-      chatMessages.appendChild(typingDiv);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+      document.getElementById('chatMessages').appendChild(typingDiv);
 
       try {
         const response = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ticker: currentTicker,
-            question,
-            report: currentReport,
-            chatHistory
-          })
+          body: JSON.stringify({ ticker: currentTicker, question, report: currentReport, chatHistory })
         });
-
         typingDiv.remove();
         const data = await response.json();
-
         if (data.error) {
-          addMessage('assistant', 'Sorry, something went wrong. Please try again.');
+          addChatMessage('assistant', 'Sorry, something went wrong.');
         } else {
-          addMessage('assistant', data.answer);
+          addChatMessage('assistant', data.answer);
           chatHistory.push({ role: 'user', content: question });
           chatHistory.push({ role: 'assistant', content: data.answer });
         }
       } catch (err) {
         typingDiv.remove();
-        addMessage('assistant', 'Sorry, something went wrong. Please try again.');
+        addChatMessage('assistant', 'Sorry, something went wrong.');
       }
-
-      chatSend.disabled = false;
-      chatInput.focus();
+      document.getElementById('chatSend').disabled = false;
+      input.focus();
     }
 
-    function addMessage(role, content) {
+    function addChatMessage(role, content) {
       const div = document.createElement('div');
-      div.className = `chat-message ${role}`;
-      div.innerHTML = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-      chatMessages.appendChild(div);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+      div.className = 'chat-message ' + role;
+      div.innerHTML = content.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+      document.getElementById('chatMessages').appendChild(div);
+      document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
     }
   </script>
 </body>
