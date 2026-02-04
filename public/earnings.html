@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Earnings Review</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Times New Roman', Georgia, serif;
+      background: #fafafa;
+      color: #1a1a1a;
+      line-height: 1.7;
+    }
+
+    /* Navigation Banner - V8: Compact with pill-style active state */
+    .nav-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #00205b;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    .nav-items {
+      display: flex;
+      gap: 6px;
+      padding: 0 8px;
+    }
+    .nav-item {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      padding: 6px 16px;
+      border-radius: 16px;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    .nav-item:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .nav-item.active {
+      color: #00205b;
+      background: white;
+      font-weight: 600;
+    }
+    .nav-item.active::after {
+      display: none;
+    }
+
+    /* Report Wrapper */
+    .report-wrapper {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      padding-top: 76px;
+    }
+    .report-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .back-link {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #00205b;
+      text-decoration: none;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Loading */
+    .loading-container {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      text-align: center;
+      padding: 100px 20px;
+      background: white;
+      box-shadow: 0 0 40px rgba(0,0,0,0.08);
+    }
+    .loading-title {
+      font-size: 18px;
+      margin-bottom: 30px;
+      color: #333;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #e8eaed;
+      border-top-color: #00205b;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loading-text {
+      font-size: 14px;
+      color: #888;
+    }
+    .error {
+      color: #c0392b;
+      text-align: center;
+      padding: 40px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* Report Page - Goldman Style */
+    .page {
+      background: white;
+      padding: 48px 56px;
+      box-shadow: 0 0 40px rgba(0,0,0,0.08);
+      display: none;
+    }
+    .page.visible {
+      display: block;
+    }
+
+    /* Header */
+    .report-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 3px solid #00205b;
+      padding-bottom: 20px;
+      margin-bottom: 28px;
+    }
+    .header-left {
+      flex: 1;
+    }
+    .report-type {
+      font-family: Arial, sans-serif;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #00205b;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    .company-name {
+      font-size: 38px;
+      font-weight: bold;
+      color: #00205b;
+      margin-bottom: 4px;
+    }
+    .ticker-info {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      color: #666;
+    }
+    .header-right {
+      text-align: right;
+      font-family: Arial, sans-serif;
+    }
+    .price-move-badge {
+      display: inline-block;
+      padding: 12px 24px;
+      font-size: 24px;
+      font-weight: 700;
+      border-radius: 8px;
+      margin-top: 8px;
+    }
+    .price-move-badge.positive {
+      background: #e6f4ea;
+      color: #137333;
+    }
+    .price-move-badge.negative {
+      background: #fce8e6;
+      color: #c5221f;
+    }
+    .price-move-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    /* Section Headers */
+    .page h2 {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #00205b;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 8px;
+      margin-top: 32px;
+      margin-bottom: 16px;
+    }
+    .page h2:first-of-type {
+      margin-top: 0;
+    }
+
+    /* Sub-section Headers */
+    .page h3 {
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: #00205b;
+      margin-top: 24px;
+      margin-bottom: 12px;
+    }
+
+    /* Body Text */
+    .page p {
+      margin-bottom: 14px;
+      text-align: justify;
+      font-size: 15px;
+    }
+
+    /* Lists */
+    .page ul, .page ol {
+      margin: 14px 0 14px 24px;
+      font-size: 15px;
+    }
+    .page li {
+      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+
+    /* Key Insight Box */
+    .insight-box {
+      background: #f0f4f8;
+      border-left: 4px solid #00205b;
+      padding: 16px 20px;
+      margin: 24px 0;
+    }
+    .insight-label {
+      font-family: Arial, sans-serif;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #00205b;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .insight-text {
+      font-style: italic;
+      color: #333;
+      font-size: 15px;
+    }
+
+    /* Headline Box */
+    .headline-box {
+      background: #00205b;
+      color: white;
+      padding: 20px 24px;
+      margin-bottom: 28px;
+    }
+    .headline-label {
+      font-family: Arial, sans-serif;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      opacity: 0.8;
+      margin-bottom: 8px;
+    }
+    .headline-text {
+      font-size: 18px;
+      line-height: 1.5;
+      font-weight: 500;
+    }
+
+    /* Content Sections */
+    .review-section {
+      margin-bottom: 28px;
+    }
+    .review-section:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Strong text */
+    .page strong {
+      color: #1a1a1a;
+      font-weight: 600;
+    }
+
+    /* Meta info */
+    .meta-info {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      color: #888;
+      margin-top: 32px;
+      padding-top: 16px;
+      border-top: 1px solid #eee;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .report-wrapper {
+        padding: 16px;
+        padding-top: 64px;
+      }
+      .page {
+        padding: 24px;
+      }
+      .company-name {
+        font-size: 28px;
+      }
+      .price-move-badge {
+        font-size: 18px;
+        padding: 8px 16px;
+      }
+      .report-header {
+        flex-direction: column;
+        gap: 16px;
+      }
+      .header-right {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav-banner">
+    <div class="nav-items">
+      <a href="/" class="nav-item">Initiate Coverage</a>
+      <a href="/market.html" class="nav-item">Market Update</a>
+      <a href="/portfolio.html" class="nav-item">Top Movers</a>
+      <a href="/thematic.html" class="nav-item">Thematic Investments</a>
+    </div>
+  </nav>
+
+  <div class="report-wrapper">
+    <div class="report-toolbar">
+      <div class="toolbar-left">
+        <a href="#" class="back-link" id="back-link">&#8592; Back</a>
+      </div>
+    </div>
+
+    <div class="loading-container" id="loading">
+      <div class="loading-title">Loading Earnings Review for <strong id="loading-ticker"></strong></div>
+      <div class="spinner"></div>
+      <div class="loading-text">Generating Goldman Sachs style analysis...</div>
+    </div>
+
+    <div class="page" id="report-page"></div>
+  </div>
+
+  <script>
+    // Get ticker and priceMove from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const ticker = urlParams.get('ticker');
+    const priceMove = urlParams.get('priceMove') || '+0%';
+
+    // Set up back link based on referrer
+    const backLink = document.getElementById('back-link');
+    if (document.referrer) {
+      backLink.href = document.referrer;
+    } else if (urlParams.get('from') === 'market') {
+      backLink.href = '/market.html';
+    } else {
+      backLink.href = '/portfolio.html';
+    }
+
+    // Update loading ticker
+    const loadingTicker = document.getElementById('loading-ticker');
+    if (ticker) {
+      loadingTicker.textContent = ticker.toUpperCase();
+      document.title = `${ticker.toUpperCase()} Earnings Review`;
+    }
+
+    // Elements
+    const loadingEl = document.getElementById('loading');
+    const reportPage = document.getElementById('report-page');
+
+    // Fetch and display earnings review
+    async function loadEarningsReview() {
+      if (!ticker) {
+        loadingEl.innerHTML = '<div class="error">No ticker specified. Please provide a ticker parameter.</div>';
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/earnings-review/${ticker}?priceMove=${encodeURIComponent(priceMove)}`);
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to fetch earnings review');
+        }
+
+        const data = await response.json();
+        renderReport(data);
+
+      } catch (error) {
+        console.error('Error fetching earnings review:', error);
+        loadingEl.innerHTML = `<div class="error">
+          <h3>Unable to load earnings review</h3>
+          <p>${error.message}</p>
+          <p style="margin-top: 16px;"><a href="${backLink.href}" style="color: #00205b;">Go back</a></p>
+        </div>`;
+      }
+    }
+
+    function renderReport(data) {
+      const priceClass = priceMove.startsWith('-') ? 'negative' : 'positive';
+
+      // Parse the review content into sections
+      const reviewContent = parseReviewContent(data.review);
+
+      // Build the HTML
+      let html = `
+        <div class="report-header">
+          <div class="header-left">
+            <div class="report-type">Earnings Review</div>
+            <div class="company-name">${escapeHtml(data.companyName || data.ticker)}</div>
+            <div class="ticker-info">${escapeHtml(data.ticker)} | ${escapeHtml(data.quarterInfo || 'Latest Quarter')}</div>
+          </div>
+          <div class="header-right">
+            <div class="price-move-label">T+1 Earnings Move</div>
+            <div class="price-move-badge ${priceClass}">${escapeHtml(priceMove)}</div>
+          </div>
+        </div>
+      `;
+
+      // Add the parsed content
+      html += reviewContent;
+
+      // Add meta info
+      html += `
+        <div class="meta-info">
+          Generated: ${new Date(data.generatedAt || Date.now()).toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit'
+          })}
+          ${data.cached ? ' (cached)' : ''}
+        </div>
+      `;
+
+      // Hide loading, show report
+      loadingEl.style.display = 'none';
+      reportPage.innerHTML = html;
+      reportPage.classList.add('visible');
+    }
+
+    function parseReviewContent(review) {
+      // Convert markdown-style formatting to HTML with proper structure
+      let html = review;
+
+      // Extract headline if present (first bold text or **Headline:** section)
+      const headlineMatch = html.match(/\*\*Headline[:\s]*\*\*\s*([^\n]+)/i);
+      let headlineHtml = '';
+      if (headlineMatch) {
+        headlineHtml = `
+          <div class="headline-box">
+            <div class="headline-label">Headline</div>
+            <div class="headline-text">${escapeHtml(headlineMatch[1].trim())}</div>
+          </div>
+        `;
+        html = html.replace(headlineMatch[0], '');
+      }
+
+      // Convert section headers (##, ###, **Section:**)
+      html = html
+        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+        .replace(/^\*\*([^*]+):\*\*\s*$/gm, '<h2>$1</h2>')
+        .replace(/^\*\*([^*]+):\*\*/gm, '<h3>$1</h3>');
+
+      // Convert inline bold
+      html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+      // Convert bullet points to list items
+      html = html.replace(/^[-*]\s+(.+)$/gm, '<li>$1</li>');
+
+      // Wrap consecutive list items in ul tags
+      html = html.replace(/(<li>.*<\/li>\n?)+/g, (match) => `<ul>${match}</ul>`);
+
+      // Convert paragraphs (double newlines)
+      html = html.split(/\n\n+/).map(para => {
+        para = para.trim();
+        if (!para) return '';
+        // Don't wrap if already wrapped in HTML tags
+        if (para.startsWith('<h') || para.startsWith('<ul') || para.startsWith('<div')) {
+          return para;
+        }
+        // Wrap plain text in paragraph tags
+        return `<p>${para}</p>`;
+      }).join('\n');
+
+      // Clean up any remaining single newlines within paragraphs
+      html = html.replace(/<\/p>\n<p>/g, '</p><p>');
+
+      return headlineHtml + html;
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Load on page ready
+    loadEarningsReview();
+  </script>
+</body>
+</html>

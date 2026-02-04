@@ -3,36 +3,78 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portfolio Update - Market Movers</title>
+  <title>Top Movers</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #fafafa;
+      font-family: 'Times New Roman', Georgia, serif;
+      background: #f8f9fa;
       color: #1a1a1a;
       line-height: 1.6;
     }
 
-    /* Header */
-    .header {
+    /* Navigation Banner - V8: Compact with pill-style active state */
+    .nav-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
       background: #00205b;
-      color: white;
-      padding: 20px 40px;
+      height: 40px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    .nav-items {
+      display: flex;
+      gap: 6px;
+      padding: 0 8px;
+    }
+    .nav-item {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      padding: 6px 16px;
+      border-radius: 16px;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    .nav-item:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .nav-item.active {
+      color: #00205b;
+      background: white;
+      font-weight: 600;
+    }
+    .nav-item.active::after {
+      display: none;
+    }
+
+    /* Header - deprecated, keeping for backwards compatibility */
+    .header {
+      display: none;
     }
     .header-title {
+      font-family: Arial, sans-serif;
       font-size: 24px;
       font-weight: 700;
       letter-spacing: -0.5px;
     }
     .header-subtitle {
+      font-family: Arial, sans-serif;
       font-size: 13px;
       opacity: 0.8;
       margin-top: 4px;
     }
     .back-link {
+      font-family: Arial, sans-serif;
       color: white;
       text-decoration: none;
       font-size: 14px;
@@ -46,77 +88,12 @@
       text-decoration: underline;
     }
 
-    /* Selection Bar */
-    .selection-bar {
-      background: white;
-      padding: 20px 40px;
-      border-bottom: 1px solid #e0e0e0;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-    .selection-bar label {
-      font-size: 14px;
-      font-weight: 600;
-      color: #333;
-    }
-    .selection-bar select {
-      padding: 10px 16px;
-      font-size: 14px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      background: white;
-      min-width: 180px;
-      cursor: pointer;
-    }
-    .selection-bar select:focus {
-      outline: none;
-      border-color: #00205b;
-    }
-    .custom-tickers {
-      display: none;
-      flex: 1;
-      min-width: 300px;
-    }
-    .custom-tickers.visible {
-      display: block;
-    }
-    .custom-tickers input {
-      width: 100%;
-      padding: 10px 16px;
-      font-size: 14px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-    }
-    .custom-tickers input:focus {
-      outline: none;
-      border-color: #00205b;
-    }
-    .fetch-btn {
-      background: #00205b;
-      color: white;
-      border: none;
-      padding: 10px 24px;
-      font-size: 14px;
-      font-weight: 600;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .fetch-btn:hover {
-      background: #003087;
-    }
-    .fetch-btn:disabled {
-      background: #999;
-      cursor: not-allowed;
-    }
-
     /* Main Content */
     .main-content {
       max-width: 1400px;
       margin: 0 auto;
       padding: 30px 40px;
+      padding-top: 70px;
     }
 
     /* Status Bar */
@@ -125,29 +102,104 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 24px;
-      padding: 12px 16px;
-      background: #f0f4f8;
+      padding: 16px 20px;
+      background: white;
       border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      border-left: 4px solid #00205b;
     }
     .status-text {
+      font-family: Arial, sans-serif;
       font-size: 14px;
       color: #666;
     }
     .status-text strong {
       color: #00205b;
     }
-    .cache-indicator {
-      font-size: 12px;
-      color: #888;
-      display: flex;
+    .refresh-btn {
+      font-family: Arial, sans-serif;
+      background: #00205b;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .refresh-btn:hover {
+      background: #003087;
+    }
+    .refresh-btn:disabled {
+      background: #999;
+      cursor: not-allowed;
+    }
+    .cache-badge {
+      font-family: Arial, sans-serif;
+      display: inline-flex;
       align-items: center;
       gap: 6px;
+      font-size: 12px;
+      color: #666;
+      background: #e8f5e9;
+      padding: 4px 10px;
+      border-radius: 12px;
+      margin-left: 12px;
     }
     .cache-dot {
-      width: 8px;
-      height: 8px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: #4caf50;
+    }
+
+    /* Index Selector */
+    .index-selector-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .index-label {
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      color: #666;
+      font-weight: 500;
+    }
+    .index-selector {
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      padding: 10px 36px 10px 14px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      background: white;
+      color: #1a1a1a;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      min-width: 180px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .index-selector:hover {
+      border-color: #00205b;
+    }
+    .index-selector:focus {
+      outline: none;
+      border-color: #00205b;
+      box-shadow: 0 0 0 3px rgba(0, 32, 91, 0.1);
+    }
+    .index-selector option {
+      padding: 10px;
+    }
+    .index-info {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      color: #999;
+      margin-left: 8px;
     }
 
     /* Loading State */
@@ -168,13 +220,9 @@
       to { transform: rotate(360deg); }
     }
     .loading-text {
+      font-family: Arial, sans-serif;
       font-size: 16px;
       color: #666;
-    }
-    .loading-subtext {
-      font-size: 13px;
-      color: #999;
-      margin-top: 8px;
     }
 
     /* Error State */
@@ -186,26 +234,12 @@
       margin: 20px 0;
     }
     .error-container h3 {
+      font-family: Arial, sans-serif;
       color: #c62828;
       margin-bottom: 10px;
     }
     .error-container p {
       color: #666;
-    }
-
-    /* Empty State */
-    .empty-container {
-      text-align: center;
-      padding: 60px 20px;
-      background: #f5f5f5;
-      border-radius: 8px;
-    }
-    .empty-container h3 {
-      color: #666;
-      margin-bottom: 10px;
-    }
-    .empty-container p {
-      color: #999;
     }
 
     /* Two Column Layout */
@@ -223,130 +257,193 @@
     /* Column Headers */
     .column {
       background: white;
-      border-radius: 12px;
+      border-radius: 8px;
       box-shadow: 0 2px 12px rgba(0,0,0,0.08);
       overflow: hidden;
     }
     .column-header {
+      font-family: Arial, sans-serif;
       padding: 16px 20px;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
       display: flex;
       align-items: center;
       gap: 10px;
     }
-    .column-header .count {
-      font-size: 13px;
-      font-weight: 500;
-      opacity: 0.7;
-    }
-    .winners .column-header {
-      background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-      color: #2e7d32;
+    .gainers .column-header {
+      background: #006600;
+      color: white;
     }
     .losers .column-header {
-      background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-      color: #c62828;
+      background: #c00;
+      color: white;
     }
 
-    /* Stock Cards */
-    .stock-list {
-      padding: 16px;
+    /* Table Styles */
+    .movers-table {
+      width: 100%;
+      border-collapse: collapse;
     }
-    .stock-card {
-      background: #fafafa;
-      border-radius: 8px;
-      padding: 16px;
-      margin-bottom: 12px;
-      border: 1px solid #eee;
-      transition: transform 0.2s, box-shadow 0.2s;
+    .movers-table th {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #666;
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 2px solid #e0e0e0;
+      background: #f8f9fa;
     }
-    .stock-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    .movers-table th:last-child {
+      text-align: right;
     }
-    .stock-card:last-child {
-      margin-bottom: 0;
+    .movers-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #eee;
+      vertical-align: top;
     }
-    .stock-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 10px;
+    .movers-table tr.stock-row {
+      transition: background 0.15s;
     }
-    .stock-info {
-      flex: 1;
+    .movers-table tr.stock-row:hover {
+      background: #f5f7fa;
     }
+
     .stock-ticker {
-      font-size: 18px;
+      font-family: Arial, sans-serif;
+      font-size: 15px;
       font-weight: 700;
       color: #00205b;
     }
     .stock-name {
-      font-size: 13px;
+      font-family: Arial, sans-serif;
+      font-size: 12px;
       color: #666;
       margin-top: 2px;
     }
+    .stock-price {
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      color: #333;
+    }
     .stock-change {
-      font-size: 20px;
+      font-family: Arial, sans-serif;
+      font-size: 15px;
       font-weight: 700;
-      padding: 4px 12px;
-      border-radius: 6px;
+      text-align: right;
     }
     .stock-change.positive {
-      background: #e8f5e9;
-      color: #2e7d32;
+      color: #006600;
     }
     .stock-change.negative {
-      background: #ffebee;
-      color: #c62828;
+      color: #c00;
     }
-    .stock-explanation {
+    .stock-change-dollar {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      color: #888;
+      text-align: right;
+      margin-top: 2px;
+    }
+
+    /* Inline Explanation Row - Always visible */
+    .explanation-row {
+      display: table-row;
+    }
+    .explanation-cell {
+      padding: 0 16px 16px 16px;
+      background: #f8f9fa;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .explanation-content {
+      background: white;
+      border-radius: 6px;
+      padding: 14px 16px;
+      border-left: 3px solid #00205b;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .explanation-text {
+      font-family: 'Times New Roman', Georgia, serif;
       font-size: 14px;
-      color: #444;
-      line-height: 1.5;
-      padding-top: 10px;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    /* Click hint */
+    .click-hint {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      color: #999;
+      text-align: center;
+      padding: 10px;
+      background: #f8f9fa;
       border-top: 1px solid #eee;
     }
-    .stock-explanation-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: #999;
+
+    /* Simple explanation text */
+    .explanation-sentence {
+      line-height: 1.5;
+    }
+
+    /* Explanation bullets */
+    .explanation-bullets {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .explanation-bullets li {
       margin-bottom: 6px;
+      line-height: 1.5;
+      padding-left: 16px;
+      position: relative;
     }
-
-    /* No movers message */
-    .no-movers {
-      padding: 40px 20px;
-      text-align: center;
-      color: #999;
-      font-style: italic;
+    .explanation-bullets li:last-child {
+      margin-bottom: 0;
     }
-
-    /* Initial State */
-    .initial-state {
-      text-align: center;
-      padding: 80px 20px;
-    }
-    .initial-state h2 {
+    .explanation-bullets li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
       color: #00205b;
-      font-size: 24px;
-      margin-bottom: 12px;
+      font-weight: bold;
     }
-    .initial-state p {
-      color: #666;
-      font-size: 15px;
-      max-width: 500px;
-      margin: 0 auto;
+
+    /* Earnings Review Link */
+    .earnings-link {
+      display: block;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid #e0e0e0;
+    }
+    .earnings-link a {
+      font-family: Arial, sans-serif;
+      color: #1a73e8;
+      font-size: 13px;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .earnings-link a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
+  <nav class="nav-banner">
+    <div class="nav-items">
+      <a href="/" class="nav-item">Initiate Coverage</a>
+      <a href="/market.html" class="nav-item">Market Update</a>
+      <a href="/portfolio.html" class="nav-item active">Top Movers</a>
+      <a href="/thematic.html" class="nav-item">Thematic Investments</a>
+    </div>
+  </nav>
+
   <header class="header">
     <div>
-      <div class="header-title">Portfolio Update</div>
-      <div class="header-subtitle">Stocks moving more than 5% today</div>
+      <div class="header-title">Top Movers</div>
+      <div class="header-subtitle">Top 10 Daily Movers</div>
     </div>
     <a href="/" class="back-link">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -356,30 +453,10 @@
     </a>
   </header>
 
-  <div class="selection-bar">
-    <label for="index-select">Select Portfolio:</label>
-    <select id="index-select">
-      <option value="SP500">S&P 500</option>
-      <option value="NASDAQ100">NASDAQ 100</option>
-      <option value="DOW30">Dow Jones 30</option>
-      <option value="CUSTOM">Custom Tickers</option>
-    </select>
-    <div class="custom-tickers" id="custom-tickers">
-      <input type="text" id="custom-input" placeholder="Enter tickers (e.g., AAPL, MSFT, GOOGL)">
-    </div>
-    <button class="fetch-btn" id="fetch-btn">Fetch Movers</button>
-  </div>
-
   <main class="main-content">
-    <div id="initial-state" class="initial-state">
-      <h2>Select a Portfolio to Begin</h2>
-      <p>Choose an index or enter custom tickers to see which stocks are moving more than 5% today.</p>
-    </div>
-
-    <div id="loading-state" class="loading-container" style="display: none;">
+    <div id="loading-state" class="loading-container">
       <div class="spinner"></div>
-      <div class="loading-text">Fetching market data...</div>
-      <div class="loading-subtext">Analyzing stock movements and searching for explanations</div>
+      <div class="loading-text">Loading market data and AI analysis...</div>
     </div>
 
     <div id="error-state" class="error-container" style="display: none;">
@@ -388,170 +465,96 @@
     </div>
 
     <div id="results-state" style="display: none;">
+      <div class="index-selector-wrapper">
+        <label class="index-label" for="index-select">Index:</label>
+        <select id="index-select" class="index-selector">
+          <option value="sp500">S&P 500</option>
+          <option value="nasdaq">Nasdaq 100</option>
+          <option value="dow">Dow Jones 30</option>
+          <option value="russell">Russell 2000</option>
+        </select>
+        <span id="index-info" class="index-info"></span>
+      </div>
+
       <div class="status-bar">
         <div class="status-text">
-          Showing movers as of <strong id="as-of-time"></strong>
+          Market data as of <strong id="as-of-time"></strong>
+          <span id="cache-badge" class="cache-badge" style="display: none;">
+            <span class="cache-dot"></span>
+            Cached
+          </span>
         </div>
-        <div class="cache-indicator" id="cache-indicator" style="display: none;">
-          <span class="cache-dot"></span>
-          <span>Cached data</span>
-        </div>
+        <button class="refresh-btn" id="refresh-btn">Refresh Data</button>
       </div>
 
       <div class="movers-grid">
-        <div class="column winners">
+        <div class="column gainers">
           <div class="column-header">
-            <span>Winners</span>
-            <span class="count" id="winners-count">(0)</span>
+            Top Gainers
           </div>
-          <div class="stock-list" id="winners-list">
-            <div class="no-movers">No stocks up more than 5%</div>
-          </div>
+          <table class="movers-table">
+            <thead>
+              <tr>
+                <th>Stock</th>
+                <th>Price</th>
+                <th style="text-align: right;">Change</th>
+              </tr>
+            </thead>
+            <tbody id="gainers-body"></tbody>
+          </table>
         </div>
 
         <div class="column losers">
           <div class="column-header">
-            <span>Losers</span>
-            <span class="count" id="losers-count">(0)</span>
+            Top Losers
           </div>
-          <div class="stock-list" id="losers-list">
-            <div class="no-movers">No stocks down more than 5%</div>
-          </div>
+          <table class="movers-table">
+            <thead>
+              <tr>
+                <th>Stock</th>
+                <th>Price</th>
+                <th style="text-align: right;">Change</th>
+              </tr>
+            </thead>
+            <tbody id="losers-body"></tbody>
+          </table>
         </div>
       </div>
     </div>
   </main>
 
   <script>
-    const indexSelect = document.getElementById('index-select');
-    const customTickers = document.getElementById('custom-tickers');
-    const customInput = document.getElementById('custom-input');
-    const fetchBtn = document.getElementById('fetch-btn');
-
-    const initialState = document.getElementById('initial-state');
     const loadingState = document.getElementById('loading-state');
     const errorState = document.getElementById('error-state');
     const resultsState = document.getElementById('results-state');
     const errorMessage = document.getElementById('error-message');
-
-    const winnersCount = document.getElementById('winners-count');
-    const losersCount = document.getElementById('losers-count');
-    const winnersList = document.getElementById('winners-list');
-    const losersList = document.getElementById('losers-list');
     const asOfTime = document.getElementById('as-of-time');
-    const cacheIndicator = document.getElementById('cache-indicator');
+    const cacheBadge = document.getElementById('cache-badge');
+    const refreshBtn = document.getElementById('refresh-btn');
+    const gainersBody = document.getElementById('gainers-body');
+    const losersBody = document.getElementById('losers-body');
+    const indexSelect = document.getElementById('index-select');
+    const indexInfo = document.getElementById('index-info');
 
-    // Show/hide custom tickers input
-    indexSelect.addEventListener('change', () => {
-      if (indexSelect.value === 'CUSTOM') {
-        customTickers.classList.add('visible');
-      } else {
-        customTickers.classList.remove('visible');
-      }
-    });
+    // Current data and index
+    let currentData = null;
+    let currentIndex = 'sp500';
 
-    // Fetch movers
-    fetchBtn.addEventListener('click', fetchMovers);
+    // Cache for each index
+    const indexCache = {};
+
+    // Index stock counts for info display
+    const INDEX_STOCK_COUNTS = {
+      sp500: '~500 stocks',
+      nasdaq: '~100 stocks',
+      dow: '30 stocks',
+      russell: '~100 stocks (subset)'
+    };
 
     function showState(state) {
-      initialState.style.display = state === 'initial' ? 'block' : 'none';
       loadingState.style.display = state === 'loading' ? 'block' : 'none';
       errorState.style.display = state === 'error' ? 'block' : 'none';
       resultsState.style.display = state === 'results' ? 'block' : 'none';
-    }
-
-    async function fetchMovers() {
-      const index = indexSelect.value;
-      let tickers = null;
-
-      if (index === 'CUSTOM') {
-        const tickerStr = customInput.value.trim();
-        if (!tickerStr) {
-          alert('Please enter at least one ticker symbol');
-          return;
-        }
-        tickers = tickerStr.split(',').map(t => t.trim().toUpperCase()).filter(t => t);
-        if (tickers.length === 0) {
-          alert('Please enter valid ticker symbols');
-          return;
-        }
-      }
-
-      showState('loading');
-      fetchBtn.disabled = true;
-
-      try {
-        const response = await fetch('/api/portfolio-movers', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ index, tickers })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to fetch data');
-        }
-
-        renderResults(data);
-        showState('results');
-      } catch (error) {
-        console.error('Error fetching movers:', error);
-        errorMessage.textContent = error.message;
-        showState('error');
-      }
-
-      fetchBtn.disabled = false;
-    }
-
-    function renderResults(data) {
-      // Update timestamp
-      asOfTime.textContent = data.asOf;
-
-      // Show cache indicator if cached
-      if (data.cached) {
-        cacheIndicator.style.display = 'flex';
-      } else {
-        cacheIndicator.style.display = 'none';
-      }
-
-      // Render winners
-      winnersCount.textContent = `(${data.winners.length})`;
-      if (data.winners.length === 0) {
-        winnersList.innerHTML = '<div class="no-movers">No stocks up more than 5%</div>';
-      } else {
-        winnersList.innerHTML = data.winners.map(stock => createStockCard(stock, true)).join('');
-      }
-
-      // Render losers
-      losersCount.textContent = `(${data.losers.length})`;
-      if (data.losers.length === 0) {
-        losersList.innerHTML = '<div class="no-movers">No stocks down more than 5%</div>';
-      } else {
-        losersList.innerHTML = data.losers.map(stock => createStockCard(stock, false)).join('');
-      }
-    }
-
-    function createStockCard(stock, isWinner) {
-      const changeClass = isWinner ? 'positive' : 'negative';
-      const changeSign = isWinner ? '+' : '';
-      const changeValue = stock.changePercent.toFixed(2);
-
-      return `
-        <div class="stock-card">
-          <div class="stock-header">
-            <div class="stock-info">
-              <div class="stock-ticker">${escapeHtml(stock.ticker)}</div>
-              <div class="stock-name">${escapeHtml(stock.companyName)}</div>
-            </div>
-            <div class="stock-change ${changeClass}">${changeSign}${changeValue}%</div>
-          </div>
-          <div class="stock-explanation">
-            <div class="stock-explanation-label">Why it's moving</div>
-            ${escapeHtml(stock.explanation)}
-          </div>
-        </div>
-      `;
     }
 
     function escapeHtml(text) {
@@ -559,6 +562,171 @@
       div.textContent = text;
       return div.innerHTML;
     }
+
+    function formatPrice(price) {
+      return '$' + price.toFixed(2);
+    }
+
+    function formatChange(percent, dollar) {
+      const sign = percent >= 0 ? '+' : '';
+      return {
+        percent: sign + percent.toFixed(2) + '%',
+        dollar: sign + '$' + Math.abs(dollar).toFixed(2)
+      };
+    }
+
+    function createStockRows(stock, isGainer, index) {
+      const change = formatChange(stock.changePercent, stock.changeDollar);
+      const changeClass = isGainer ? 'positive' : 'negative';
+      const rowId = (isGainer ? 'gainer' : 'loser') + '-' + index;
+
+      // Main stock row
+      const tr = document.createElement('tr');
+      tr.className = 'stock-row';
+      tr.dataset.ticker = stock.ticker;
+      tr.dataset.rowId = rowId;
+
+      tr.innerHTML = `
+        <td>
+          <div class="stock-ticker">${escapeHtml(stock.ticker)}</div>
+          <div class="stock-name">${escapeHtml(stock.companyName)}</div>
+        </td>
+        <td>
+          <div class="stock-price">${formatPrice(stock.price)}</div>
+        </td>
+        <td>
+          <div class="stock-change ${changeClass}">${change.percent}</div>
+          <div class="stock-change-dollar">${change.dollar}</div>
+        </td>
+      `;
+
+      // Explanation row with bullet points for each sentence
+      const explanationTr = document.createElement('tr');
+      explanationTr.className = 'explanation-row';
+      explanationTr.id = 'explanation-' + rowId;
+
+      const explanation = stock.explanation || 'Analysis not available.';
+
+      // Split explanation into sentences (split on period followed by space)
+      const sentences = explanation.split(/\.\s+/).filter(s => s.trim());
+
+      // Build bullet list HTML
+      let bulletsHtml = '<ul class="explanation-bullets">';
+      sentences.forEach((sentence, i) => {
+        // Add period back if it was removed by split (except if sentence already ends with punctuation)
+        const sentenceText = sentence.trim();
+        const needsPeriod = !sentenceText.match(/[.!?]$/);
+        bulletsHtml += `<li>${escapeHtml(sentenceText)}${needsPeriod ? '.' : ''}</li>`;
+      });
+      bulletsHtml += '</ul>';
+
+      // Add earnings review link if transcript is available
+      let earningsLinkHtml = '';
+      if (stock.hasTranscript) {
+        const priceMove = change.percent;
+        const escapedPriceMove = encodeURIComponent(priceMove);
+        earningsLinkHtml = `<div class="earnings-link"><a href="/earnings.html?ticker=${stock.ticker}&priceMove=${escapedPriceMove}&from=portfolio">See Earnings Review</a></div>`;
+      }
+
+      explanationTr.innerHTML = `
+        <td colspan="3" class="explanation-cell">
+          <div class="explanation-content">
+            <div class="explanation-text">
+              ${bulletsHtml}
+              ${earningsLinkHtml}
+            </div>
+          </div>
+        </td>
+      `;
+
+      return { stockRow: tr, explanationRow: explanationTr };
+    }
+
+    function renderResults(data) {
+      currentData = data;
+      asOfTime.textContent = data.asOf;
+
+      if (data.cached) {
+        cacheBadge.style.display = 'inline-flex';
+      } else {
+        cacheBadge.style.display = 'none';
+      }
+
+      // Clear tables
+      gainersBody.innerHTML = '';
+      losersBody.innerHTML = '';
+
+      // Render gainers with pre-loaded explanations
+      data.gainers.forEach((stock, index) => {
+        const { stockRow, explanationRow } = createStockRows(stock, true, index);
+        gainersBody.appendChild(stockRow);
+        gainersBody.appendChild(explanationRow);
+      });
+
+      // Render losers with pre-loaded explanations
+      data.losers.forEach((stock, index) => {
+        const { stockRow, explanationRow } = createStockRows(stock, false, index);
+        losersBody.appendChild(stockRow);
+        losersBody.appendChild(explanationRow);
+      });
+    }
+
+    async function fetchMarketMovers(forceRefresh = false) {
+      const index = currentIndex;
+
+      // Check client-side cache first (unless force refresh)
+      if (!forceRefresh && indexCache[index]) {
+        console.log(`Using client-side cache for ${index}`);
+        renderResults(indexCache[index]);
+        showState('results');
+        updateIndexInfo();
+        return;
+      }
+
+      showState('loading');
+      refreshBtn.disabled = true;
+      indexSelect.disabled = true;
+
+      try {
+        const response = await fetch(`/api/market-movers?index=${index}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch data');
+        }
+
+        // Store in client-side cache
+        indexCache[index] = data;
+
+        renderResults(data);
+        showState('results');
+        updateIndexInfo();
+      } catch (error) {
+        console.error('Error fetching market movers:', error);
+        errorMessage.textContent = error.message;
+        showState('error');
+      }
+
+      refreshBtn.disabled = false;
+      indexSelect.disabled = false;
+    }
+
+    function updateIndexInfo() {
+      indexInfo.textContent = INDEX_STOCK_COUNTS[currentIndex] || '';
+    }
+
+    function handleIndexChange() {
+      currentIndex = indexSelect.value;
+      fetchMarketMovers();
+    }
+
+    // Event listeners
+    refreshBtn.addEventListener('click', () => fetchMarketMovers(true));
+    indexSelect.addEventListener('change', handleIndexChange);
+
+    // Initial load
+    updateIndexInfo();
+    fetchMarketMovers();
   </script>
 </body>
 </html>

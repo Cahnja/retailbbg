@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Market Update - RetailBBG</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f8f9fa;
+      color: #202124;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Navigation Banner - V8: Compact with pill-style active state */
+    .nav-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #00205b;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-items {
+      display: flex;
+      gap: 6px;
+      padding: 0 8px;
+    }
+
+    .nav-item {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      padding: 6px 16px;
+      border-radius: 16px;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-item.active {
+      color: #00205b;
+      background: white;
+      font-weight: 600;
+    }
+
+    /* Main Content */
+    .main-content {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 32px;
+      padding-top: 72px;
+    }
+
+    /* Page Header */
+    .page-header {
+      margin-bottom: 32px;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 400;
+      color: #202124;
+      margin-bottom: 8px;
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      color: #5f6368;
+      font-weight: 400;
+    }
+
+    /* Index Cards Container */
+    .indices-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    /* Index Card */
+    .index-card {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 20px 24px;
+      border: 1px solid #e8eaed;
+      box-shadow: 0 1px 2px rgba(60, 64, 67, 0.1);
+    }
+
+    .index-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: #5f6368;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .index-change {
+      font-size: 32px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .index-change.positive {
+      color: #137333;
+    }
+
+    .index-change.negative {
+      color: #c5221f;
+    }
+
+    .change-arrow {
+      font-size: 18px;
+    }
+
+    .index-price {
+      font-size: 14px;
+      font-weight: 500;
+      color: #5f6368;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Timestamp */
+    .timestamp {
+      font-size: 12px;
+      color: #80868b;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: #137333;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Drivers Section */
+    .drivers-section {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 24px 28px;
+      border: 1px solid #e8eaed;
+      box-shadow: 0 1px 2px rgba(60, 64, 67, 0.1);
+    }
+
+    .drivers-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e8eaed;
+    }
+
+    .drivers-title {
+      font-size: 18px;
+      font-weight: 500;
+      color: #202124;
+    }
+
+    .drivers-subtitle {
+      font-size: 12px;
+      color: #5f6368;
+    }
+
+    .drivers-list {
+      list-style: none;
+    }
+
+    .driver-item {
+      padding: 14px 0;
+      border-bottom: 1px solid #f1f3f4;
+      font-size: 15px;
+      line-height: 1.6;
+      color: #3c4043;
+    }
+
+    .driver-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .driver-item::before {
+      content: "";
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: #00205b;
+      border-radius: 50%;
+      margin-right: 12px;
+      vertical-align: middle;
+    }
+
+    .driver-highlight {
+      font-weight: 600;
+      color: #202124;
+    }
+
+    .driver-negative {
+      color: #c5221f;
+      font-weight: 600;
+    }
+
+    .driver-positive {
+      color: #137333;
+      font-weight: 600;
+    }
+
+    /* Loading State */
+    .loading-container {
+      text-align: center;
+      padding: 80px 20px;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #e8eaed;
+      border-top-color: #00205b;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-size: 14px;
+      color: #5f6368;
+    }
+
+    /* Error State */
+    .error-container {
+      text-align: center;
+      padding: 48px 24px;
+      background: #ffffff;
+      border-radius: 8px;
+      border: 1px solid #e8eaed;
+    }
+
+    .error-container h3 {
+      color: #c5221f;
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .error-container p {
+      color: #5f6368;
+      font-size: 14px;
+    }
+
+    .retry-btn {
+      margin-top: 16px;
+      background: #00205b;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .retry-btn:hover {
+      background: #003087;
+    }
+
+    /* Refresh Button */
+    .refresh-btn {
+      background: transparent;
+      color: #00205b;
+      border: 1px solid #dadce0;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .refresh-btn:hover {
+      background: #f8f9fa;
+      border-color: #00205b;
+    }
+
+    .refresh-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .refresh-icon {
+      width: 14px;
+      height: 14px;
+      transition: transform 0.3s;
+    }
+
+    .refresh-btn.loading .refresh-icon {
+      animation: spin 0.8s linear infinite;
+    }
+
+    /* Cache Badge */
+    .cache-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: #137333;
+      background: #e6f4ea;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+      margin-left: 8px;
+    }
+
+    .cache-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #137333;
+    }
+
+    /* Earnings Review Link */
+    .earnings-link {
+      margin-left: 8px;
+    }
+
+    .earnings-link a {
+      font-size: 12px;
+      color: #00205b;
+      text-decoration: none;
+      background: #e8f0fe;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .earnings-link a:hover {
+      background: #c2d9fc;
+      text-decoration: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 24px 16px;
+        padding-top: 64px;
+      }
+
+      .indices-container {
+        grid-template-columns: 1fr;
+      }
+
+      .index-change {
+        font-size: 28px;
+      }
+
+      .index-price {
+        font-size: 13px;
+      }
+
+      .drivers-section {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav-banner">
+    <div class="nav-items">
+      <a href="/" class="nav-item">Initiate Coverage</a>
+      <a href="/market.html" class="nav-item active">Market Update</a>
+      <a href="/portfolio.html" class="nav-item">Top Movers</a>
+      <a href="/thematic.html" class="nav-item">Thematic Investments</a>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1 class="page-title">Market Update</h1>
+      <p class="page-subtitle">Real-time market overview and key drivers</p>
+    </div>
+
+    <div id="loading-state" class="loading-container">
+      <div class="spinner"></div>
+      <div class="loading-text">Loading market data...</div>
+    </div>
+
+    <div id="error-state" class="error-container" style="display: none;">
+      <h3>Unable to load market data</h3>
+      <p id="error-message">Something went wrong. Please try again.</p>
+      <button class="retry-btn" onclick="loadMarketData()">Retry</button>
+    </div>
+
+    <div id="content-container" style="display: none;">
+      <div class="indices-container" id="indices-container">
+        <!-- Index cards will be inserted here -->
+      </div>
+
+      <div class="timestamp" id="timestamp">
+        <span class="live-dot"></span>
+        <span id="last-updated">Last updated: --</span>
+        <span id="cache-badge"></span>
+      </div>
+
+      <div class="drivers-section">
+        <div class="drivers-header">
+          <div>
+            <div class="drivers-title">What's Moving Markets</div>
+            <div class="drivers-subtitle">Key drivers behind today's action</div>
+          </div>
+          <button class="refresh-btn" id="refresh-btn" onclick="refreshData()">
+            <svg class="refresh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+            </svg>
+            Refresh
+          </button>
+        </div>
+
+        <ul class="drivers-list" id="drivers-list">
+          <!-- Market drivers will be inserted here -->
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const loadingState = document.getElementById('loading-state');
+    const errorState = document.getElementById('error-state');
+    const errorMessage = document.getElementById('error-message');
+    const contentContainer = document.getElementById('content-container');
+    const indicesContainer = document.getElementById('indices-container');
+    const driversList = document.getElementById('drivers-list');
+    const lastUpdated = document.getElementById('last-updated');
+    const cacheBadge = document.getElementById('cache-badge');
+    const refreshBtn = document.getElementById('refresh-btn');
+
+    function formatNumber(num) {
+      return num.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function formatPercent(num) {
+      const sign = num >= 0 ? '+' : '';
+      return sign + num.toFixed(2) + '%';
+    }
+
+    function formatTime(isoString) {
+      const date = new Date(isoString);
+      return date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    }
+
+    function renderIndices(indices) {
+      indicesContainer.innerHTML = indices.map(index => {
+        const isPositive = index.changePercent >= 0;
+        const changeClass = isPositive ? 'positive' : 'negative';
+        const arrow = isPositive ? '&#9650;' : '&#9660;';
+
+        return `
+          <div class="index-card">
+            <div class="index-name">${index.name}</div>
+            <div class="index-change ${changeClass}">
+              <span class="change-arrow">${arrow}</span>
+              ${formatPercent(index.changePercent)}
+            </div>
+            <div class="index-price">${formatNumber(index.price)}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function highlightText(text) {
+      // Add highlighting for key terms
+      return text
+        // Positive percentages: +X%, up X%, gains X%, rose X%
+        .replace(/(\+[\d.]+%)/g, '<span class="driver-positive">$1</span>')
+        .replace(/\b(up\s+)([\d.]+%)/gi, '$1<span class="driver-positive">$2</span>')
+        .replace(/\b(gains?\s+)([\d.]+%)/gi, '$1<span class="driver-positive">$2</span>')
+        .replace(/\b(rose\s+)([\d.]+%)/gi, '$1<span class="driver-positive">$2</span>')
+        .replace(/\b(climbs?\s+)([\d.]+%)/gi, '$1<span class="driver-positive">$2</span>')
+        .replace(/\b(adds?\s+)([\d.]+%)/gi, '$1<span class="driver-positive">$2</span>')
+        // Negative percentages: -X%, down X%, drops X%, falls X%, loses X%
+        .replace(/([\-−][\d.]+%)/g, '<span class="driver-negative">$1</span>')
+        .replace(/\b(down\s+)([\d.]+%)/gi, '$1<span class="driver-negative">$2</span>')
+        .replace(/\b(drops?\s+)([\d.]+%)/gi, '$1<span class="driver-negative">$2</span>')
+        .replace(/\b(falls?\s+)([\d.]+%)/gi, '$1<span class="driver-negative">$2</span>')
+        .replace(/\b(loses?\s+)([\d.]+%)/gi, '$1<span class="driver-negative">$2</span>')
+        .replace(/\b(declines?\s+)([\d.]+%)/gi, '$1<span class="driver-negative">$2</span>')
+        .replace(/\b(sheds?\s+)([\d.]+%)/gi, '$1<span class="driver-negative">$2</span>');
+    }
+
+    function renderDrivers(drivers) {
+      driversList.innerHTML = drivers.map(driver => {
+        // Handle both old format (string) and new enriched format (object)
+        const isEnriched = typeof driver === 'object' && driver.text;
+        const text = isEnriched ? driver.text : driver;
+        const highlightedText = highlightText(text);
+
+        // Add earnings review link if available
+        let earningsLink = '';
+        if (isEnriched && driver.hasEarningsReview && driver.ticker) {
+          const escapedPriceMove = encodeURIComponent(driver.priceMove || '+0%');
+          earningsLink = `<span class="earnings-link"><a href="/earnings.html?ticker=${driver.ticker}&priceMove=${escapedPriceMove}&from=market">See Earnings Review</a></span>`;
+        }
+
+        return `<li class="driver-item">${highlightedText}${earningsLink}</li>`;
+      }).join('');
+    }
+
+    async function loadMarketData(forceRefresh = false) {
+      loadingState.style.display = 'block';
+      errorState.style.display = 'none';
+      contentContainer.style.display = 'none';
+
+      try {
+        const url = forceRefresh ? '/api/market-update?refresh=true' : '/api/market-update';
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch market data');
+        }
+
+        const data = await response.json();
+
+        renderIndices(data.indices);
+        renderDrivers(data.drivers);
+        lastUpdated.textContent = 'Last updated: ' + formatTime(data.asOf);
+
+        if (data.cached) {
+          cacheBadge.innerHTML = '<span class="cache-badge"><span class="cache-dot"></span>Cached</span>';
+        } else {
+          cacheBadge.innerHTML = '';
+        }
+
+        loadingState.style.display = 'none';
+        contentContainer.style.display = 'block';
+      } catch (error) {
+        console.error('Error loading market data:', error);
+        loadingState.style.display = 'none';
+        errorState.style.display = 'block';
+        errorMessage.textContent = error.message || 'Something went wrong. Please try again.';
+      }
+    }
+
+    async function refreshData() {
+      refreshBtn.classList.add('loading');
+      refreshBtn.disabled = true;
+
+      try {
+        await loadMarketData(true);
+      } finally {
+        refreshBtn.classList.remove('loading');
+        refreshBtn.disabled = false;
+      }
+    }
+
+    // Load data on page load
+    loadMarketData();
+
+    // Auto-refresh every 5 minutes during market hours
+    setInterval(() => {
+      const now = new Date();
+      const hour = now.getHours();
+      const day = now.getDay();
+
+      // Market hours: Mon-Fri 9:30 AM - 4:00 PM ET
+      const isWeekday = day >= 1 && day <= 5;
+      const isMarketHours = hour >= 9 && hour < 17;
+
+      if (isWeekday && isMarketHours) {
+        loadMarketData();
+      }
+    }, 5 * 60 * 1000);
+  </script>
+</body>
+</html>
