@@ -5018,26 +5018,30 @@ Provide specific facts and quotes from recent news.`;
 
     const newsContext = searchResponse.output_text;
 
-    // Generate 4-paragraph analysis based on search results
-    const analysisPrompt = `You are a senior markets analyst. A user clicked on this stock move from ${dayReference}:
+    // Fetch Finnhub headlines for additional context
+    if (isStream) sendSSE(res, { type: 'status', message: 'Fetching headlines...' });
+    const finnhubHeadlines = await getFinnhubNews(ticker);
+    console.log(`[Stock Details] Finnhub headlines for ${ticker}: ${finnhubHeadlines ? 'found' : 'none'}`);
 
-"${companyName} (${ticker}) moved ${direction} ${absChange}%"
-
-Note: This market data is from ${timeContext}.
+    // Generate 4-paragraph analysis based on search results + Finnhub headlines
+    const analysisPrompt = `You are a Goldman Sachs equity research analyst. Explain why ${companyName} (${ticker}) is ${direction} today.
 
 RESEARCH:
 ${newsContext}
 
-Write 4 short paragraphs. Be extremely concise and direct — every sentence must deliver new information.
+HEADLINES:
+${finnhubHeadlines || 'No additional headlines available.'}
+
+Write 4 flowing paragraphs explaining the move.
 
 STYLE RULES:
-- Do NOT repeat the stock price change or percentage move — jump straight into the WHY.
-- ONLY include facts from the RESEARCH above. Never invent numbers.
-- No throat-clearing ("The stock surged today due to several catalysts that excited the market"). Start with the actual catalyst.
-- No generic advice, hedging, or obvious statements.
-- Short, punchy sentences. Cut any sentence that doesn't add a new fact.
-- Wrap the single most important sentence in each paragraph with **bold** markdown.
-- Just four tight paragraphs, no headers.`;
+- Do NOT mention the stock's price change or percentage move — jump straight into the catalyst.
+- Fact-based and informative. No filler, no generic advice, no hedging.
+- Be specific with numbers, data points, analyst price targets, revenue figures, and margin estimates where available.
+- ONLY include facts from the RESEARCH and HEADLINES above. Never invent numbers.
+- No throat-clearing openers. Start paragraph 1 with the primary catalyst.
+- **Bold** the single most important sentence in each paragraph.
+- No headers — just 4 flowing paragraphs.`;
 
     if (isStream) {
       sendSSE(res, { type: 'status', message: 'Generating analysis...' });
