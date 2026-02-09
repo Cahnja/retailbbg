@@ -3703,10 +3703,13 @@ Write ONE sentence (15-25 words) explaining the likely catalyst for today's move
 
 REQUIREMENTS:
 - Be specific with numbers if available
-- Start directly with the catalyst, not the company name
+- Do NOT start with the company name or ticker — start with the catalyst itself
+- Do NOT mention the stock price movement (no "surged", "fell", "rose X%", "dropped", "gained", etc.)
 - NO hedging or vague language
-- Do NOT mention the stock is up/down X%
-- Just ONE sentence
+- Just ONE sentence describing WHAT HAPPENED to cause the move
+
+GOOD: "Q4 earnings beat expectations with revenue up 15% to $4.2B, driven by strong cloud demand."
+BAD: "Oracle's stock surged 7.88% today after strong Q4 earnings beat expectations."
 
 Write ONE catalyst sentence:`;
 
@@ -3720,7 +3723,7 @@ Write ONE catalyst sentence:`;
       catalyst = response.choices[0].message.content.trim();
     } else {
       // Fallback: use GPT-4o-mini with just the stock info (no news)
-      const prompt = `${name} (${ticker}) stock is ${direction} ${changeAbs}% today. Write ONE sentence (15-25 words) with a plausible catalyst. Be specific. Just the sentence:`;
+      const prompt = `${name} (${ticker}) stock is ${direction} ${changeAbs}% today. Write ONE sentence (15-25 words) describing a plausible catalyst. Be specific. Do NOT start with the company name or mention the stock price movement. Just describe what happened. Just the sentence:`;
 
       const response = await client.chat.completions.create({
         model: 'gpt-4o-mini',
