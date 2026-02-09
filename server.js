@@ -5244,13 +5244,14 @@ Find:
 
 Provide specific facts and quotes from recent news.`;
 
-    const broadSearchPrompt = `Search for "${ticker} stock news today" on financial news sites (Yahoo Finance, Investing.com, MarketWatch, Seeking Alpha, CNBC).
+    const broadSearchPrompt = `Run multiple searches to find ALL recent news about ${ticker} (${companyName}):
+1. Search: "${ticker} stock drop" or "${ticker} stock ${dayReference}"
+2. Search: "${companyName} news"
+3. Search for news about ${companyName}'s industry or competitors that could impact it
 
-What are the top headlines about ${ticker} (${companyName}) right now? The stock moved ${direction} ${absChange}% so there must be a significant catalyst.
+The stock moved ${direction} ${absChange}% — there MUST be a major catalyst. If direct company news doesn't explain a ${absChange}% move, the cause is likely INDIRECT: a competitor launching a disruptive product, an industry threat, or regulatory change.
 
-The cause might be INDIRECT — a competitor, tech company, or industry event that threatens ${companyName}'s business. Search broadly for any major news that mentions ${ticker} or could impact it.
-
-List every headline and key fact you find.`;
+List every recent headline and key detail you find about ${ticker}.`;
 
     if (isStream) sendSSE(res, { type: 'status', message: 'Searching for latest news...' });
 
@@ -5258,12 +5259,12 @@ List every headline and key fact you find.`;
     const [directSearchResponse, broadSearchResponse] = await Promise.all([
       client.responses.create({
         model: 'gpt-4o',
-        tools: [{ type: 'web_search' }],
+        tools: [{ type: 'web_search', search_context_size: 'high' }],
         input: directSearchPrompt
       }, { timeout: 45000 }),
       client.responses.create({
         model: 'gpt-4o',
-        tools: [{ type: 'web_search' }],
+        tools: [{ type: 'web_search', search_context_size: 'high' }],
         input: broadSearchPrompt
       }, { timeout: 45000 })
     ]);
