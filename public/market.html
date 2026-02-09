@@ -756,6 +756,30 @@
       font-size: 14px;
     }
 
+    /* Streaming status */
+    .panel-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 20px 0;
+      color: #666;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+
+    .panel-status .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #e0e0e0;
+      border-top-color: #666;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
     /* Responsive */
     @media (max-width: 900px) {
       .indices-grid {
@@ -1218,21 +1242,45 @@
 
     async function fetchDriverDetails(bulletText) {
       try {
-        const response = await fetch(`/api/market-driver-details?bullet=${encodeURIComponent(bulletText)}`);
+        const response = await fetch(`/api/market-driver-details?bullet=${encodeURIComponent(bulletText)}&stream=true`);
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          if (errorData.isQuotaError) {
-            throw new Error('quota');
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let fullText = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop(); // keep incomplete line in buffer
+
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            let event;
+            try { event = JSON.parse(line.slice(6)); } catch { continue; }
+
+            if (event.type === 'status') {
+              panelContent.innerHTML = `
+                <div class="panel-status">
+                  <div class="spinner"></div>
+                  <span>${event.message}</span>
+                </div>
+              `;
+            } else if (event.type === 'chunk') {
+              fullText += event.text;
+              const sections = parseAnalysisIntoSections(fullText);
+              panelContent.innerHTML = renderSections(sections);
+            } else if (event.type === 'done') {
+              const sections = parseAnalysisIntoSections(event.analysis);
+              panelContent.innerHTML = renderSections(sections);
+            } else if (event.type === 'error') {
+              throw new Error(event.isQuotaError ? 'quota' : event.message);
+            }
           }
-          throw new Error(errorData.message || 'Failed to fetch analysis');
         }
-
-        const data = await response.json();
-
-        // Parse and render structured content
-        const sections = parseAnalysisIntoSections(data.analysis);
-        panelContent.innerHTML = renderSections(sections);
       } catch (error) {
         console.error('Error fetching driver details:', error);
         let errorMsg = 'Unable to load detailed analysis. Please try again.';
@@ -1265,6 +1313,14 @@
         renderIndices(data.indices);
         renderDrivers(data.drivers);
         lastUpdated.textContent = 'Last updated: ' + formatTime(data.asOf);
+
+        // Pre-load first 4 drivers in background
+        if (data.drivers && data.drivers.length > 0) {
+          data.drivers.slice(0, 4).forEach(driver => {
+            const bulletText = typeof driver === 'object' && driver.text ? driver.text : driver;
+            fetch(`/api/market-driver-details?bullet=${encodeURIComponent(bulletText)}`).catch(() => {});
+          });
+        }
 
         if (data.cached) {
           cacheBadge.innerHTML = '<span class="cache-badge"><span class="cache-dot"></span>Cached</span>';

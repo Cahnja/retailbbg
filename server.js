@@ -4429,12 +4429,28 @@ Return ONLY a JSON array of strings with exactly 10 bullet points, like:
 });
 
 // ============================================
+// SSE STREAMING HELPERS
+// ============================================
+
+function initSSE(res) {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+  });
+}
+
+function sendSSE(res, data) {
+  res.write(`data: ${JSON.stringify(data)}\n\n`);
+}
+
+// ============================================
 // MARKET DRIVER DETAILS API
 // ============================================
 
-// Market driver details cache (4 hours - same as market update)
+// Market driver details cache (12 hours)
 const MARKET_DRIVER_CACHE_DIR = path.join(__dirname, 'cache', 'market-drivers');
-const MARKET_DRIVER_CACHE_MAX_AGE_MINUTES = 240;
+const MARKET_DRIVER_CACHE_MAX_AGE_MINUTES = 720;
 
 if (!fs.existsSync(MARKET_DRIVER_CACHE_DIR)) {
   fs.mkdirSync(MARKET_DRIVER_CACHE_DIR, { recursive: true });
@@ -4491,15 +4507,26 @@ function saveMarketDriverDetailsToCache(bulletText, data) {
 
 // GET /api/market-driver-details
 app.get('/api/market-driver-details', async (req, res) => {
-  const { bullet } = req.query;
+  const { bullet, stream } = req.query;
+  const isStream = stream === 'true';
 
   if (!bullet) {
+    if (isStream) {
+      initSSE(res);
+      sendSSE(res, { type: 'error', message: 'Missing required parameter: bullet' });
+      return res.end();
+    }
     return res.status(400).json({ error: 'Missing required parameter: bullet' });
   }
 
   // Check cache first
   const cached = getCachedMarketDriverDetails(bullet);
   if (cached) {
+    if (isStream) {
+      initSSE(res);
+      sendSSE(res, { type: 'done', analysis: cached.analysis, cached: true });
+      return res.end();
+    }
     return res.json({ ...cached, cached: true });
   }
 
@@ -4522,11 +4549,18 @@ app.get('/api/market-driver-details', async (req, res) => {
           generatedAt: cachedExplanation.generatedAt
         };
         saveMarketDriverDetailsToCache(bullet, result);
+        if (isStream) {
+          initSSE(res);
+          sendSSE(res, { type: 'done', analysis: result.analysis, cached: true });
+          return res.end();
+        }
         return res.json({ ...result, cached: true });
       }
     }
 
     console.log(`Generating detailed analysis for market driver: "${bullet.substring(0, 50)}..."`);
+
+    if (isStream) initSSE(res);
 
     // Check if market is open (9:30am - 4:00pm ET on weekdays)
     const now = new Date();
@@ -4566,6 +4600,8 @@ Find:
 
 Provide specific facts and quotes from recent news.`;
 
+    if (isStream) sendSSE(res, { type: 'status', message: 'Searching for latest news...' });
+
     console.log(`[Driver Details] Web searching... (time context: ${timeContext})`);
     const searchResponse = await client.responses.create({
       model: 'gpt-4o',
@@ -4598,35 +4634,85 @@ CRITICAL STYLE RULES:
 - Wrap the most important sentence in each paragraph with **bold** markdown.
 - Just four flowing paragraphs, no headers.`;
 
-    const response = await client.chat.completions.create({
-      model: 'gpt-4o',
-      max_tokens: 800,
-      messages: [{ role: 'user', content: analysisPrompt }]
-    });
-    logTokenUsage('driver-details', response.usage);
+    if (isStream) {
+      sendSSE(res, { type: 'status', message: 'Generating analysis...' });
 
-    const analysis = response.choices[0].message.content.trim();
+      const streamResponse = await client.chat.completions.create({
+        model: 'gpt-4o',
+        max_tokens: 800,
+        stream: true,
+        messages: [{ role: 'user', content: analysisPrompt }]
+      });
 
-    const result = {
-      bullet,
-      analysis,
-      generatedAt: new Date().toISOString()
-    };
+      let fullText = '';
+      for await (const chunk of streamResponse) {
+        const content = chunk.choices[0]?.delta?.content;
+        if (content) {
+          fullText += content;
+          sendSSE(res, { type: 'chunk', text: content });
+        }
+      }
 
-    // Cache the result
-    saveMarketDriverDetailsToCache(bullet, result);
+      const analysis = fullText.trim();
+      const result = {
+        bullet,
+        analysis,
+        generatedAt: new Date().toISOString()
+      };
 
-    // Also cache as stock explanation if single-stock driver
-    if (uniqueTickers.length === 1) {
-      const ticker = uniqueTickers[0];
-      const stockResult = { ticker, analysis, generatedAt: new Date().toISOString() };
-      saveStockExplanationToCache(ticker, stockResult);
-      console.log(`[Driver Details] Also saved as stock explanation for ${ticker}`);
+      // Cache the result
+      saveMarketDriverDetailsToCache(bullet, result);
+
+      // Also cache as stock explanation if single-stock driver
+      if (uniqueTickers.length === 1) {
+        const ticker = uniqueTickers[0];
+        const stockResult = { ticker, analysis, generatedAt: new Date().toISOString() };
+        saveStockExplanationToCache(ticker, stockResult);
+        console.log(`[Driver Details] Also saved as stock explanation for ${ticker}`);
+      }
+
+      sendSSE(res, { type: 'done', analysis, cached: false });
+      res.end();
+    } else {
+      const response = await client.chat.completions.create({
+        model: 'gpt-4o',
+        max_tokens: 800,
+        messages: [{ role: 'user', content: analysisPrompt }]
+      });
+      logTokenUsage('driver-details', response.usage);
+
+      const analysis = response.choices[0].message.content.trim();
+
+      const result = {
+        bullet,
+        analysis,
+        generatedAt: new Date().toISOString()
+      };
+
+      // Cache the result
+      saveMarketDriverDetailsToCache(bullet, result);
+
+      // Also cache as stock explanation if single-stock driver
+      if (uniqueTickers.length === 1) {
+        const ticker = uniqueTickers[0];
+        const stockResult = { ticker, analysis, generatedAt: new Date().toISOString() };
+        saveStockExplanationToCache(ticker, stockResult);
+        console.log(`[Driver Details] Also saved as stock explanation for ${ticker}`);
+      }
+
+      res.json({ ...result, cached: false });
     }
-
-    res.json({ ...result, cached: false });
   } catch (error) {
     console.error('Market driver details API error:', error);
+
+    if (isStream) {
+      try {
+        if (!res.headersSent) initSSE(res);
+        const isQuota = error.code === 'insufficient_quota' || error.status === 429;
+        sendSSE(res, { type: 'error', message: isQuota ? 'API quota exceeded' : 'Failed to generate analysis', isQuotaError: isQuota });
+      } catch (e) { /* client disconnected */ }
+      return res.end();
+    }
 
     // Check for specific error types
     if (error.code === 'insufficient_quota' || error.status === 429) {
@@ -4648,9 +4734,9 @@ CRITICAL STYLE RULES:
 // STOCK EXPLANATION DETAILS API
 // ============================================
 
-// Stock explanation details cache (4 hours - same as market update)
+// Stock explanation details cache (12 hours)
 const STOCK_EXPLANATION_CACHE_DIR = path.join(__dirname, 'cache', 'stock-explanations');
-const STOCK_EXPLANATION_CACHE_MAX_AGE_MINUTES = 240;
+const STOCK_EXPLANATION_CACHE_MAX_AGE_MINUTES = 720;
 
 if (!fs.existsSync(STOCK_EXPLANATION_CACHE_DIR)) {
   fs.mkdirSync(STOCK_EXPLANATION_CACHE_DIR, { recursive: true });
@@ -4701,20 +4787,33 @@ function saveStockExplanationToCache(ticker, data) {
 
 // GET /api/stock-explanation-details
 app.get('/api/stock-explanation-details', async (req, res) => {
-  const { ticker, companyName, changePercent } = req.query;
+  const { ticker, companyName, changePercent, stream } = req.query;
+  const isStream = stream === 'true';
 
   if (!ticker || !companyName || !changePercent) {
+    if (isStream) {
+      initSSE(res);
+      sendSSE(res, { type: 'error', message: 'Missing required parameters: ticker, companyName, changePercent' });
+      return res.end();
+    }
     return res.status(400).json({ error: 'Missing required parameters: ticker, companyName, changePercent' });
   }
 
   // Check cache first
   const cached = getCachedStockExplanation(ticker);
   if (cached) {
+    if (isStream) {
+      initSSE(res);
+      sendSSE(res, { type: 'done', analysis: cached.analysis, cached: true });
+      return res.end();
+    }
     return res.json({ ...cached, cached: true });
   }
 
   try {
     console.log(`Generating detailed stock explanation for ${ticker} (${changePercent})`);
+
+    if (isStream) initSSE(res);
 
     const direction = parseFloat(changePercent) >= 0 ? 'up' : 'down';
     const absChange = Math.abs(parseFloat(changePercent)).toFixed(1);
@@ -4759,6 +4858,8 @@ Search for:
 
 Provide specific facts, numbers, percentages, and quotes from recent news.`;
 
+    if (isStream) sendSSE(res, { type: 'status', message: 'Searching for latest news...' });
+
     console.log(`[Stock Details] Web searching for ${ticker}... (time context: ${timeContext})`);
     const searchResponse = await client.responses.create({
       model: 'gpt-4o-mini',
@@ -4789,29 +4890,73 @@ CRITICAL STYLE RULES:
 - Wrap the most important sentence in each paragraph with **bold** markdown.
 - Just four flowing paragraphs, no headers.`;
 
-    const response = await client.chat.completions.create({
-      model: 'gpt-4o',
-      max_tokens: 800,
-      messages: [{ role: 'user', content: analysisPrompt }]
-    });
-    logTokenUsage('stock-details', response.usage);
+    if (isStream) {
+      sendSSE(res, { type: 'status', message: 'Generating analysis...' });
 
-    const analysis = response.choices[0].message.content.trim();
+      const streamResponse = await client.chat.completions.create({
+        model: 'gpt-4o',
+        max_tokens: 800,
+        stream: true,
+        messages: [{ role: 'user', content: analysisPrompt }]
+      });
 
-    const result = {
-      ticker,
-      companyName,
-      changePercent,
-      analysis,
-      generatedAt: new Date().toISOString()
-    };
+      let fullText = '';
+      for await (const chunk of streamResponse) {
+        const content = chunk.choices[0]?.delta?.content;
+        if (content) {
+          fullText += content;
+          sendSSE(res, { type: 'chunk', text: content });
+        }
+      }
 
-    // Cache the result
-    saveStockExplanationToCache(ticker, result);
+      const analysis = fullText.trim();
+      const result = {
+        ticker,
+        companyName,
+        changePercent,
+        analysis,
+        generatedAt: new Date().toISOString()
+      };
 
-    res.json({ ...result, cached: false });
+      // Cache the result
+      saveStockExplanationToCache(ticker, result);
+
+      sendSSE(res, { type: 'done', analysis, cached: false });
+      res.end();
+    } else {
+      const response = await client.chat.completions.create({
+        model: 'gpt-4o',
+        max_tokens: 800,
+        messages: [{ role: 'user', content: analysisPrompt }]
+      });
+      logTokenUsage('stock-details', response.usage);
+
+      const analysis = response.choices[0].message.content.trim();
+
+      const result = {
+        ticker,
+        companyName,
+        changePercent,
+        analysis,
+        generatedAt: new Date().toISOString()
+      };
+
+      // Cache the result
+      saveStockExplanationToCache(ticker, result);
+
+      res.json({ ...result, cached: false });
+    }
   } catch (error) {
     console.error('Stock explanation API error:', error);
+
+    if (isStream) {
+      try {
+        if (!res.headersSent) initSSE(res);
+        const isQuota = error.code === 'insufficient_quota' || error.status === 429;
+        sendSSE(res, { type: 'error', message: isQuota ? 'API quota exceeded' : 'Failed to generate analysis', isQuotaError: isQuota });
+      } catch (e) { /* client disconnected */ }
+      return res.end();
+    }
 
     // Check for specific error types
     if (error.code === 'insufficient_quota' || error.status === 429) {
