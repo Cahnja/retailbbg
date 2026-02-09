@@ -86,6 +86,114 @@
       font-weight: 400;
     }
 
+    /* Bitcoin Banner */
+    .bitcoin-banner {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 20px 28px;
+      margin-bottom: 20px;
+      border: 1px solid #e8eaed;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bitcoin-banner::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(135deg, #f7931a 0%, #e8850e 100%);
+    }
+
+    .bitcoin-icon {
+      width: 40px;
+      height: 40px;
+      background: #f7931a;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #fff;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .bitcoin-info {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .bitcoin-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #5f6368;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .bitcoin-price {
+      font-size: 28px;
+      font-weight: 700;
+      color: #202124;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .bitcoin-change {
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .bitcoin-change.positive {
+      color: #137333;
+    }
+
+    .bitcoin-change.negative {
+      color: #c5221f;
+    }
+
+    .bitcoin-change-detail {
+      font-size: 14px;
+      font-weight: 500;
+      color: #5f6368;
+    }
+
+    .bitcoin-change-detail.positive {
+      color: #137333;
+    }
+
+    .bitcoin-change-detail.negative {
+      color: #c5221f;
+    }
+
+    @media (max-width: 768px) {
+      .bitcoin-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 20px;
+      }
+
+      .bitcoin-info {
+        gap: 12px;
+      }
+
+      .bitcoin-price {
+        font-size: 24px;
+      }
+    }
+
     /* Index Cards Grid - V1 Style */
     .indices-grid {
       display: grid;
@@ -862,6 +970,19 @@
     </div>
 
     <div id="content-container" style="display: none;">
+      <!-- Bitcoin Price Banner -->
+      <div class="bitcoin-banner" id="bitcoin-banner" style="display: none;">
+        <div class="bitcoin-icon">&#8383;</div>
+        <div>
+          <div class="bitcoin-label">Bitcoin</div>
+          <div class="bitcoin-info">
+            <div class="bitcoin-price" id="bitcoin-price">--</div>
+            <div class="bitcoin-change" id="bitcoin-change">--</div>
+            <div class="bitcoin-change-detail" id="bitcoin-change-detail"></div>
+          </div>
+        </div>
+      </div>
+
       <!-- Index Cards Grid - V1 Style -->
       <div class="indices-grid" id="indices-container">
         <!-- Index cards will be inserted here -->
@@ -929,6 +1050,10 @@
     const errorMessage = document.getElementById('error-message');
     const contentContainer = document.getElementById('content-container');
     const indicesContainer = document.getElementById('indices-container');
+    const bitcoinBanner = document.getElementById('bitcoin-banner');
+    const bitcoinPrice = document.getElementById('bitcoin-price');
+    const bitcoinChange = document.getElementById('bitcoin-change');
+    const bitcoinChangeDetail = document.getElementById('bitcoin-change-detail');
     const driversList = document.getElementById('drivers-list');
     const lastUpdated = document.getElementById('last-updated');
     const cacheBadge = document.getElementById('cache-badge');
@@ -1038,24 +1163,135 @@
       }).join('');
     }
 
+    function renderBitcoin(btc) {
+      if (!btc || btc.price === 0) {
+        bitcoinBanner.style.display = 'none';
+        return;
+      }
+      const isPositive = btc.changePercent >= 0;
+      const changeClass = isPositive ? 'positive' : 'negative';
+      const arrow = isPositive ? '&#9650;' : '&#9660;';
+      const sign = isPositive ? '+' : '';
+
+      bitcoinPrice.textContent = '$' + btc.price.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+      bitcoinChange.className = 'bitcoin-change ' + changeClass;
+      bitcoinChange.innerHTML = '<span class="change-arrow">' + arrow + '</span> ' + sign + btc.changePercent.toFixed(2) + '%';
+      bitcoinChangeDetail.className = 'bitcoin-change-detail ' + changeClass;
+      bitcoinChangeDetail.textContent = sign + '$' + Math.abs(btc.change).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+      bitcoinBanner.style.display = 'flex';
+    }
+
     function highlightText(text) {
-      // Add highlighting for key terms
-      return text
-        // Positive percentages: +X%, up X%, gains X%, rose X%
-        .replace(/(\+[\d.]+%)/g, '<span class="driver-positive">$1</span>')
-        .replace(/\b(up\s+)([\d.]+%)/gi, '$1<span class="driver-positive">$2</span>')
-        .replace(/\b(gains?\s+)([\d.]+%)/gi, '$1<span class="driver-positive">$2</span>')
-        .replace(/\b(rose\s+)([\d.]+%)/gi, '$1<span class="driver-positive">$2</span>')
-        .replace(/\b(climbs?\s+)([\d.]+%)/gi, '$1<span class="driver-positive">$2</span>')
-        .replace(/\b(adds?\s+)([\d.]+%)/gi, '$1<span class="driver-positive">$2</span>')
-        // Negative percentages: -X%, down X%, drops X%, falls X%, loses X%
-        .replace(/([\-−][\d.]+%)/g, '<span class="driver-negative">$1</span>')
-        .replace(/\b(down\s+)([\d.]+%)/gi, '$1<span class="driver-negative">$2</span>')
-        .replace(/\b(drops?\s+)([\d.]+%)/gi, '$1<span class="driver-negative">$2</span>')
-        .replace(/\b(falls?\s+)([\d.]+%)/gi, '$1<span class="driver-negative">$2</span>')
-        .replace(/\b(loses?\s+)([\d.]+%)/gi, '$1<span class="driver-negative">$2</span>')
-        .replace(/\b(declines?\s+)([\d.]+%)/gi, '$1<span class="driver-negative">$2</span>')
-        .replace(/\b(sheds?\s+)([\d.]+%)/gi, '$1<span class="driver-negative">$2</span>');
+      // Directional word lists for determining green/red coloring
+      var positiveWords = ['up', 'rose', 'gain', 'gains', 'gained', 'gaining', 'climb', 'climbs', 'climbed', 'climbing',
+        'add', 'adds', 'added', 'adding', 'surge', 'surges', 'surged', 'surging', 'jump', 'jumps', 'jumped', 'jumping',
+        'rally', 'rallies', 'rallied', 'rallying', 'advance', 'advances', 'advanced', 'advancing',
+        'rise', 'rises', 'rising', 'soar', 'soars', 'soared', 'soaring', 'spike', 'spikes', 'spiked', 'spiking',
+        'increase', 'increases', 'increased', 'increasing', 'recover', 'recovers', 'recovered', 'recovering',
+        'bounce', 'bounces', 'bounced', 'bouncing', 'lifted', 'lifts', 'lifting'];
+      var negativeWords = ['down', 'fell', 'fall', 'falls', 'falling', 'drop', 'drops', 'dropped', 'dropping',
+        'lose', 'loses', 'lost', 'losing', 'decline', 'declines', 'declined', 'declining',
+        'shed', 'sheds', 'shedding', 'plunge', 'plunges', 'plunged', 'plunging',
+        'tumble', 'tumbles', 'tumbled', 'tumbling', 'slide', 'slides', 'slid', 'sliding',
+        'sink', 'sinks', 'sank', 'sunk', 'sinking', 'retreat', 'retreats', 'retreated', 'retreating',
+        'slump', 'slumps', 'slumped', 'slumping', 'dip', 'dips', 'dipped', 'dipping',
+        'decrease', 'decreases', 'decreased', 'decreasing', 'off', 'lower', 'lowered'];
+
+      var positiveSet = new Set(positiveWords);
+      var negativeSet = new Set(negativeWords);
+
+      // Percentage pattern: matches "X%", "X.Y%", "X-Y%", "X% to Y%", "X.Y-Z.W%" etc.
+      var pctPattern = /[\d]+(?:\.[\d]+)?(?:\s*(?:[-\u2013\u2014]|to)\s*[\d]+(?:\.[\d]+)?)?%/g;
+
+      // First pass: find all percentage matches and determine their color based on context
+      var replacements = [];
+      var match;
+      while ((match = pctPattern.exec(text)) !== null) {
+        var matchStart = match.index;
+        var matchEnd = matchStart + match[0].length;
+        var pctStr = match[0];
+
+        // Look at the text before this percentage to find a directional word
+        var precedingText = text.substring(Math.max(0, matchStart - 80), matchStart);
+        var precedingWords = precedingText.trim().split(/\s+/);
+
+        var color = null;
+
+        // Check preceding words (look back up to 6 words for context)
+        var wordsToCheck = precedingWords.slice(-6);
+        for (var i = wordsToCheck.length - 1; i >= 0; i--) {
+          var cleanWord = wordsToCheck[i].replace(/[^a-zA-Z]/g, '').toLowerCase();
+          if (positiveSet.has(cleanWord)) {
+            color = 'driver-positive';
+            break;
+          }
+          if (negativeSet.has(cleanWord)) {
+            color = 'driver-negative';
+            break;
+          }
+        }
+
+        if (color) {
+          replacements.push({ start: matchStart, end: matchEnd, text: pctStr, color: color });
+        }
+      }
+
+      // Also handle explicit sign prefixes: +X.Y% or -X.Y% (and en-dash/em-dash minus)
+      var signedPctPattern = /([+\-\u2212\u2013\u2014])([\d]+(?:\.[\d]+)?(?:\s*(?:[-\u2013\u2014]|to)\s*[\d]+(?:\.[\d]+)?)?%)/g;
+      while ((match = signedPctPattern.exec(text)) !== null) {
+        var sign = match[1];
+        var pctStr = match[0];
+        var matchStart = match.index;
+        var matchEnd = matchStart + pctStr.length;
+
+        // Check if this range is already covered by a directional-word replacement
+        var alreadyCovered = replacements.some(function(r) {
+          return matchStart >= r.start && matchStart < r.end;
+        });
+        if (alreadyCovered) continue;
+
+        var color = (sign === '+') ? 'driver-positive' : 'driver-negative';
+        replacements.push({ start: matchStart, end: matchEnd, text: pctStr, color: color });
+      }
+
+      // Sort replacements by start position descending so we can replace from end to start
+      replacements.sort(function(a, b) { return b.start - a.start; });
+
+      // Remove overlapping replacements (keep earliest start position)
+      var filtered = [];
+      for (var i = 0; i < replacements.length; i++) {
+        var r = replacements[i];
+        var dominated = false;
+        for (var j = 0; j < filtered.length; j++) {
+          if (r.start < filtered[j].end && r.end > filtered[j].start) {
+            dominated = true;
+            break;
+          }
+        }
+        if (!dominated) {
+          filtered.push(r);
+        }
+      }
+
+      // Re-sort descending by start for safe string splicing
+      filtered.sort(function(a, b) { return b.start - a.start; });
+
+      // Apply replacements from end to start to preserve indices
+      var result = text;
+      for (var i = 0; i < filtered.length; i++) {
+        var r = filtered[i];
+        result = result.substring(0, r.start) +
+          '<span class="' + r.color + '">' + r.text + '</span>' +
+          result.substring(r.end);
+      }
+
+      return result;
     }
 
     function getImpactBadgeHTML(impact) {
@@ -1310,6 +1546,7 @@
 
         const data = await response.json();
 
+        renderBitcoin(data.bitcoin);
         renderIndices(data.indices);
         renderDrivers(data.drivers);
         lastUpdated.textContent = 'Last updated: ' + formatTime(data.asOf);
@@ -1353,20 +1590,34 @@
     // Load data on page load
     loadMarketData();
 
-    // Auto-refresh every 5 minutes during market hours
-    setInterval(() => {
-      const now = new Date();
-      const hour = now.getHours();
-      const day = now.getDay();
+    // Lightweight price refresh - updates only index cards, bitcoin, and timestamp
+    // without re-rendering drivers or showing loading spinners
+    async function refreshPrices() {
+      try {
+        const response = await fetch('/api/market-update');
+        if (!response.ok) return;
 
-      // Market hours: Mon-Fri 9:30 AM - 4:00 PM ET
-      const isWeekday = day >= 1 && day <= 5;
-      const isMarketHours = hour >= 9 && hour < 17;
+        const data = await response.json();
 
-      if (isWeekday && isMarketHours) {
-        loadMarketData();
+        // Update only the price displays and timestamp (not drivers)
+        renderIndices(data.indices);
+        if (data.bitcoin && typeof renderBitcoin === 'function') {
+          renderBitcoin(data.bitcoin);
+        }
+        lastUpdated.textContent = 'Last updated: ' + formatTime(data.asOf);
+
+        if (data.cached) {
+          cacheBadge.innerHTML = '<span class="cache-badge"><span class="cache-dot"></span>Cached</span>';
+        } else {
+          cacheBadge.innerHTML = '';
+        }
+      } catch (error) {
+        console.error('Price auto-refresh failed:', error);
       }
-    }, 5 * 60 * 1000);
+    }
+
+    // Auto-refresh prices every 15 minutes
+    setInterval(refreshPrices, 15 * 60 * 1000);
   </script>
 </body>
 </html>

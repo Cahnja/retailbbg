@@ -4322,27 +4322,42 @@ app.get('/api/market-update', async (req, res) => {
     ];
 
     console.log('Fetching market indices...');
-    const indices = await Promise.all(indexSymbols.map(async ({ symbol, name }) => {
-      try {
-        const quote = await yahooFinance.quote(symbol);
-        return {
-          symbol,
-          name,
-          price: quote.regularMarketPrice || 0,
-          change: quote.regularMarketChange || 0,
-          changePercent: quote.regularMarketChangePercent || 0
-        };
-      } catch (err) {
-        console.error(`Failed to fetch ${symbol}:`, err.message);
-        return {
-          symbol,
-          name,
-          price: 0,
-          change: 0,
-          changePercent: 0
-        };
-      }
-    }));
+    const [indices, bitcoin] = await Promise.all([
+      Promise.all(indexSymbols.map(async ({ symbol, name }) => {
+        try {
+          const quote = await yahooFinance.quote(symbol);
+          return {
+            symbol,
+            name,
+            price: quote.regularMarketPrice || 0,
+            change: quote.regularMarketChange || 0,
+            changePercent: quote.regularMarketChangePercent || 0
+          };
+        } catch (err) {
+          console.error(`Failed to fetch ${symbol}:`, err.message);
+          return {
+            symbol,
+            name,
+            price: 0,
+            change: 0,
+            changePercent: 0
+          };
+        }
+      })),
+      (async () => {
+        try {
+          const quote = await yahooFinance.quote('BTC-USD');
+          return {
+            price: quote.regularMarketPrice || 0,
+            change: quote.regularMarketChange || 0,
+            changePercent: quote.regularMarketChangePercent || 0
+          };
+        } catch (err) {
+          console.error('Failed to fetch BTC-USD:', err.message);
+          return { price: 0, change: 0, changePercent: 0 };
+        }
+      })()
+    ]);
 
     // 2. Use web search to find today's market drivers
     const today = new Date();
@@ -4414,6 +4429,7 @@ Return ONLY a JSON array of strings with exactly 10 bullet points, like:
 
     const result = {
       indices,
+      bitcoin,
       drivers: enrichedDrivers,
       asOf: new Date().toISOString()
     };
@@ -5364,21 +5380,36 @@ async function refreshMarketUpdate() {
       { symbol: '^DJI', name: 'Dow Jones' }
     ];
 
-    const indices = await Promise.all(indexSymbols.map(async ({ symbol, name }) => {
-      try {
-        const quote = await yahooFinance.quote(symbol);
-        return {
-          symbol,
-          name,
-          price: quote.regularMarketPrice || 0,
-          change: quote.regularMarketChange || 0,
-          changePercent: quote.regularMarketChangePercent || 0
-        };
-      } catch (err) {
-        console.error(`Failed to fetch ${symbol}:`, err.message);
-        return { symbol, name, price: 0, change: 0, changePercent: 0 };
-      }
-    }));
+    const [indices, bitcoin] = await Promise.all([
+      Promise.all(indexSymbols.map(async ({ symbol, name }) => {
+        try {
+          const quote = await yahooFinance.quote(symbol);
+          return {
+            symbol,
+            name,
+            price: quote.regularMarketPrice || 0,
+            change: quote.regularMarketChange || 0,
+            changePercent: quote.regularMarketChangePercent || 0
+          };
+        } catch (err) {
+          console.error(`Failed to fetch ${symbol}:`, err.message);
+          return { symbol, name, price: 0, change: 0, changePercent: 0 };
+        }
+      })),
+      (async () => {
+        try {
+          const quote = await yahooFinance.quote('BTC-USD');
+          return {
+            price: quote.regularMarketPrice || 0,
+            change: quote.regularMarketChange || 0,
+            changePercent: quote.regularMarketChangePercent || 0
+          };
+        } catch (err) {
+          console.error('Failed to fetch BTC-USD:', err.message);
+          return { price: 0, change: 0, changePercent: 0 };
+        }
+      })()
+    ]);
 
     // Search for market drivers
     const today = new Date();
@@ -5442,6 +5473,7 @@ Return ONLY a JSON array of strings with exactly 10 bullet points, like:
 
     const result = {
       indices,
+      bitcoin,
       drivers,
       asOf: new Date().toISOString()
     };

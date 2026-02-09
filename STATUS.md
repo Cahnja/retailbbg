@@ -22,9 +22,9 @@ A web app that generates Goldman Sachs-style stock research with multiple tabs:
 |--------|---------|----------------|
 | Yahoo Finance (`yahoo-finance2`) | Stock/index prices, market data | Real-time |
 | **Finnhub API** | Stock news headlines for Top Movers | Real-time |
-| OpenAI GPT-4o | Market Update, detailed analysis, reports | Varies |
+| OpenAI GPT-4o | Market Update, detailed analysis, reports, stock explanation search | Varies |
 | OpenAI GPT-4o-mini | Top Movers catalysts, company descriptions | Varies |
-| OpenAI Web Search (Responses API) | Market drivers, stock click-through details | 4 hours |
+| OpenAI Web Search (Responses API) | Market drivers, stock click-through details | 12 hours |
 | SEC-API.io | 10-K filings (Business, Risk, MD&A) | 90 days |
 | EarningsCall.biz | Earnings call transcripts | 30 days |
 | Alpha Vantage | Financial data for reports | 30 days |
@@ -34,8 +34,8 @@ A web app that generates Goldman Sachs-style stock research with multiple tabs:
 - **Earnings reviews**: 30 days
 - **Market Update**: 4 hours
 - **Top Movers**: Always serve cached (refresh on schedule only)
-- **Market Driver Details**: 4 hours
-- **Stock Explanation Details**: 4 hours
+- **Market Driver Details**: 12 hours
+- **Stock Explanation Details**: 12 hours
 - **Thematic themes**: 30 days
 - **Company descriptions**: Permanent (one-time generation)
 - **User watchlists**: Persistent (JSON files)
@@ -183,10 +183,10 @@ GOOGLE_CLIENT_ID=...  # For Google Sign-In
 |----------|-------------|
 | `GET /api/market-update` | Index prices + 10 market driver bullets |
 | `GET /api/market-update?refresh=true` | Force refresh market update |
-| `GET /api/market-driver-details` | Detailed analysis for a market driver |
+| `GET /api/market-driver-details` | Detailed analysis for a market driver (supports `?stream=true` for SSE) |
 | `GET /api/market-movers` | Top gainers/losers (always cached) |
 | `GET /api/market-movers?refresh=true` | Force refresh top movers |
-| `GET /api/stock-explanation-details` | Detailed analysis for a stock move |
+| `GET /api/stock-explanation-details` | Detailed analysis for a stock move (supports `?stream=true` for SSE) |
 | `GET /api/earnings-review/:ticker` | Earnings review with Q&A |
 | `POST /api/generate-report` | Generate initiation report |
 | `GET /api/thematic/:theme` | Thematic investment ideas (5 stocks) |
@@ -218,7 +218,35 @@ ssh root@138.197.118.128 "cd /root/retailbbg && npm install && pm2 restart retai
 ssh root@138.197.118.128 "pm2 logs retailbbg --lines 50"
 ```
 
-## Recent Changes (Feb 5, 2026)
+## Recent Changes (Feb 9, 2026)
+
+### SSE Streaming for Detail Endpoints
+- [x] **Server-Sent Events**: Both `/api/market-driver-details` and `/api/stock-explanation-details` support `?stream=true` query parameter
+- [x] **Status Messages**: Users see progress updates ("Searching for latest news...", "Generating analysis...") while waiting
+- [x] **Incremental Text Chunks**: Analysis text streams in real-time as GPT-4o generates it
+- [x] **Frontend Integration**: Both `portfolio.html` and `market.html` consume SSE streams with incremental rendering
+
+### Extended Cache TTL
+- [x] **12-Hour Cache**: Market driver details and stock explanation details cache extended from 4 hours to 12 hours (720 minutes)
+
+### Pre-loading / Cache Warming
+- [x] **Portfolio Page**: After page load, fires background fetches for top 3 gainers + top 3 losers (fire-and-forget)
+- [x] **Market Page**: After page load, fires background fetches for first 4 drivers (fire-and-forget)
+- [x] **Instant Load**: Items load instantly when clicked because server cache is already warm
+
+### Fixed Hallucinated Earnings
+- [x] **Search Prompt Cleanup**: Removed earnings-biased bullet points from stock explanation search prompt
+- [x] **Fact-Only Instruction**: Added explicit instruction to only cite facts present in web search research
+- [x] **Simplified Search**: Search prompt simplified from listing specific categories to just asking for "the specific catalyst behind this move"
+
+### Concise Analysis Style
+- [x] **Stricter Style Rules**: Both analysis prompts updated -- no throat-clearing openings, no inventing numbers, start with the actual catalyst
+- [x] **Anti-Example**: Added example of what NOT to write: "The stock surged today due to several catalysts that excited the market"
+
+### Stock Explanation Search Upgraded
+- [x] **GPT-4o for Search**: Web search for stock explanations upgraded from GPT-4o-mini to GPT-4o (matching market driver details quality)
+
+## Previous Changes (Feb 5, 2026)
 
 ### Major: Token Cost Optimization (99% reduction for Top Movers)
 - [x] **Finnhub Integration**: Replaced OpenAI web search with Finnhub news API for Top Movers
@@ -264,7 +292,7 @@ ssh root@138.197.118.128 "pm2 logs retailbbg --lines 50"
 - [x] **Market Driver Click-Through**: Web search + 4-paragraph detailed analysis
 - [x] **Portfolio Click-Through**: Same functionality as Top Movers (shared cache)
 - [x] **Unified Style**: Both use fact-based prompts with bold key sentences, no headers
-- [x] **Shared Cache**: Stock explanations cached by `{TICKER}_{DATE}.json` (4-hour TTL)
+- [x] **Shared Cache**: Stock explanations cached by `{TICKER}_{DATE}.json` (12-hour TTL)
 
 ### Time-Aware AI Prompts
 - [x] **Pre-market detection**: Before 9:30am ET, AI knows data is from "yesterday"
@@ -347,7 +375,7 @@ Used for Market Update and Top Movers detail views:
 - **Market Update**: Serve cached, refresh on schedule
 - **Initiation reports**: Never clear without permission
 - **Earnings reviews**: 30-day cache
-- **Detail popups**: 4-hour cache
+- **Detail popups**: 12-hour cache
 
 ## Known Issues / Notes
 - Google Sign-In requires GOOGLE_CLIENT_ID in .env
