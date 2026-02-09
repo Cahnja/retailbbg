@@ -5234,11 +5234,11 @@ app.get('/api/stock-explanation-details', async (req, res) => {
     }
 
     // Web search to find why the stock moved
-    const searchPrompt = `Search financial news sites for all recent headlines about ${companyName} (${ticker}). The stock is ${direction} ${absChange}% ${dayReference}.
+    const searchPrompt = `Search financial news sites for all recent news about ${companyName} (${ticker}). The stock is ${direction} ${absChange}% ${dayReference}.
 
-Search for "${ticker} stock", "${companyName} news", and "${ticker} ${dayReference}".
+Search for "${ticker} stock", "${companyName} news".
 
-List every relevant headline and key fact you find.`;
+List every relevant key fact you find.`;
 
     if (isStream) sendSSE(res, { type: 'status', message: 'Searching for latest news...' });
 
