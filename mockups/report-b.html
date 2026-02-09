@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report Option B - Two Column</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      background: #fff;
+      color: #2c2c2c;
+      line-height: 1.65;
+    }
+
+    /* Top Banner */
+    .top-banner {
+      background: #1a1a2e;
+      color: white;
+      padding: 16px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .banner-left {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .banner-right {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+
+    /* Main Layout */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: calc(100vh - 52px);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: #f5f6f8;
+      padding: 30px 24px;
+      border-right: 1px solid #e0e0e0;
+    }
+    .company-block {
+      margin-bottom: 30px;
+    }
+    .company-name {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-bottom: 4px;
+    }
+    .ticker {
+      font-size: 13px;
+      color: #666;
+    }
+
+    .rating-block {
+      background: #1a1a2e;
+      color: white;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .rating-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.7;
+    }
+    .rating-value {
+      font-size: 28px;
+      font-weight: 700;
+      margin: 4px 0;
+    }
+    .price-target {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .metrics-list {
+      list-style: none;
+    }
+    .metrics-list li {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #e0e0e0;
+      font-size: 13px;
+    }
+    .metrics-list .label {
+      color: #666;
+    }
+    .metrics-list .value {
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+
+    /* Content Area */
+    .content {
+      padding: 40px 50px;
+      max-width: 700px;
+    }
+
+    .thesis-section {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 28px 32px;
+      margin-bottom: 40px;
+      border-radius: 4px;
+    }
+    .thesis-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      opacity: 0.8;
+      margin-bottom: 12px;
+    }
+    .thesis-text {
+      font-size: 17px;
+      line-height: 1.6;
+      font-weight: 500;
+    }
+
+    h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-top: 36px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #1a1a2e;
+      display: inline-block;
+    }
+
+    p {
+      margin-bottom: 16px;
+      color: #444;
+    }
+
+    .highlight-box {
+      background: #f0f7ff;
+      border-radius: 4px;
+      padding: 16px 20px;
+      margin: 20px 0;
+      border-left: 4px solid #3b82f6;
+    }
+    .highlight-box strong {
+      color: #1a1a2e;
+    }
+
+    h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a2e;
+      margin-top: 24px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-banner">
+    <div class="banner-left">Initiation of Coverage</div>
+    <div class="banner-right">February 2026</div>
+  </div>
+
+  <div class="main-layout">
+    <div class="sidebar">
+      <div class="company-block">
+        <div class="company-name">Broadcom Inc.</div>
+        <div class="ticker">AVGO · NASDAQ</div>
+      </div>
+
+      <div class="rating-block">
+        <div class="rating-label">Rating</div>
+        <div class="rating-value">BUY</div>
+        <div class="price-target">PT: $220 (+19%)</div>
+      </div>
+
+      <ul class="metrics-list">
+        <li><span class="label">Price</span><span class="value">$185.32</span></li>
+        <li><span class="label">Market Cap</span><span class="value">$774B</span></li>
+        <li><span class="label">P/E (FY25)</span><span class="value">24.5x</span></li>
+        <li><span class="label">EV/EBITDA</span><span class="value">18.2x</span></li>
+        <li><span class="label">Dividend Yield</span><span class="value">1.4%</span></li>
+        <li><span class="label">52-Week Range</span><span class="value">$120-$195</span></li>
+      </ul>
+    </div>
+
+    <div class="content">
+      <div class="thesis-section">
+        <div class="thesis-label">Investment Thesis</div>
+        <div class="thesis-text">
+          Buy AVGO. Dominant semiconductor franchise with unmatched FCF generation. VMware acquisition transforms the business into an infrastructure software powerhouse. AI networking tailwinds accelerating.
+        </div>
+      </div>
+
+      <h2>Business Overview</h2>
+      <p>
+        Broadcom Inc. is a global technology leader that designs, develops, and supplies semiconductor and infrastructure software solutions. The company operates through two segments: Semiconductor Solutions and Infrastructure Software.
+      </p>
+
+      <div class="highlight-box">
+        <strong>Key Insight:</strong> Broadcom's semiconductor business generates 50%+ gross margins with minimal capex requirements, resulting in industry-leading free cash flow conversion.
+      </div>
+
+      <h2>Thesis Details</h2>
+
+      <h3>1. AI Networking Leadership</h3>
+      <p>
+        Broadcom's custom AI accelerators (XPUs) and networking solutions position the company at the center of hyperscaler AI infrastructure buildouts. Design wins with three of four major cloud providers.
+      </p>
+
+      <h3>2. VMware Integration</h3>
+      <p>
+        The VMware acquisition provides Broadcom with a recurring revenue software business. Management targets $8.5B in run-rate synergies within three years.
+      </p>
+
+      <h2>Key Risks</h2>
+      <p>
+        Customer concentration with Apple (~20% of semi revenue). VMware integration execution. Cyclical enterprise IT exposure.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

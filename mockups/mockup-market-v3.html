@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Update - Timeline/Feed Layout (V3)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            color: #202124;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Navigation Banner - 40px height */
+        .nav-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #00205b;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-items {
+            display: flex;
+            gap: 6px;
+            padding: 0 8px;
+        }
+
+        .nav-item {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            padding: 6px 16px;
+            border-radius: 16px;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item.active {
+            color: #00205b;
+            background: white;
+            font-weight: 600;
+        }
+
+        /* Index Header Bar */
+        .index-header {
+            position: fixed;
+            top: 40px;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .index-ticker {
+            display: flex;
+            gap: 48px;
+            align-items: center;
+        }
+
+        .index-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: white;
+        }
+
+        .index-name {
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.8;
+        }
+
+        .index-data {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+        }
+
+        .index-price {
+            font-size: 18px;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .index-change {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .index-change.positive {
+            color: #7bed9f;
+        }
+
+        .index-change.negative {
+            color: #ff6b6b;
+        }
+
+        .index-divider {
+            width: 1px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 32px 24px;
+            padding-top: 136px; /* 40px nav + 64px header + 32px spacing */
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .page-info {
+            flex: 1;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1e3a5f;
+            margin-bottom: 4px;
+        }
+
+        .page-subtitle {
+            font-size: 13px;
+            color: #5f6368;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #e6f4ea;
+            color: #137333;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            background: #137333;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Timeline Section */
+        .timeline-header {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #1e3a5f;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e8f0f7;
+        }
+
+        /* Timeline Feed */
+        .timeline-feed {
+            position: relative;
+        }
+
+        .timeline-feed::before {
+            content: "";
+            position: absolute;
+            left: 40px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, #2d5a87 0%, #e8f0f7 100%);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 80px;
+            padding-bottom: 24px;
+            cursor: pointer;
+        }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-time {
+            position: absolute;
+            left: 0;
+            top: 4px;
+            width: 32px;
+            text-align: right;
+            font-size: 11px;
+            font-weight: 500;
+            color: #5f6368;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 34px;
+            top: 6px;
+            width: 14px;
+            height: 14px;
+            background: #ffffff;
+            border: 3px solid #2d5a87;
+            border-radius: 50%;
+            z-index: 1;
+            transition: all 0.2s;
+        }
+
+        .timeline-item:hover .timeline-dot {
+            background: #2d5a87;
+            transform: scale(1.2);
+        }
+
+        .timeline-card {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e8eaed;
+            padding: 20px;
+            border-left: 4px solid #2d5a87;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .timeline-item:hover .timeline-card {
+            border-left-color: #1e3a5f;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            transform: translateX(4px);
+        }
+
+        .timeline-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .timeline-text {
+            flex: 1;
+        }
+
+        .driver-text {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #3c4043;
+            margin-bottom: 12px;
+        }
+
+        .driver-highlight {
+            font-weight: 600;
+            color: #1e3a5f;
+        }
+
+        .driver-positive {
+            color: #137333;
+            font-weight: 600;
+        }
+
+        .driver-negative {
+            color: #c5221f;
+            font-weight: 600;
+        }
+
+        .driver-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 12px;
+            color: #80868b;
+        }
+
+        .driver-tag {
+            background: #e8f0f7;
+            color: #1e3a5f;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 11px;
+        }
+
+        .impact-badge {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .impact-badge.high {
+            color: #c5221f;
+        }
+
+        .impact-badge.medium {
+            color: #ea8600;
+        }
+
+        .impact-badge.low {
+            color: #137333;
+        }
+
+        .timeline-arrow {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2d5a87;
+            background: #f8fafc;
+            border-radius: 8px;
+            flex-shrink: 0;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .timeline-item:hover .timeline-arrow {
+            opacity: 1;
+        }
+
+        /* Expand/Collapse Markers */
+        .time-marker {
+            position: relative;
+            padding-left: 80px;
+            padding-bottom: 20px;
+            padding-top: 8px;
+        }
+
+        .time-marker-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #80868b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: #f8f9fa;
+            padding: 4px 12px;
+            border-radius: 4px;
+        }
+
+        /* Side Panel Overlay */
+        .panel-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .panel-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Side Panel */
+        .side-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 480px;
+            max-width: 100%;
+            height: 100vh;
+            background: #ffffff;
+            z-index: 2001;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+            transform: translateX(100%);
+            transition: transform 0.3s ease-out;
+        }
+
+        .side-panel.active {
+            transform: translateX(0);
+        }
+
+        /* Panel Header */
+        .panel-header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+            padding: 24px;
+            color: white;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .panel-close-button {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .panel-close-button:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .panel-close-button svg {
+            width: 20px;
+            height: 20px;
+            color: white;
+        }
+
+        .panel-label {
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            margin-bottom: 8px;
+        }
+
+        .panel-title {
+            font-size: 20px;
+            font-weight: 600;
+            line-height: 1.4;
+            padding-right: 40px;
+            margin: 0;
+        }
+
+        .panel-meta {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .meta-item svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Panel Content */
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .panel-section {
+            margin-bottom: 24px;
+        }
+
+        .panel-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .panel-section-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #1e3a5f;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e8f0f7;
+        }
+
+        .section-content {
+            color: #444;
+            line-height: 1.7;
+            font-size: 15px;
+        }
+
+        .section-content p {
+            margin-bottom: 12px;
+        }
+
+        .section-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-content strong {
+            color: #1e3a5f;
+            font-weight: 600;
+        }
+
+        /* Key Points Box */
+        .key-points {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            border-left: 4px solid #2d5a87;
+        }
+
+        .key-points ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .key-points li {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .key-points li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 14px;
+            width: 8px;
+            height: 8px;
+            background: #2d5a87;
+            border-radius: 50%;
+        }
+
+        .key-points li:not(:last-child) {
+            border-bottom: 1px solid #e8f0f7;
+        }
+
+        /* Panel Footer */
+        .panel-footer {
+            padding: 16px 24px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            flex-shrink: 0;
+        }
+
+        .panel-footer-btn {
+            width: 100%;
+            background: #1e3a5f;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .panel-footer-btn:hover {
+            background: #2d5a87;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .index-header {
+                height: auto;
+                padding: 12px 16px;
+            }
+
+            .index-ticker {
+                flex-wrap: wrap;
+                gap: 16px 32px;
+                justify-content: center;
+            }
+
+            .index-divider {
+                display: none;
+            }
+
+            .main-content {
+                padding-top: 160px;
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .timeline-feed::before {
+                left: 24px;
+            }
+
+            .timeline-item {
+                padding-left: 56px;
+            }
+
+            .timeline-time {
+                width: 20px;
+                font-size: 10px;
+            }
+
+            .timeline-dot {
+                left: 18px;
+            }
+
+            .time-marker {
+                padding-left: 56px;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .side-panel {
+                width: 100%;
+            }
+
+            .index-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+
+            .index-data {
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav-banner">
+        <div class="nav-items">
+            <a href="/" class="nav-item">Home</a>
+            <a href="/market.html" class="nav-item active">Market Update</a>
+            <a href="/portfolio.html" class="nav-item">Top Movers</a>
+            <a href="/thematic.html" class="nav-item">Idea Gen</a>
+        </div>
+    </nav>
+
+    <!-- Compact Index Header Bar -->
+    <div class="index-header">
+        <div class="index-ticker">
+            <div class="index-item">
+                <span class="index-name">S&P 500</span>
+                <div class="index-data">
+                    <span class="index-price">5,234.18</span>
+                    <span class="index-change positive">&#9650; +1.23%</span>
+                </div>
+            </div>
+            <div class="index-divider"></div>
+            <div class="index-item">
+                <span class="index-name">Nasdaq</span>
+                <div class="index-data">
+                    <span class="index-price">16,742.39</span>
+                    <span class="index-change positive">&#9650; +1.87%</span>
+                </div>
+            </div>
+            <div class="index-divider"></div>
+            <div class="index-item">
+                <span class="index-name">Dow Jones</span>
+                <div class="index-data">
+                    <span class="index-price">39,156.72</span>
+                    <span class="index-change negative">&#9660; -0.34%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main class="main-content">
+        <div class="page-header">
+            <div class="page-info">
+                <h1 class="page-title">Market Update</h1>
+                <p class="page-subtitle">Real-time market news and analysis</p>
+            </div>
+            <div class="live-indicator">
+                <span class="live-dot"></span>
+                LIVE
+            </div>
+        </div>
+
+        <h2 class="timeline-header">Today's Market Drivers</h2>
+
+        <!-- Timeline Feed -->
+        <div class="timeline-feed">
+            <div class="timeline-item" onclick="openPanel('Fed signals potential rate cuts as inflation cools to 2.4% YoY')">
+                <div class="timeline-time">9:45<br>AM</div>
+                <div class="timeline-dot"></div>
+                <div class="timeline-card">
+                    <div class="timeline-content">
+                        <div class="timeline-text">
+                            <div class="driver-text">
+                                <span class="driver-highlight">Fed signals potential rate cuts</span> as inflation cools to <span class="driver-positive">2.4% YoY</span>, nearing 2% target
+                            </div>
+                            <div class="driver-meta">
+                                <span class="driver-tag">Macro</span>
+                                <span class="impact-badge high">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                                    </svg>
+                                    High Impact
+                                </span>
+                            </div>
+                        </div>
+                        <div class="timeline-arrow">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item" onclick="openPanel('NVIDIA surges +8.2% on AI chip demand guidance')">
+                <div class="timeline-time">9:32<br>AM</div>
+                <div class="timeline-dot"></div>
+                <div class="timeline-card">
+                    <div class="timeline-content">
+                        <div class="timeline-text">
+                            <div class="driver-text">
+                                <span class="driver-highlight">NVIDIA surges</span> <span class="driver-positive">+8.2%</span> on stronger-than-expected AI chip demand guidance
+                            </div>
+                            <div class="driver-meta">
+                                <span class="driver-tag">Technology</span>
+                                <span class="impact-badge high">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                                    </svg>
+                                    High Impact
+                                </span>
+                            </div>
+                        </div>
+                        <div class="timeline-arrow">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item" onclick="openPanel('Treasury yields drop 15bps as bond market rallies')">
+                <div class="timeline-time">9:28<br>AM</div>
+                <div class="timeline-dot"></div>
+                <div class="timeline-card">
+                    <div class="timeline-content">
+                        <div class="timeline-text">
+                            <div class="driver-text">
+                                Treasury yields <span class="driver-negative">drop 15bps</span> to 3.85% as bond market rallies on rate cut expectations
+                            </div>
+                            <div class="driver-meta">
+                                <span class="driver-tag">Fixed Income</span>
+                                <span class="impact-badge medium">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                    Medium Impact
+                                </span>
+                            </div>
+                        </div>
+                        <div class="timeline-arrow">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item" onclick="openPanel('Apple announces $100B buyback program')">
+                <div class="timeline-time">9:15<br>AM</div>
+                <div class="timeline-dot"></div>
+                <div class="timeline-card">
+                    <div class="timeline-content">
+                        <div class="timeline-text">
+                            <div class="driver-text">
+                                <span class="driver-highlight">Apple announces $100B buyback</span> program, largest in corporate history, shares <span class="driver-positive">+3.4%</span>
+                            </div>
+                            <div class="driver-meta">
+                                <span class="driver-tag">Earnings</span>
+                                <span class="impact-badge high">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                                    </svg>
+                                    High Impact
+                                </span>
+                            </div>
+                        </div>
+                        <div class="timeline-arrow">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="time-marker">
+                <span class="time-marker-label">Pre-Market</span>
+            </div>
+
+            <div class="timeline-item" onclick="openPanel('Oil prices fall on OPEC+ supply concerns')">
+                <div class="timeline-time">8:45<br>AM</div>
+                <div class="timeline-dot"></div>
+                <div class="timeline-card">
+                    <div class="timeline-content">
+                        <div class="timeline-text">
+                            <div class="driver-text">
+                                Oil prices <span class="driver-negative">fall -2.8%</span> on OPEC+ supply concerns and stronger dollar
+                            </div>
+                            <div class="driver-meta">
+                                <span class="driver-tag">Commodities</span>
+                                <span class="impact-badge medium">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                    Medium Impact
+                                </span>
+                            </div>
+                        </div>
+                        <div class="timeline-arrow">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item" onclick="openPanel('Regional banks rally on improved earnings outlook')">
+                <div class="timeline-time">8:30<br>AM</div>
+                <div class="timeline-dot"></div>
+                <div class="timeline-card">
+                    <div class="timeline-content">
+                        <div class="timeline-text">
+                            <div class="driver-text">
+                                Regional banks <span class="driver-positive">rally +4.1%</span> on improved earnings outlook and deposit stabilization
+                            </div>
+                            <div class="driver-meta">
+                                <span class="driver-tag">Financials</span>
+                                <span class="impact-badge low">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                    Low Impact
+                                </span>
+                            </div>
+                        </div>
+                        <div class="timeline-arrow">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Side Panel Overlay -->
+    <div class="panel-overlay" id="panel-overlay" onclick="closePanel()"></div>
+
+    <!-- Side Panel -->
+    <div class="side-panel" id="side-panel">
+        <div class="panel-header">
+            <button class="panel-close-button" onclick="closePanel()" aria-label="Close panel">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <div class="panel-label">Market Driver Analysis</div>
+            <h1 class="panel-title" id="panel-title">Fed signals potential rate cuts as inflation cools</h1>
+            <div class="panel-meta">
+                <span class="meta-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span id="panel-time">9:45 AM EST</span>
+                </span>
+                <span class="meta-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                    High Impact
+                </span>
+            </div>
+        </div>
+
+        <div class="panel-content" id="panel-content">
+            <div class="panel-section">
+                <h2 class="panel-section-title">Key Takeaways</h2>
+                <div class="key-points">
+                    <ul>
+                        <li><strong>Rate cuts could begin Q2 2026</strong> if inflation trend continues</li>
+                        <li>Core PCE inflation at <strong>2.4% YoY</strong>, nearing 2% target</li>
+                        <li>10-year Treasury yield <strong>down 15bps to 3.85%</strong></li>
+                        <li>Equity markets rallying on dovish signals</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h2 class="panel-section-title">Analysis</h2>
+                <div class="section-content">
+                    <p>
+                        Federal Reserve officials indicated at their latest policy meeting that <strong>interest rate cuts could begin as early as the second quarter</strong> if inflation continues its downward trajectory. The shift in tone marks a significant pivot from the hawkish stance maintained throughout much of the previous year.
+                    </p>
+                    <p>
+                        Recent economic data has bolstered the case for monetary easing. <strong>Core PCE inflation fell to 2.4% year-over-year</strong>, approaching the Fed's 2% target for the first time since early 2021.
+                    </p>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h2 class="panel-section-title">Market Impact</h2>
+                <div class="section-content">
+                    <p>
+                        Market participants have responded enthusiastically to the dovish signals. Treasury yields declined across the curve, with <strong>the 10-year yield falling 15 basis points to 3.85%</strong>. Equity markets rallied broadly, led by rate-sensitive sectors.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-footer">
+            <button class="panel-footer-btn" onclick="closePanel()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        const panelOverlay = document.getElementById('panel-overlay');
+        const sidePanel = document.getElementById('side-panel');
+        const panelTitle = document.getElementById('panel-title');
+
+        function openPanel(title) {
+            panelTitle.textContent = title;
+            panelOverlay.classList.add('active');
+            sidePanel.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePanel() {
+            panelOverlay.classList.remove('active');
+            sidePanel.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && sidePanel.classList.contains('active')) {
+                closePanel();
+            }
+        });
+    </script>
+</body>
+</html>

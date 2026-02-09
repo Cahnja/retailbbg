@@ -1,0 +1,30 @@
+APPROACH 5: Minimalist
+============================================================
+
+DESCRIPTION:
+Simple directive: 'Be punchy and direct'
+
+PROMPT USED:
+----------------------------------------
+Write a Goldman Sachs investment thesis for Broadcom (AVGO). Be punchy and direct. Short sentences only. No filler. 3-4 sentences.
+
+
+Company: Broadcom Inc. (AVGO)
+Sector: Semiconductors / Infrastructure Software
+Market Cap: ~$750B
+Forward P/E: 14x
+Key Business Lines: Semiconductors (networking, broadband, storage), Infrastructure Software (VMware)
+Recent: Acquired VMware for $69B in late 2023
+Strengths: #1 in AI networking (custom silicon for hyperscalers), dominant semiconductor franchises, best-in-class FCF margins (50%+)
+Growth Drivers: AI networking boom, VMware synergies, 5G infrastructure
+
+----------------------------------------
+
+GENERATED THESIS:
+----------------------------------------
+Broadcom (AVGO) is poised for robust growth. Dominant in AI networking and semiconductors, it capitalizes on the AI and 5G boom. The VMware acquisition enhances software offerings and synergies. Strong free cash flow margins and a forward P/E of 14x highlight its value.
+----------------------------------------
+
+NOTES:
+- Model: gpt-4o
+- Temperature: 0.7

@@ -1,0 +1,2106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio - RetailBBG</title>
+  <!-- Google Identity Services for Sign-In -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f8f9fa;
+      color: #202124;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Navigation Banner */
+    .nav-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #00205b;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-items {
+      display: flex;
+      gap: 6px;
+      padding: 0 8px;
+    }
+
+    .nav-item {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      padding: 6px 16px;
+      border-radius: 16px;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-item.active {
+      color: #00205b;
+      background: white;
+      font-weight: 600;
+    }
+
+    /* Main Content */
+    .main-content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px;
+      padding-top: 72px;
+    }
+
+    /* Page Header */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 600;
+      color: #1e3a5f;
+      margin-bottom: 8px;
+    }
+
+    .auth-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-info {
+      font-size: 14px;
+      color: #5f6368;
+    }
+
+    .auth-btn {
+      background: #00205b;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .auth-btn:hover {
+      background: #003087;
+    }
+
+    .auth-btn.secondary {
+      background: transparent;
+      color: #00205b;
+      border: 1px solid #dadce0;
+    }
+
+    .auth-btn.secondary:hover {
+      background: #f8f9fa;
+      border-color: #00205b;
+    }
+
+    /* Watchlist Selector */
+    .watchlist-selector {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .watchlist-dropdown {
+      padding: 8px 32px 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235f6368' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center;
+      cursor: pointer;
+      min-width: 200px;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .watchlist-dropdown:hover {
+      border-color: #00205b;
+    }
+
+    .watchlist-dropdown:focus {
+      outline: none;
+      border-color: #00205b;
+      box-shadow: 0 0 0 2px rgba(0, 32, 91, 0.1);
+    }
+
+    .new-watchlist-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #00205b;
+      background: transparent;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .new-watchlist-btn:hover {
+      background: #f8f9fa;
+      border-color: #00205b;
+    }
+
+    .watchlist-actions-btn {
+      padding: 6px 10px;
+      font-size: 13px;
+      color: #5f6368;
+      background: transparent;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .watchlist-actions-btn:hover {
+      background: #f8f9fa;
+      color: #202124;
+    }
+
+    /* Add Stock Section */
+    .add-stock-section {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 20px 24px;
+      border: 1px solid #e8eaed;
+      box-shadow: 0 1px 2px rgba(60, 64, 67, 0.1);
+      margin-bottom: 24px;
+    }
+
+    .add-stock-form {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .ticker-input {
+      flex: 1;
+      max-width: 200px;
+      padding: 12px 16px;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      font-size: 14px;
+      text-transform: uppercase;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    .ticker-input:focus {
+      outline: none;
+      border-color: #00205b;
+      box-shadow: 0 0 0 2px rgba(0, 32, 91, 0.1);
+    }
+
+    .add-btn {
+      background: #00205b;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .add-btn:hover {
+      background: #003087;
+    }
+
+    .add-btn:disabled {
+      background: #9aa0a6;
+      cursor: not-allowed;
+    }
+
+    .login-prompt {
+      font-size: 13px;
+      color: #5f6368;
+      margin-left: auto;
+    }
+
+    .login-prompt a {
+      color: #00205b;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .login-prompt a:hover {
+      text-decoration: underline;
+    }
+
+    /* Watchlist Table */
+    .watchlist-section {
+      background: #ffffff;
+      border-radius: 8px;
+      border: 1px solid #e8eaed;
+      box-shadow: 0 1px 2px rgba(60, 64, 67, 0.1);
+      overflow: hidden;
+    }
+
+    .watchlist-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      border-bottom: 1px solid #e8eaed;
+      background: #f8f9fa;
+    }
+
+    .watchlist-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: #202124;
+    }
+
+    .refresh-info {
+      font-size: 12px;
+      color: #5f6368;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .refresh-btn {
+      background: transparent;
+      color: #00205b;
+      border: 1px solid #dadce0;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .refresh-btn:hover {
+      background: #f8f9fa;
+      border-color: #00205b;
+    }
+
+    /* Stock Row */
+    .stock-row {
+      display: grid;
+      grid-template-columns: 120px 1fr 100px 100px 60px;
+      gap: 16px;
+      align-items: center;
+      padding: 16px 24px;
+      border-bottom: 1px solid #e8eaed;
+      transition: background 0.15s;
+    }
+
+    .stock-row:last-child {
+      border-bottom: none;
+    }
+
+    .stock-row:hover {
+      background: #f8f9fa;
+    }
+
+    .stock-ticker {
+      font-size: 15px;
+      font-weight: 600;
+      color: #00205b;
+      cursor: pointer;
+    }
+
+    .stock-ticker:hover {
+      text-decoration: underline;
+    }
+
+    .stock-name {
+      font-size: 14px;
+      color: #3c4043;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .stock-price {
+      font-size: 14px;
+      font-weight: 500;
+      color: #202124;
+      text-align: right;
+    }
+
+    .stock-change {
+      font-size: 14px;
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .stock-change.positive {
+      color: #137333;
+    }
+
+    .stock-change.negative {
+      color: #c5221f;
+    }
+
+    .remove-btn {
+      background: transparent;
+      border: none;
+      color: #9aa0a6;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .remove-btn:hover {
+      background: #fce8e6;
+      color: #c5221f;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 24px;
+      color: #5f6368;
+    }
+
+    .empty-state h3 {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: #202124;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+    }
+
+    /* Loading State */
+    .loading-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: #5f6368;
+      font-size: 14px;
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #e8eaed;
+      border-top-color: #00205b;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 12px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Auth Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 8px;
+      width: 400px;
+      max-width: 90%;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #e8eaed;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 500;
+      color: #202124;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      font-size: 24px;
+      color: #5f6368;
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+    }
+
+    .modal-close:hover {
+      color: #202124;
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #3c4043;
+      margin-bottom: 6px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #dadce0;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #00205b;
+      box-shadow: 0 0 0 2px rgba(0, 32, 91, 0.1);
+    }
+
+    .form-error {
+      color: #c5221f;
+      font-size: 13px;
+      margin-top: 6px;
+      display: none;
+    }
+
+    .form-error.visible {
+      display: block;
+    }
+
+    .form-submit {
+      width: 100%;
+      background: #00205b;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 8px;
+    }
+
+    .form-submit:hover {
+      background: #003087;
+    }
+
+    .form-submit:disabled {
+      background: #9aa0a6;
+      cursor: not-allowed;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid #e8eaed;
+      text-align: center;
+      font-size: 13px;
+      color: #5f6368;
+    }
+
+    .modal-footer a {
+      color: #00205b;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .modal-footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Tab Switcher */
+    .auth-tabs {
+      display: flex;
+      border-bottom: 1px solid #e8eaed;
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      color: #5f6368;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .auth-tab:hover {
+      color: #202124;
+      background: #f8f9fa;
+    }
+
+    .auth-tab.active {
+      color: #00205b;
+      border-bottom: 2px solid #00205b;
+      margin-bottom: -1px;
+    }
+
+    /* Google Sign-In */
+    .google-signin-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      margin: 20px 0;
+      color: #5f6368;
+      font-size: 13px;
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #dadce0;
+    }
+
+    .auth-divider span {
+      padding: 0 16px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 24px 16px;
+        padding-top: 64px;
+      }
+
+      .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
+      .add-stock-form {
+        flex-wrap: wrap;
+      }
+
+      .ticker-input {
+        max-width: none;
+        flex: 1;
+        min-width: 120px;
+      }
+
+      .login-prompt {
+        margin-left: 0;
+        margin-top: 8px;
+        width: 100%;
+      }
+
+      .stock-row {
+        grid-template-columns: 80px 1fr 70px 70px 40px;
+        gap: 8px;
+        padding: 12px 16px;
+      }
+
+      .stock-name {
+        font-size: 13px;
+      }
+    }
+
+    /* Side Panel Overlay */
+    .panel-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.4);
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .panel-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Side Panel */
+    .side-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 480px;
+      max-width: 100%;
+      height: 100vh;
+      background: #ffffff;
+      z-index: 2001;
+      display: flex;
+      flex-direction: column;
+      box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+      transform: translateX(100%);
+      transition: transform 0.3s ease-out;
+    }
+
+    .side-panel.active {
+      transform: translateX(0);
+    }
+
+    .panel-header {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+      padding: 24px;
+      color: white;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .panel-close-button {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s;
+    }
+
+    .panel-close-button:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .panel-close-button svg {
+      width: 20px;
+      height: 20px;
+      color: white;
+    }
+
+    .panel-label {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.8;
+      margin-bottom: 8px;
+    }
+
+    .panel-title {
+      font-family: Arial, sans-serif;
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1.4;
+      padding-right: 40px;
+      margin: 0;
+    }
+
+    .panel-ticker {
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+
+    .panel-meta {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .meta-item svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .meta-item.positive {
+      color: #90EE90;
+    }
+
+    .meta-item.negative {
+      color: #FFB6C1;
+    }
+
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    .panel-section {
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #1e3a5f;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e8f0f7;
+    }
+
+    .section-content {
+      font-family: 'Times New Roman', Georgia, serif;
+      color: #444;
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    .section-content p {
+      margin-bottom: 12px;
+    }
+
+    .section-content p:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-content strong {
+      color: #1e3a5f;
+      font-weight: 600;
+    }
+
+    .panel-footer {
+      padding: 16px 24px;
+      background: #f8f9fa;
+      border-top: 1px solid #e0e0e0;
+      flex-shrink: 0;
+    }
+
+    .panel-footer-btn {
+      font-family: Arial, sans-serif;
+      width: 100%;
+      background: #1e3a5f;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .panel-footer-btn:hover {
+      background: #2d5a87;
+    }
+
+    /* Loading Skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 4px;
+    }
+
+    .skeleton-section {
+      margin-bottom: 24px;
+    }
+
+    .skeleton-label {
+      height: 12px;
+      width: 100px;
+      margin-bottom: 12px;
+    }
+
+    .skeleton-line {
+      height: 16px;
+      margin-bottom: 10px;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .panel-error {
+      text-align: center;
+      padding: 40px 20px;
+      color: #c62828;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+
+    /* Clickable stock row */
+    .stock-row.clickable {
+      cursor: pointer;
+      transition: background-color 0.15s;
+    }
+
+    .stock-row.clickable:hover {
+      background-color: #f0f4f8;
+    }
+
+    @media (max-width: 520px) {
+      .side-panel {
+        width: 100%;
+      }
+    }
+
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: #1e3a5f;
+      color: white;
+      padding: 14px 24px;
+      border-radius: 8px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: auto;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.error {
+      background: #c62828;
+    }
+
+    .toast.success {
+      background: #2e7d32;
+    }
+  </style>
+</head>
+<body>
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <nav class="nav-banner">
+    <div class="nav-items">
+      <a href="/market.html" class="nav-item">Market Update</a>
+      <a href="/top-movers" class="nav-item">Top Movers</a>
+      <a href="/portfolio" class="nav-item active">Portfolio</a>
+      <a href="/ideageneration" class="nav-item">Idea Generation</a>
+      <a href="/index.html" class="nav-item">Initiation</a>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1 class="page-title">My Portfolio</h1>
+      <div class="auth-section" id="auth-section">
+        <!-- Dynamically populated based on auth state -->
+      </div>
+    </div>
+
+    <!-- Watchlist Selector (shown when logged in) -->
+    <div class="watchlist-selector" id="watchlist-selector" style="display: none;">
+      <select id="watchlist-select" class="watchlist-dropdown">
+        <!-- Options populated dynamically -->
+      </select>
+      <button class="new-watchlist-btn" onclick="showCreateWatchlistModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+        New
+      </button>
+      <button class="watchlist-actions-btn" onclick="showWatchlistActionsMenu()" id="watchlist-actions-btn" title="More actions">
+        ⋯
+      </button>
+    </div>
+
+    <div class="add-stock-section">
+      <form class="add-stock-form" id="add-stock-form">
+        <input type="text" class="ticker-input" id="ticker-input" placeholder="Enter ticker (e.g., AAPL)" maxlength="5">
+        <button type="submit" class="add-btn" id="add-btn">Add to Watchlist</button>
+        <span class="login-prompt" id="login-prompt" style="display: none;">
+          <a href="#" id="login-link">Login</a> to save your watchlist
+        </span>
+      </form>
+    </div>
+
+    <div class="watchlist-section">
+      <div class="watchlist-header">
+        <span class="watchlist-title">Watchlist</span>
+        <div class="refresh-info">
+          <span id="last-updated">--</span>
+          <button class="refresh-btn" id="refresh-btn">Refresh</button>
+        </div>
+      </div>
+      <div id="watchlist-container">
+        <!-- Watchlist items will be rendered here -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Auth Modal -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="modal">
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Login</button>
+        <button class="auth-tab" data-tab="signup">Sign Up</button>
+      </div>
+
+      <!-- Login Form -->
+      <div id="login-form-container">
+        <div class="modal-header">
+          <span class="modal-title">Welcome Back</span>
+          <button class="modal-close" id="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <!-- Google Sign-In Button -->
+          <div id="google-signin-btn-login" class="google-signin-container"></div>
+
+          <!-- Divider -->
+          <div class="auth-divider">
+            <span>or continue with email</span>
+          </div>
+
+          <form id="login-form">
+            <div class="form-group">
+              <label class="form-label" for="login-email">Email</label>
+              <input type="email" class="form-input" id="login-email" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="login-password">Password</label>
+              <input type="password" class="form-input" id="login-password" required>
+            </div>
+            <div class="form-error" id="login-error"></div>
+            <button type="submit" class="form-submit" id="login-submit">Login</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Signup Form -->
+      <div id="signup-form-container" style="display: none;">
+        <div class="modal-header">
+          <span class="modal-title">Create Account</span>
+          <button class="modal-close" id="modal-close-signup">&times;</button>
+        </div>
+        <div class="modal-body">
+          <!-- Google Sign-In Button -->
+          <div id="google-signin-btn-signup" class="google-signin-container"></div>
+
+          <!-- Divider -->
+          <div class="auth-divider">
+            <span>or continue with email</span>
+          </div>
+
+          <form id="signup-form">
+            <div class="form-group">
+              <label class="form-label" for="signup-email">Email</label>
+              <input type="email" class="form-input" id="signup-email" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="signup-password">Password</label>
+              <input type="password" class="form-input" id="signup-password" minlength="6" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="signup-confirm">Confirm Password</label>
+              <input type="password" class="form-input" id="signup-confirm" minlength="6" required>
+            </div>
+            <div class="form-error" id="signup-error"></div>
+            <button type="submit" class="form-submit" id="signup-submit">Create Account</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Watchlist Modal -->
+  <div class="modal-overlay" id="create-watchlist-modal">
+    <div class="modal" style="max-width: 400px;">
+      <div class="modal-header">
+        <span class="modal-title">Create New Watchlist</span>
+        <button class="modal-close" onclick="hideCreateWatchlistModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="create-watchlist-form">
+          <div class="form-group">
+            <label class="form-label" for="new-watchlist-name">Watchlist Name</label>
+            <input type="text" class="form-input" id="new-watchlist-name" maxlength="50" placeholder="e.g., Tech Stocks" required>
+          </div>
+          <button type="submit" class="form-submit">Create Watchlist</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rename Watchlist Modal -->
+  <div class="modal-overlay" id="rename-watchlist-modal">
+    <div class="modal" style="max-width: 400px;">
+      <div class="modal-header">
+        <span class="modal-title">Rename Watchlist</span>
+        <button class="modal-close" onclick="hideRenameWatchlistModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="rename-watchlist-form">
+          <div class="form-group">
+            <label class="form-label" for="rename-watchlist-name">Watchlist Name</label>
+            <input type="text" class="form-input" id="rename-watchlist-name" maxlength="50" required>
+          </div>
+          <button type="submit" class="form-submit">Rename</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Watchlist Actions Menu -->
+  <div class="watchlist-actions-menu" id="watchlist-actions-menu" style="display: none; position: absolute; background: white; border: 1px solid #dadce0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; min-width: 150px;">
+    <div style="padding: 8px 16px; cursor: pointer; font-size: 14px;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'" onclick="showRenameWatchlistModal()">Rename</div>
+    <div style="padding: 8px 16px; cursor: pointer; font-size: 14px; color: #c5221f;" onmouseover="this.style.background='#fce8e6'" onmouseout="this.style.background='white'" onclick="deleteCurrentWatchlist()">Delete</div>
+  </div>
+
+  <script>
+    // Google Sign-In Configuration
+    // NOTE: To enable Google Sign-In, you need to:
+    // 1. Create a Google Cloud project at https://console.cloud.google.com/
+    // 2. Enable the Google+ API
+    // 3. Create OAuth 2.0 credentials (Web application type)
+    // 4. Add your domain to the authorized JavaScript origins
+    // 5. Replace the CLIENT_ID below with your actual Google Client ID
+    const GOOGLE_CLIENT_ID = '526500240893-io4bf4eveom20ld8jv1k5qs7m6a4tn5j.apps.googleusercontent.com';
+
+    // State
+    let currentUser = null;
+    let authToken = localStorage.getItem('authToken');
+    let watchlist = JSON.parse(localStorage.getItem('localWatchlist') || '[]');
+    let stockPrices = {};
+    let refreshInterval = null;
+    let googleInitialized = false;
+
+    // Multiple watchlists state
+    let watchlistsData = null;  // Full watchlist data from server
+    let currentWatchlistId = null;  // Currently selected watchlist ID
+
+    // DOM Elements
+    const authSection = document.getElementById('auth-section');
+    const authModal = document.getElementById('auth-modal');
+    const loginFormContainer = document.getElementById('login-form-container');
+    const signupFormContainer = document.getElementById('signup-form-container');
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const loginError = document.getElementById('login-error');
+    const signupError = document.getElementById('signup-error');
+    const addStockForm = document.getElementById('add-stock-form');
+    const tickerInput = document.getElementById('ticker-input');
+    const loginPrompt = document.getElementById('login-prompt');
+    const watchlistContainer = document.getElementById('watchlist-container');
+    const refreshBtn = document.getElementById('refresh-btn');
+    const lastUpdated = document.getElementById('last-updated');
+
+    // Initialize
+    init();
+
+    async function init() {
+      // Check for existing auth
+      if (authToken) {
+        try {
+          const response = await fetch('/api/auth/me', {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            currentUser = data.user;
+            await loadServerWatchlist();
+          } else {
+            // Invalid token
+            authToken = null;
+            localStorage.removeItem('authToken');
+          }
+        } catch (err) {
+          console.error('Auth check failed:', err);
+        }
+      }
+
+      updateAuthUI();
+      renderWatchlist();
+
+      // Start auto-refresh (every 30 seconds)
+      startAutoRefresh();
+    }
+
+    function updateAuthUI() {
+      if (currentUser) {
+        authSection.innerHTML = `
+          <span class="user-info">${currentUser.email}</span>
+          <button class="auth-btn secondary" onclick="logout()">Logout</button>
+        `;
+        loginPrompt.style.display = 'none';
+      } else {
+        authSection.innerHTML = `
+          <button class="auth-btn" onclick="showAuthModal('login')">Login</button>
+          <button class="auth-btn secondary" onclick="showAuthModal('signup')">Sign Up</button>
+        `;
+        if (watchlist.length > 0) {
+          loginPrompt.style.display = 'inline';
+        }
+      }
+    }
+
+    function showAuthModal(tab = 'login') {
+      authModal.classList.add('active');
+      switchAuthTab(tab);
+    }
+
+    function hideAuthModal() {
+      authModal.classList.remove('active');
+      loginError.textContent = '';
+      loginError.classList.remove('visible');
+      signupError.textContent = '';
+      signupError.classList.remove('visible');
+      loginForm.reset();
+      signupForm.reset();
+    }
+
+    function switchAuthTab(tab) {
+      document.querySelectorAll('.auth-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.tab === tab);
+      });
+      loginFormContainer.style.display = tab === 'login' ? 'block' : 'none';
+      signupFormContainer.style.display = tab === 'signup' ? 'block' : 'none';
+    }
+
+    // Event Listeners
+    document.querySelectorAll('.auth-tab').forEach(tab => {
+      tab.addEventListener('click', () => switchAuthTab(tab.dataset.tab));
+    });
+
+    document.getElementById('modal-close').addEventListener('click', hideAuthModal);
+    document.getElementById('modal-close-signup').addEventListener('click', hideAuthModal);
+    document.getElementById('login-link').addEventListener('click', (e) => {
+      e.preventDefault();
+      showAuthModal('login');
+    });
+
+    authModal.addEventListener('click', (e) => {
+      if (e.target === authModal) hideAuthModal();
+    });
+
+    // Login Form
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      const submitBtn = document.getElementById('login-submit');
+
+      submitBtn.disabled = true;
+      loginError.classList.remove('visible');
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Login failed');
+        }
+
+        authToken = data.token;
+        currentUser = data.user;
+        localStorage.setItem('authToken', authToken);
+
+        // Sync local watchlist to server
+        if (watchlist.length > 0) {
+          await syncLocalWatchlistToServer();
+        } else {
+          await loadServerWatchlist();
+        }
+
+        hideAuthModal();
+        updateAuthUI();
+        renderWatchlist();
+      } catch (err) {
+        loginError.textContent = err.message;
+        loginError.classList.add('visible');
+      }
+
+      submitBtn.disabled = false;
+    });
+
+    // Signup Form
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+      const confirm = document.getElementById('signup-confirm').value;
+      const submitBtn = document.getElementById('signup-submit');
+
+      if (password !== confirm) {
+        signupError.textContent = 'Passwords do not match';
+        signupError.classList.add('visible');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      signupError.classList.remove('visible');
+
+      try {
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Signup failed');
+        }
+
+        authToken = data.token;
+        currentUser = data.user;
+        localStorage.setItem('authToken', authToken);
+
+        // Sync local watchlist to server
+        if (watchlist.length > 0) {
+          await syncLocalWatchlistToServer();
+        }
+
+        hideAuthModal();
+        updateAuthUI();
+        renderWatchlist();
+      } catch (err) {
+        signupError.textContent = err.message;
+        signupError.classList.add('visible');
+      }
+
+      submitBtn.disabled = false;
+    });
+
+    // Add Stock Form
+    addStockForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const ticker = tickerInput.value.trim().toUpperCase();
+      if (!ticker) return;
+
+      // Check if already in watchlist
+      if (watchlist.includes(ticker)) {
+        showToast('This stock is already in your watchlist');
+        return;
+      }
+
+      const addBtn = document.getElementById('add-btn');
+      addBtn.disabled = true;
+      addBtn.textContent = 'Validating...';
+
+      try {
+        // Validate ticker exists by fetching price
+        const validateResponse = await fetch(`/api/watchlist/prices?tickers=${ticker}`);
+        const validateData = await validateResponse.json();
+
+        if (!validateData.prices || !validateData.prices[ticker]) {
+          throw new Error(`"${ticker}" is not a valid ticker symbol`);
+        }
+
+        if (currentUser && authToken && currentWatchlistId) {
+          // Add to specific watchlist on server
+          const response = await fetch(`/api/watchlists/${currentWatchlistId}/add`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ ticker })
+          });
+
+          if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to add stock');
+          }
+
+          // Update local watchlistsData (watchlist is a reference to this array)
+          if (watchlistsData?.watchlists[currentWatchlistId]) {
+            watchlistsData.watchlists[currentWatchlistId].tickers.push(ticker);
+          }
+          // Update selector to show new count
+          renderWatchlistSelector();
+        } else {
+          // Not logged in - add to local list only
+          watchlist.push(ticker);
+          localStorage.setItem('localWatchlist', JSON.stringify(watchlist));
+          loginPrompt.style.display = 'inline';
+        }
+
+        tickerInput.value = '';
+        renderWatchlist();
+        await fetchPrices();
+      } catch (err) {
+        showToast(err.message);
+      }
+
+      addBtn.disabled = false;
+      addBtn.textContent = 'Add';
+    });
+
+    // Remove Stock
+    async function removeStock(ticker) {
+      if (!confirm(`Remove ${ticker} from your watchlist?`)) return;
+
+      try {
+        if (currentUser && authToken && currentWatchlistId) {
+          const response = await fetch(`/api/watchlists/${currentWatchlistId}/remove/${ticker}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${authToken}` }
+          });
+
+          if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to remove stock');
+          }
+
+          // Update local watchlistsData
+          if (watchlistsData?.watchlists[currentWatchlistId]) {
+            watchlistsData.watchlists[currentWatchlistId].tickers =
+              watchlistsData.watchlists[currentWatchlistId].tickers.filter(t => t !== ticker);
+          }
+        }
+
+        watchlist = watchlist.filter(t => t !== ticker);
+        if (!currentUser) {
+          localStorage.setItem('localWatchlist', JSON.stringify(watchlist));
+          if (watchlist.length === 0) {
+            loginPrompt.style.display = 'none';
+          }
+        } else {
+          // Update selector to show new count
+          renderWatchlistSelector();
+        }
+
+        renderWatchlist();
+      } catch (err) {
+        showToast(err.message);
+      }
+    }
+
+    // Logout
+    async function logout() {
+      authToken = null;
+      currentUser = null;
+      localStorage.removeItem('authToken');
+
+      // Reset watchlist state
+      watchlist = [];
+      watchlistsData = null;
+      currentWatchlistId = null;
+      localStorage.removeItem('localWatchlist');
+      stockPrices = {};
+
+      // Hide watchlist selector
+      document.getElementById('watchlist-selector').style.display = 'none';
+
+      updateAuthUI();
+      renderWatchlist();
+    }
+
+    // Load all watchlists from server
+    async function loadServerWatchlist() {
+      try {
+        const response = await fetch('/api/watchlists', {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          watchlistsData = {
+            defaultWatchlist: data.defaultWatchlist,
+            watchlists: {}
+          };
+          data.watchlists.forEach(wl => {
+            watchlistsData.watchlists[wl.id] = wl;
+          });
+
+          currentWatchlistId = data.defaultWatchlist;
+          watchlist = watchlistsData.watchlists[currentWatchlistId]?.tickers || [];
+
+          // Clear local storage since we're using server data
+          localStorage.removeItem('localWatchlist');
+
+          // Show watchlist selector and render
+          document.getElementById('watchlist-selector').style.display = 'flex';
+          renderWatchlistSelector();
+          await fetchPrices();
+        }
+      } catch (err) {
+        console.error('Failed to load watchlists:', err);
+        // Fallback to legacy endpoint
+        try {
+          const legacyResponse = await fetch('/api/watchlist', {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+          });
+          if (legacyResponse.ok) {
+            const data = await legacyResponse.json();
+            watchlist = data.watchlist || [];
+            localStorage.removeItem('localWatchlist');
+            await fetchPrices();
+          }
+        } catch (e) {
+          console.error('Legacy watchlist load failed:', e);
+        }
+      }
+    }
+
+    // Render watchlist selector dropdown
+    function renderWatchlistSelector() {
+      if (!watchlistsData) return;
+
+      const select = document.getElementById('watchlist-select');
+      select.innerHTML = Object.values(watchlistsData.watchlists)
+        .map(wl => `
+          <option value="${wl.id}" ${wl.id === currentWatchlistId ? 'selected' : ''}>
+            ${escapeHtml(wl.name)}
+          </option>
+        `).join('');
+    }
+
+    // Toast notification function
+    function showToast(message, type = 'error') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+
+      // Trigger animation
+      requestAnimationFrame(() => {
+        toast.classList.add('show');
+      });
+
+      // Remove after 3 seconds
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // Escape HTML to prevent XSS
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Switch watchlist
+    async function switchWatchlist(watchlistId) {
+      if (!watchlistsData?.watchlists[watchlistId]) return;
+
+      currentWatchlistId = watchlistId;
+      watchlist = watchlistsData.watchlists[watchlistId].tickers;
+
+      renderWatchlist();
+      await fetchPrices();
+    }
+
+    // Handle watchlist selector change
+    document.getElementById('watchlist-select').addEventListener('change', (e) => {
+      switchWatchlist(e.target.value);
+    });
+
+    // Create watchlist modal functions
+    function showCreateWatchlistModal() {
+      document.getElementById('create-watchlist-modal').classList.add('active');
+      document.getElementById('new-watchlist-name').focus();
+    }
+
+    function hideCreateWatchlistModal() {
+      document.getElementById('create-watchlist-modal').classList.remove('active');
+      document.getElementById('new-watchlist-name').value = '';
+    }
+
+    // Create watchlist form handler
+    document.getElementById('create-watchlist-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('new-watchlist-name').value.trim();
+      if (!name) return;
+
+      try {
+        const response = await fetch('/api/watchlists', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify({ name })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          watchlistsData.watchlists[data.watchlist.id] = data.watchlist;
+          currentWatchlistId = data.watchlist.id;
+          watchlist = [];
+
+          renderWatchlistSelector();
+          renderWatchlist();
+          hideCreateWatchlistModal();
+        } else {
+          const data = await response.json();
+          showToast(data.error || 'Failed to create watchlist');
+        }
+      } catch (err) {
+        showToast('Failed to create watchlist');
+      }
+    });
+
+    // Rename watchlist modal functions
+    function showRenameWatchlistModal() {
+      hideWatchlistActionsMenu();
+      if (!currentWatchlistId || !watchlistsData) return;
+
+      const currentName = watchlistsData.watchlists[currentWatchlistId]?.name || '';
+      document.getElementById('rename-watchlist-name').value = currentName;
+      document.getElementById('rename-watchlist-modal').classList.add('active');
+      document.getElementById('rename-watchlist-name').focus();
+    }
+
+    function hideRenameWatchlistModal() {
+      document.getElementById('rename-watchlist-modal').classList.remove('active');
+    }
+
+    // Rename watchlist form handler
+    document.getElementById('rename-watchlist-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('rename-watchlist-name').value.trim();
+      if (!name || !currentWatchlistId) return;
+
+      try {
+        const response = await fetch(`/api/watchlists/${currentWatchlistId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify({ name })
+        });
+
+        if (response.ok) {
+          watchlistsData.watchlists[currentWatchlistId].name = name;
+          renderWatchlistSelector();
+          hideRenameWatchlistModal();
+        } else {
+          const data = await response.json();
+          showToast(data.error || 'Failed to rename watchlist');
+        }
+      } catch (err) {
+        showToast('Failed to rename watchlist');
+      }
+    });
+
+    // Delete current watchlist
+    async function deleteCurrentWatchlist() {
+      hideWatchlistActionsMenu();
+      if (!currentWatchlistId || !watchlistsData) return;
+
+      const watchlistName = watchlistsData.watchlists[currentWatchlistId]?.name || 'this watchlist';
+
+      if (Object.keys(watchlistsData.watchlists).length === 1) {
+        showToast('Cannot delete the last watchlist');
+        return;
+      }
+
+      if (!confirm(`Delete "${watchlistName}"? This cannot be undone.`)) return;
+
+      try {
+        const response = await fetch(`/api/watchlists/${currentWatchlistId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          delete watchlistsData.watchlists[currentWatchlistId];
+          currentWatchlistId = data.defaultWatchlist;
+          watchlist = watchlistsData.watchlists[currentWatchlistId]?.tickers || [];
+
+          renderWatchlistSelector();
+          renderWatchlist();
+          await fetchPrices();
+        } else {
+          const errData = await response.json();
+          showToast(errData.error || 'Failed to delete watchlist');
+        }
+      } catch (err) {
+        showToast('Failed to delete watchlist');
+      }
+    }
+
+    // Watchlist actions menu
+    function showWatchlistActionsMenu() {
+      const menu = document.getElementById('watchlist-actions-menu');
+      const btn = document.getElementById('watchlist-actions-btn');
+      const rect = btn.getBoundingClientRect();
+      menu.style.top = (rect.bottom + 4) + 'px';
+      menu.style.left = rect.left + 'px';
+      menu.style.display = 'block';
+
+      // Close on outside click
+      setTimeout(() => {
+        document.addEventListener('click', closeMenuOnOutsideClick);
+      }, 0);
+    }
+
+    function hideWatchlistActionsMenu() {
+      document.getElementById('watchlist-actions-menu').style.display = 'none';
+      document.removeEventListener('click', closeMenuOnOutsideClick);
+    }
+
+    function closeMenuOnOutsideClick(e) {
+      const menu = document.getElementById('watchlist-actions-menu');
+      const btn = document.getElementById('watchlist-actions-btn');
+      if (!menu.contains(e.target) && !btn.contains(e.target)) {
+        hideWatchlistActionsMenu();
+      }
+    }
+
+    // Sync local watchlist to server
+    async function syncLocalWatchlistToServer() {
+      for (const ticker of watchlist) {
+        try {
+          await fetch('/api/watchlist/add', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ ticker })
+          });
+        } catch (err) {
+          console.error(`Failed to sync ${ticker}:`, err);
+        }
+      }
+      // Clear local storage after syncing
+      localStorage.removeItem('localWatchlist');
+    }
+
+    // Fetch prices
+    async function fetchPrices() {
+      if (watchlist.length === 0) return;
+
+      try {
+        const response = await fetch(`/api/watchlist/prices?tickers=${watchlist.join(',')}`);
+        if (response.ok) {
+          const data = await response.json();
+          stockPrices = data.prices || {};
+          lastUpdated.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+          renderWatchlist();
+        }
+      } catch (err) {
+        console.error('Failed to fetch prices:', err);
+      }
+    }
+
+    // Render watchlist
+    function renderWatchlist() {
+      if (watchlist.length === 0) {
+        watchlistContainer.innerHTML = `
+          <div class="empty-state">
+            <h3>Your watchlist is empty</h3>
+            <p>Add stocks above to start tracking them</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      for (const ticker of watchlist) {
+        const price = stockPrices[ticker];
+        const priceDisplay = price ? `$${price.price.toFixed(2)}` : '--';
+        const changeDisplay = price ? `${price.changePercent >= 0 ? '+' : ''}${price.changePercent.toFixed(2)}%` : '--';
+        const changeClass = price ? (price.changePercent >= 0 ? 'positive' : 'negative') : '';
+        const companyName = price?.companyName || ticker;
+        const changePercent = price?.changePercent || 0;
+        const escapedCompanyName = escapeHtml(companyName).replace(/'/g, "\\'");
+
+        html += `
+          <div class="stock-row clickable" onclick="openStockPanel('${ticker}', '${escapedCompanyName}', ${changePercent})">
+            <span class="stock-ticker">${ticker}</span>
+            <span class="stock-name">${escapeHtml(companyName)}</span>
+            <span class="stock-price">${priceDisplay}</span>
+            <span class="stock-change ${changeClass}">${changeDisplay}</span>
+            <button class="remove-btn" onclick="event.stopPropagation(); removeStock('${ticker}')" title="Remove">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        `;
+      }
+
+      watchlistContainer.innerHTML = html;
+    }
+
+    // Auto-refresh
+    function startAutoRefresh() {
+      // Initial fetch
+      if (watchlist.length > 0) {
+        fetchPrices();
+      }
+
+      // Refresh every 15 minutes
+      refreshInterval = setInterval(() => {
+        if (watchlist.length > 0) {
+          fetchPrices();
+        }
+      }, 900000);
+    }
+
+    // Manual refresh
+    refreshBtn.addEventListener('click', () => {
+      if (watchlist.length > 0) {
+        fetchPrices();
+      }
+    });
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
+    });
+
+    // Google Sign-In Initialization
+    // This function is called when the Google Identity Services script loads
+    function initializeGoogleSignIn() {
+      if (typeof google === 'undefined' || !google.accounts) {
+        // Google script not loaded yet, retry after a delay
+        setTimeout(initializeGoogleSignIn, 100);
+        return;
+      }
+
+      if (googleInitialized) return;
+      googleInitialized = true;
+
+      // Initialize Google Sign-In
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleCredentialResponse,
+        auto_select: false,
+        cancel_on_tap_outside: true
+      });
+
+      // Render Google Sign-In button in login form
+      const loginBtnContainer = document.getElementById('google-signin-btn-login');
+      if (loginBtnContainer) {
+        google.accounts.id.renderButton(
+          loginBtnContainer,
+          {
+            type: 'standard',
+            theme: 'outline',
+            size: 'large',
+            text: 'signin_with',
+            shape: 'rectangular',
+            logo_alignment: 'left',
+            width: 352
+          }
+        );
+      }
+
+      // Render Google Sign-In button in signup form
+      const signupBtnContainer = document.getElementById('google-signin-btn-signup');
+      if (signupBtnContainer) {
+        google.accounts.id.renderButton(
+          signupBtnContainer,
+          {
+            type: 'standard',
+            theme: 'outline',
+            size: 'large',
+            text: 'signup_with',
+            shape: 'rectangular',
+            logo_alignment: 'left',
+            width: 352
+          }
+        );
+      }
+    }
+
+    // Handle Google credential response
+    async function handleGoogleCredentialResponse(response) {
+      try {
+        // Send the ID token to our backend for verification
+        const backendResponse = await fetch('/api/auth/google', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ credential: response.credential })
+        });
+
+        const data = await backendResponse.json();
+
+        if (!backendResponse.ok) {
+          throw new Error(data.error || 'Google sign-in failed');
+        }
+
+        // Success - store token and user info
+        authToken = data.token;
+        currentUser = data.user;
+        localStorage.setItem('authToken', authToken);
+
+        // Sync local watchlist to server if user had local items
+        if (watchlist.length > 0) {
+          await syncLocalWatchlistToServer();
+        } else {
+          await loadServerWatchlist();
+        }
+
+        hideAuthModal();
+        updateAuthUI();
+        renderWatchlist();
+
+        console.log('Google sign-in successful:', currentUser.email);
+      } catch (err) {
+        console.error('Google sign-in error:', err);
+        // Show error in the currently visible form
+        const visibleError = loginFormContainer.style.display !== 'none' ? loginError : signupError;
+        visibleError.textContent = err.message;
+        visibleError.classList.add('visible');
+      }
+    }
+
+    // Initialize Google Sign-In when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeGoogleSignIn);
+    } else {
+      initializeGoogleSignIn();
+    }
+
+    // ========================================
+    // Side Panel Functions
+    // ========================================
+    function getCurrentTime() {
+      const now = new Date();
+      return now.toLocaleString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+        timeZoneName: 'short'
+      });
+    }
+
+    function showLoadingState() {
+      const panelContent = document.getElementById('panel-content');
+      panelContent.innerHTML = `
+        <div class="panel-loading">
+          <div class="skeleton-section">
+            <div class="skeleton skeleton-label"></div>
+            <div class="skeleton skeleton-line" style="width: 100%;"></div>
+            <div class="skeleton skeleton-line" style="width: 95%;"></div>
+            <div class="skeleton skeleton-line" style="width: 88%;"></div>
+          </div>
+          <div class="skeleton-section">
+            <div class="skeleton skeleton-label"></div>
+            <div class="skeleton skeleton-line" style="width: 100%;"></div>
+            <div class="skeleton skeleton-line" style="width: 92%;"></div>
+            <div class="skeleton skeleton-line" style="width: 85%;"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAnalysis(analysisText) {
+      const withBold = analysisText.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      const paragraphs = withBold.split('\n\n').filter(p => p.trim());
+
+      return `
+        <div class="panel-section">
+          <h2 class="section-title">Analysis</h2>
+          <div class="section-content">
+            ${paragraphs.map(p => `<p>${p.trim()}</p>`).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function openStockPanel(ticker, companyName, changePercent) {
+      const panelOverlay = document.getElementById('panel-overlay');
+      const sidePanel = document.getElementById('side-panel');
+      const panelTitle = document.getElementById('panel-title');
+      const panelTicker = document.getElementById('panel-ticker');
+      const panelChange = document.getElementById('panel-change');
+      const panelChangeText = document.getElementById('panel-change-text');
+      const panelTime = document.getElementById('panel-time');
+
+      const change = parseFloat(changePercent);
+      const isPositive = change >= 0;
+
+      panelTitle.textContent = companyName;
+      panelTicker.textContent = ticker;
+      panelChangeText.textContent = (isPositive ? '+' : '') + change.toFixed(2) + '%';
+      panelChange.className = 'meta-item ' + (isPositive ? 'positive' : 'negative');
+      panelTime.textContent = getCurrentTime();
+
+      showLoadingState();
+
+      panelOverlay.classList.add('active');
+      sidePanel.classList.add('active');
+      document.body.style.overflow = 'hidden';
+
+      fetchStockExplanation(ticker, companyName, changePercent);
+    }
+
+    function closePanel() {
+      const panelOverlay = document.getElementById('panel-overlay');
+      const sidePanel = document.getElementById('side-panel');
+      panelOverlay.classList.remove('active');
+      sidePanel.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    document.addEventListener('click', function(e) {
+      if (e.target.id === 'panel-overlay') {
+        closePanel();
+      }
+    });
+
+    document.addEventListener('keydown', function(e) {
+      const sidePanel = document.getElementById('side-panel');
+      if (e.key === 'Escape' && sidePanel && sidePanel.classList.contains('active')) {
+        closePanel();
+      }
+    });
+
+    async function fetchStockExplanation(ticker, companyName, changePercent) {
+      const panelContent = document.getElementById('panel-content');
+      try {
+        const params = new URLSearchParams({ ticker, companyName, changePercent });
+        const response = await fetch(`/api/stock-explanation-details?${params}`);
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          if (errorData.isQuotaError) {
+            throw new Error('quota');
+          }
+          throw new Error(errorData.message || 'Failed to fetch analysis');
+        }
+
+        const data = await response.json();
+        panelContent.innerHTML = renderAnalysis(data.analysis);
+      } catch (error) {
+        console.error('Error fetching stock explanation:', error);
+        let errorMsg = 'Unable to load detailed analysis. Please try again.';
+        if (error.message === 'quota') {
+          errorMsg = 'AI service quota exceeded. Please try again later.';
+        }
+        panelContent.innerHTML = `<div class="panel-error"><p>${errorMsg}</p></div>`;
+      }
+    }
+  </script>
+
+  <!-- Side Panel Overlay -->
+  <div class="panel-overlay" id="panel-overlay"></div>
+
+  <!-- Stock Explanation Side Panel -->
+  <div class="side-panel" id="side-panel">
+    <div class="panel-header">
+      <button class="panel-close-button" onclick="closePanel()" aria-label="Close panel">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      <div class="panel-label">Stock Analysis</div>
+      <h1 class="panel-title" id="panel-title">Loading...</h1>
+      <div class="panel-ticker" id="panel-ticker"></div>
+      <div class="panel-meta">
+        <span class="meta-item" id="panel-change">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          </svg>
+          <span id="panel-change-text">--</span>
+        </span>
+        <span class="meta-item">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span id="panel-time">--</span>
+        </span>
+      </div>
+    </div>
+    <div class="panel-content" id="panel-content"></div>
+    <div class="panel-footer">
+      <button class="panel-footer-btn" onclick="closePanel()">Close</button>
+    </div>
+  </div>
+</body>
+</html>

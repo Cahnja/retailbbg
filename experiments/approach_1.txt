@@ -1,0 +1,38 @@
+APPROACH 1: Few-shot Example
+============================================================
+
+DESCRIPTION:
+Includes the mockup thesis as a style example to follow
+
+PROMPT USED:
+----------------------------------------
+Here is an example of the writing style I want for investment theses:
+
+EXAMPLE (for reference style only):
+"Dominant semiconductor franchise with unmatched FCF generation. VMware acquisition transforms the business into an infrastructure software powerhouse. AI networking tailwinds accelerating. Trading at discount to intrinsic value despite best-in-class capital allocation."
+
+Now write an Investment Thesis for Broadcom (AVGO) using this exact style - punchy, short sentences, confident, direct.
+
+Company Data:
+
+Company: Broadcom Inc. (AVGO)
+Sector: Semiconductors / Infrastructure Software
+Market Cap: ~$750B
+Forward P/E: 14x
+Key Business Lines: Semiconductors (networking, broadband, storage), Infrastructure Software (VMware)
+Recent: Acquired VMware for $69B in late 2023
+Strengths: #1 in AI networking (custom silicon for hyperscalers), dominant semiconductor franchises, best-in-class FCF margins (50%+)
+Growth Drivers: AI networking boom, VMware synergies, 5G infrastructure
+
+
+Write ONLY the Investment Thesis section (3-4 sentences). Match the example style exactly.
+----------------------------------------
+
+GENERATED THESIS:
+----------------------------------------
+Dominant semiconductor powerhouse with unrivaled FCF generation. VMware acquisition elevates the business into an infrastructure software leader. AI networking surge and 5G infrastructure expansion driving growth. Trading at discount to intrinsic value despite superior capital allocation.
+----------------------------------------
+
+NOTES:
+- Model: gpt-4o
+- Temperature: 0.7

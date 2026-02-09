@@ -13,8 +13,12 @@
   "type": "commonjs",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.72.0",
+    "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "google-auth-library": "^10.5.0",
+    "jsonwebtoken": "^9.0.3",
+    "node-cron": "^4.2.1",
     "openai": "^6.17.0",
     "puppeteer": "^24.36.1",
     "yahoo-finance2": "^3.13.0",

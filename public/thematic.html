@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Idea Generation - RetailBBG</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f8f9fa;
+      color: #202124;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Navigation Banner */
+    .nav-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #00205b;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-items {
+      display: flex;
+      gap: 4px;
+    }
+
+    .nav-item {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 20px;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .nav-item:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-item.active {
+      color: #00205b;
+      background: white;
+      font-weight: 600;
+    }
+
+    /* Main Content */
+    .main-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px;
+      padding-top: 80px;
+    }
+
+    /* Page Header */
+    .page-header {
+      margin-bottom: 32px;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 400;
+      color: #202124;
+      margin-bottom: 8px;
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      color: #5f6368;
+      font-weight: 400;
+    }
+
+    /* Theme Grid */
+    .themes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    /* Theme Card - Google Style */
+    .theme-card {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 20px 24px;
+      cursor: pointer;
+      transition: box-shadow 0.2s ease, transform 0.1s ease;
+      border: 1px solid #e8eaed;
+      box-shadow: 0 1px 2px rgba(60, 64, 67, 0.1);
+    }
+
+    .theme-card:hover {
+      box-shadow: 0 1px 3px rgba(60, 64, 67, 0.15), 0 4px 8px rgba(60, 64, 67, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .theme-card.selected {
+      border-color: #00205b;
+      box-shadow: 0 1px 3px rgba(0, 32, 91, 0.2);
+    }
+
+    .theme-name {
+      font-size: 16px;
+      font-weight: 500;
+      color: #202124;
+      margin-bottom: 6px;
+    }
+
+    .theme-description {
+      font-size: 13px;
+      color: #5f6368;
+      line-height: 1.5;
+    }
+
+    /* Results Section */
+    .results-section {
+      display: none;
+    }
+
+    .results-section.visible {
+      display: block;
+    }
+
+    /* Results Header */
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e8eaed;
+    }
+
+    .results-title {
+      font-size: 22px;
+      font-weight: 400;
+      color: #202124;
+    }
+
+    .results-subtitle {
+      font-size: 13px;
+      color: #5f6368;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .back-btn {
+      background: transparent;
+      color: #00205b;
+      border: 1px solid #dadce0;
+      padding: 8px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+      font-family: inherit;
+    }
+
+    .back-btn:hover {
+      background: #f8f9fa;
+      border-color: #00205b;
+    }
+
+    /* Loading State */
+    .loading-container {
+      text-align: center;
+      padding: 80px 20px;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #e8eaed;
+      border-top-color: #00205b;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-size: 14px;
+      color: #5f6368;
+    }
+
+    /* Stock Table */
+    .stocks-table {
+      width: 100%;
+      background: #ffffff;
+      border-radius: 8px;
+      border: 1px solid #e8eaed;
+      overflow: hidden;
+    }
+
+    .stock-row {
+      display: grid;
+      grid-template-columns: 120px 1fr auto;
+      gap: 24px;
+      padding: 20px 24px;
+      align-items: start;
+      border-bottom: 1px solid #e8eaed;
+      transition: background 0.15s ease;
+    }
+
+    .stock-row:last-child {
+      border-bottom: none;
+    }
+
+    .stock-row:hover {
+      background: #f8f9fa;
+    }
+
+    .stock-identity {
+      min-width: 0;
+    }
+
+    .stock-ticker {
+      font-size: 15px;
+      font-weight: 600;
+      color: #202124;
+      letter-spacing: -0.2px;
+    }
+
+    .stock-name {
+      font-size: 12px;
+      color: #5f6368;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .stock-content {
+      min-width: 0;
+    }
+
+    .stock-overview {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #3c4043;
+    }
+
+    .stock-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .learn-more-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: #00205b;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .learn-more-link:hover {
+      color: #1a73e8;
+    }
+
+    .learn-more-link svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .report-status {
+      font-size: 11px;
+      color: #5f6368;
+      margin-top: 2px;
+    }
+
+    .report-status.available {
+      color: #137333;
+    }
+
+    /* Error State */
+    .error-container {
+      text-align: center;
+      padding: 48px 24px;
+      background: #ffffff;
+      border-radius: 8px;
+      border: 1px solid #e8eaed;
+    }
+
+    .error-container h3 {
+      color: #c5221f;
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .error-container p {
+      color: #5f6368;
+      font-size: 14px;
+    }
+
+    /* Cache Badge */
+    .cache-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: #137333;
+      background: #e6f4ea;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .cache-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #137333;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 24px 16px;
+        padding-top: 72px;
+      }
+
+      .stock-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .stock-actions {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav-banner">
+    <div class="nav-items">
+      <a href="/market.html" class="nav-item">Market Update</a>
+      <a href="/top-movers" class="nav-item">Top Movers</a>
+      <a href="/portfolio" class="nav-item">Portfolio</a>
+      <a href="/ideageneration" class="nav-item active">Idea Generation</a>
+      <a href="/index.html" class="nav-item">Initiation</a>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <!-- Theme Selection -->
+    <div id="theme-selection">
+      <div class="page-header">
+        <h1 class="page-title">Idea Generation</h1>
+        <p class="page-subtitle">Select an investment theme to discover top equity opportunities</p>
+      </div>
+
+      <div class="themes-grid" id="themes-grid">
+        <div class="theme-card" data-theme="ai">
+          <div class="theme-name">AI / Artificial Intelligence</div>
+          <div class="theme-description">Companies leading in AI development, infrastructure, and deployment</div>
+        </div>
+
+        <div class="theme-card" data-theme="quantum">
+          <div class="theme-name">Quantum Computing</div>
+          <div class="theme-description">Quantum hardware, software, and adjacent technology plays</div>
+        </div>
+
+        <div class="theme-card" data-theme="gold">
+          <div class="theme-name">Gold / Precious Metals</div>
+          <div class="theme-description">Gold miners, ETFs, and related equities</div>
+        </div>
+
+        <div class="theme-card" data-theme="clean_energy">
+          <div class="theme-name">Clean Energy / Renewables</div>
+          <div class="theme-description">Solar, wind, EV, and battery storage companies</div>
+        </div>
+
+        <div class="theme-card" data-theme="cybersecurity">
+          <div class="theme-name">Cybersecurity</div>
+          <div class="theme-description">Security software and services companies</div>
+        </div>
+
+        <div class="theme-card" data-theme="semiconductors">
+          <div class="theme-name">Semiconductors</div>
+          <div class="theme-description">Chip makers and equipment manufacturers</div>
+        </div>
+
+        <div class="theme-card" data-theme="space">
+          <div class="theme-name">Space / Aerospace</div>
+          <div class="theme-description">Space exploration, satellites, and defense</div>
+        </div>
+
+        <div class="theme-card" data-theme="biotech">
+          <div class="theme-name">Biotech / Genomics</div>
+          <div class="theme-description">Biotechnology and gene therapy companies</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Section -->
+    <div id="results-section" class="results-section">
+      <div class="results-header">
+        <div>
+          <div class="results-title" id="results-title">Theme Results</div>
+          <div class="results-subtitle" id="results-subtitle">Top equity recommendations</div>
+        </div>
+        <button class="back-btn" id="back-btn">Back to Themes</button>
+      </div>
+
+      <div id="loading-state" class="loading-container" style="display: none;">
+        <div class="spinner"></div>
+        <div class="loading-text">Analyzing thematic opportunities...</div>
+      </div>
+
+      <div id="error-state" class="error-container" style="display: none;">
+        <h3>Unable to load data</h3>
+        <p id="error-message">Something went wrong. Please try again.</p>
+      </div>
+
+      <div id="stocks-container" class="stocks-table"></div>
+    </div>
+  </main>
+
+  <script>
+    const themeSelection = document.getElementById('theme-selection');
+    const resultsSection = document.getElementById('results-section');
+    const resultsTitle = document.getElementById('results-title');
+    const resultsSubtitle = document.getElementById('results-subtitle');
+    const loadingState = document.getElementById('loading-state');
+    const errorState = document.getElementById('error-state');
+    const errorMessage = document.getElementById('error-message');
+    const stocksContainer = document.getElementById('stocks-container');
+    const backBtn = document.getElementById('back-btn');
+
+    const themeNames = {
+      ai: 'AI / Artificial Intelligence',
+      quantum: 'Quantum Computing',
+      gold: 'Gold / Precious Metals',
+      clean_energy: 'Clean Energy / Renewables',
+      cybersecurity: 'Cybersecurity',
+      semiconductors: 'Semiconductors',
+      space: 'Space / Aerospace',
+      biotech: 'Biotech / Genomics'
+    };
+
+    // URL slug mapping (for clean URLs like /thematic/clean-energy)
+    const themeSlugMap = {
+      'ai': 'ai',
+      'quantum': 'quantum',
+      'gold': 'gold',
+      'clean-energy': 'clean_energy',
+      'clean_energy': 'clean_energy',
+      'cybersecurity': 'cybersecurity',
+      'semiconductors': 'semiconductors',
+      'space': 'space',
+      'biotech': 'biotech'
+    };
+
+    // Reverse map for generating URL slugs from theme keys
+    const themeToSlug = {
+      'ai': 'ai',
+      'quantum': 'quantum',
+      'gold': 'gold',
+      'clean_energy': 'clean-energy',
+      'cybersecurity': 'cybersecurity',
+      'semiconductors': 'semiconductors',
+      'space': 'space',
+      'biotech': 'biotech'
+    };
+
+    // Get theme from URL path
+    function getThemeFromUrl() {
+      const path = window.location.pathname;
+      const match = path.match(/^\/thematic\/([^\/]+)$/);
+      if (match) {
+        const slug = match[1].toLowerCase();
+        return themeSlugMap[slug] || null;
+      }
+      return null;
+    }
+
+    // Add click handlers to theme cards
+    document.querySelectorAll('.theme-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const theme = card.dataset.theme;
+        navigateToTheme(theme);
+      });
+    });
+
+    backBtn.addEventListener('click', navigateToThemeList);
+
+    // Navigate to a theme (updates URL and loads theme)
+    function navigateToTheme(theme) {
+      const slug = themeToSlug[theme] || theme;
+      history.pushState({ theme: theme }, '', `/thematic/${slug}`);
+      loadTheme(theme);
+    }
+
+    // Navigate back to theme list (updates URL)
+    function navigateToThemeList() {
+      history.pushState({ theme: null }, '', '/thematic');
+      showThemeSelection();
+    }
+
+    // Handle browser back/forward buttons
+    window.addEventListener('popstate', (event) => {
+      const theme = event.state?.theme || getThemeFromUrl();
+      if (theme && themeNames[theme]) {
+        loadTheme(theme);
+      } else {
+        showThemeSelection();
+      }
+    });
+
+    function showThemeSelection() {
+      themeSelection.style.display = 'block';
+      resultsSection.classList.remove('visible');
+    }
+
+    function showResults() {
+      themeSelection.style.display = 'none';
+      resultsSection.classList.add('visible');
+    }
+
+    function showLoading() {
+      loadingState.style.display = 'block';
+      errorState.style.display = 'none';
+      stocksContainer.innerHTML = '';
+    }
+
+    function showError(message) {
+      loadingState.style.display = 'none';
+      errorState.style.display = 'block';
+      errorMessage.textContent = message;
+    }
+
+    function showStocks(stocks, cached) {
+      loadingState.style.display = 'none';
+      errorState.style.display = 'none';
+
+      if (!stocks || stocks.length === 0) {
+        stocksContainer.innerHTML = '<div style="padding: 40px; text-align: center; color: #5f6368;">No stocks found for this theme.</div>';
+        return;
+      }
+
+      let html = '';
+      for (const stock of stocks) {
+        // Use thesis as the main description, fall back to overview if no thesis
+        const description = stock.thesis || stock.overview || '';
+
+        const reportStatusText = stock.hasFullReport ? 'Full report available' : 'Generate report';
+        const reportStatusClass = stock.hasFullReport ? 'report-status available' : 'report-status';
+        const linkText = stock.hasFullReport ? 'View Report' : 'Generate Report';
+
+        html += `
+          <div class="stock-row">
+            <div class="stock-identity">
+              <div class="stock-ticker">${escapeHtml(stock.ticker)}</div>
+              <div class="stock-name">${escapeHtml(stock.companyName)}</div>
+            </div>
+            <div class="stock-content">
+              <div class="stock-overview">${escapeHtml(description)}</div>
+            </div>
+            <div class="stock-actions">
+              <a href="/?ticker=${encodeURIComponent(stock.ticker)}" class="learn-more-link">
+                ${linkText}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </a>
+              <span class="${reportStatusClass}">${reportStatusText}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      stocksContainer.innerHTML = html;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Load theme data (without changing URL - used internally)
+    async function loadTheme(theme) {
+      resultsTitle.textContent = themeNames[theme] || theme;
+      resultsSubtitle.innerHTML = 'Top equity recommendations';
+
+      showResults();
+      showLoading();
+
+      try {
+        const response = await fetch(`/api/thematic/${theme}`);
+
+        if (!response.ok) {
+          let errorMsg = 'Failed to fetch thematic data';
+          try {
+            const errorData = await response.json();
+            errorMsg = errorData.error || errorMsg;
+          } catch {
+            errorMsg = `Server error (${response.status})`;
+          }
+          throw new Error(errorMsg);
+        }
+
+        const data = await response.json();
+
+        if (data.cached) {
+          resultsSubtitle.innerHTML = 'Top equity recommendations <span class="cache-badge"><span class="cache-dot"></span>Cached</span>';
+        }
+
+        showStocks(data.stocks, data.cached);
+      } catch (error) {
+        console.error('Error fetching thematic data:', error);
+        showError(error.message);
+      }
+    }
+
+    // Check URL on page load to handle direct navigation (e.g., /thematic/ai)
+    (function initFromUrl() {
+      const theme = getThemeFromUrl();
+      if (theme && themeNames[theme]) {
+        // Replace current history state with theme info
+        history.replaceState({ theme: theme }, '', window.location.pathname);
+        loadTheme(theme);
+      } else {
+        // On theme list page
+        history.replaceState({ theme: null }, '', window.location.pathname);
+      }
+    })();
+  </script>
+</body>
+</html>

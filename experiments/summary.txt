@@ -1,0 +1,126 @@
+INVESTMENT THESIS PROMPT EXPERIMENTS - SUMMARY
+================================================================================
+
+TARGET STYLE (from mockup):
+"Dominant semiconductor franchise with unmatched FCF generation. VMware acquisition transforms the business into an infrastructure software powerhouse. AI networking tailwinds accelerating. Trading at discount to intrinsic value despite best-in-class capital allocation."
+
+BAD STYLE (current v2 output):
+"Broadcom commands a dominant position in semiconductors with industry-leading FCF generation, benefiting from secular trends in AI and 5G. Its acquisition of VMware positions the company as an infrastructure software leader, enhancing revenue diversification and synergies. Despite trading at 14x forward earnings, AVGO presents a compelling risk/reward proposition."
+
+================================================================================
+RESULTS COMPARISON
+================================================================================
+
+
+APPROACH 1: Few-shot Example
+------------------------------------------------------------
+Dominant semiconductor powerhouse with unrivaled FCF generation. VMware acquisition elevates the business into an infrastructure software leader. AI networking surge and 5G infrastructure expansion driving growth. Trading at discount to intrinsic value despite superior capital allocation.
+
+
+APPROACH 2: Style Instructions
+------------------------------------------------------------
+Broadcom dominates AI networking with top-tier custom silicon. The VMware acquisition boosts software capabilities and synergies. Strong semiconductor franchises drive consistent growth. Best-in-class FCF margins solidify financial strength.
+
+
+APPROACH 3: Negative Examples
+------------------------------------------------------------
+Broadcom dominates semiconductors and infrastructure software. The VMware acquisition transforms its software capabilities, boosting synergies and diversification. AI networking and 5G infrastructure accelerate growth. AVGO trades at a discount to intrinsic value.
+
+
+APPROACH 4: Role-play Persona
+------------------------------------------------------------
+Broadcom is a powerhouse in AI networking with custom silicon dominating hyperscaler demand. The VMware acquisition accelerates growth, enhancing infrastructure software capabilities with strong cross-sell opportunities. Trading at a forward P/E of 14x with 50%+ FCF margins, it remains undervalued. Key growth drivers: AI, VMware synergies, and 5G infrastructure expansion.
+
+
+APPROACH 5: Minimalist
+------------------------------------------------------------
+Broadcom (AVGO) is poised for robust growth. Dominant in AI networking and semiconductors, it capitalizes on the AI and 5G boom. The VMware acquisition enhances software offerings and synergies. Strong free cash flow margins and a forward P/E of 14x highlight its value.
+
+
+================================================================================
+DETAILED ANALYSIS
+================================================================================
+
+APPROACH 1: Few-shot Example  [RATING: A-]
++ Closest to target style structure
++ Short, punchy sentences
++ No company name at start (matches target)
++ Uses strong verbs: "elevates", "driving"
+- Still slightly longer sentences than target
+- "AI networking surge and 5G infrastructure expansion" is a bit wordy
+
+APPROACH 2: Style Instructions  [RATING: B+]
++ Very short sentences
++ Avoids most filler phrases
++ Good use of active verbs: "dominates", "boosts", "drive", "solidify"
+- Starts with "Broadcom" (target doesn't)
+- "boosts software capabilities and synergies" still has a filler feel
+- Missing the valuation point (trading at discount)
+
+APPROACH 3: Negative Examples  [RATING: B]
++ Short sentences
++ Avoids the specifically-banned phrases
+- Still uses "boosting synergies and diversification" (very close to bad example)
+- "transforms its software capabilities" is weaker than target
+- Less confident tone overall
+
+APPROACH 4: Role-play Persona  [RATING: C+]
++ Good energy and confidence
++ Mentions specific numbers (14x P/E, 50%+ FCF)
+- LONGEST output - not punchy
+- Uses "enhancing" which was flagged as bad
+- "strong cross-sell opportunities" is corporate speak
+- Last sentence is a list, not a statement
+
+APPROACH 5: Minimalist  [RATING: C]
++ Simple prompt
+- "is poised for robust growth" - classic filler
+- "capitalizes on" - corporate speak
+- "enhances software offerings and synergies" - buzzwords
+- "highlight its value" - weak ending
+- Most generic output overall
+
+================================================================================
+WINNER: APPROACH 1 (Few-shot Example)
+================================================================================
+
+The few-shot example approach produced the output closest to the target style.
+It best captures:
+- The sentence rhythm (short, declarative)
+- The confident tone (no hedging)
+- The structure (thesis -> catalyst -> growth -> valuation)
+- Avoiding company name at the start
+
+RECOMMENDED PROMPT TEMPLATE:
+----------------------------
+Here is an example of the writing style I want for investment theses:
+
+EXAMPLE (for reference style only):
+"Dominant semiconductor franchise with unmatched FCF generation. VMware acquisition
+transforms the business into an infrastructure software powerhouse. AI networking
+tailwinds accelerating. Trading at discount to intrinsic value despite best-in-class
+capital allocation."
+
+Now write an Investment Thesis for [COMPANY] ([TICKER]) using this exact style -
+punchy, short sentences, confident, direct.
+
+[COMPANY DATA HERE]
+
+Write ONLY the Investment Thesis section (3-4 sentences). Match the example style exactly.
+----------------------------
+
+ALTERNATIVE RECOMMENDATION:
+---------------------------
+Consider combining Approach 1 (few-shot) with Approach 2 (style instructions) for
+even better results. The explicit "NO filler phrases" rules from Approach 2 could
+help further eliminate weak language.
+
+HYBRID PROMPT IDEA:
+"Here is an example of excellent writing style: [example]
+
+RULES:
+- NO filler phrases like "positions the company", "compelling opportunity"
+- NO phrases like "benefiting from", "enhancing", "represents a"
+- Short sentences only (under 12 words)
+
+Write a thesis for [COMPANY] matching this style exactly."

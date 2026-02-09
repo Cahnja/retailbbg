@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Top Movers - Timeline Feed</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f1f3f4;
+      color: #202124;
+      line-height: 1.5;
+    }
+
+    /* Navigation Banner - 40px pill tabs */
+    .nav-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #00205b;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .nav-items {
+      display: flex;
+      gap: 6px;
+    }
+    .nav-item {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      padding: 6px 16px;
+      border-radius: 16px;
+      transition: all 0.2s ease;
+    }
+    .nav-item:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .nav-item.active {
+      color: #00205b;
+      background: white;
+      font-weight: 600;
+    }
+
+    /* Main Content */
+    .main-content {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 64px 16px 40px;
+    }
+
+    /* Page Header */
+    .page-header {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .page-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: #202124;
+      margin-bottom: 4px;
+    }
+    .page-subtitle {
+      font-size: 13px;
+      color: #5f6368;
+    }
+
+    /* Filter Pills */
+    .filter-pills {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 0;
+      margin-bottom: 8px;
+    }
+    .pill {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      background: white;
+      color: #5f6368;
+    }
+    .pill:hover {
+      background: #e8eaed;
+    }
+    .pill.active {
+      background: #00205b;
+      color: white;
+    }
+    .pill.gainers.active {
+      background: #137333;
+    }
+    .pill.losers.active {
+      background: #c5221f;
+    }
+
+    /* Feed Timeline */
+    .feed {
+      position: relative;
+    }
+
+    /* Timeline line */
+    .feed::before {
+      content: "";
+      position: absolute;
+      left: 24px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #e8eaed;
+    }
+
+    /* Feed Item */
+    .feed-item {
+      position: relative;
+      padding-left: 56px;
+      padding-bottom: 16px;
+    }
+
+    /* Timeline dot */
+    .feed-item::before {
+      content: "";
+      position: absolute;
+      left: 18px;
+      top: 24px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: white;
+      border: 3px solid;
+    }
+    .feed-item.gainer::before {
+      border-color: #137333;
+    }
+    .feed-item.loser::before {
+      border-color: #c5221f;
+    }
+
+    /* Feed Card */
+    .feed-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .stock-info {
+      flex: 1;
+    }
+    .stock-ticker {
+      font-size: 16px;
+      font-weight: 700;
+      color: #202124;
+    }
+    .stock-name {
+      font-size: 13px;
+      color: #5f6368;
+      margin-top: 2px;
+    }
+    .stock-metrics {
+      text-align: right;
+    }
+    .stock-price {
+      font-size: 16px;
+      font-weight: 600;
+      color: #202124;
+    }
+    .stock-change {
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    .stock-change.positive { color: #137333; }
+    .stock-change.negative { color: #c5221f; }
+
+    /* Divider */
+    .card-divider {
+      height: 1px;
+      background: #f1f3f4;
+      margin: 12px 0;
+    }
+
+    /* Bullet Points */
+    .card-bullets {
+      list-style: none;
+    }
+    .card-bullets li {
+      position: relative;
+      padding-left: 16px;
+      font-size: 13px;
+      color: #3c4043;
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+    .card-bullets li:last-child {
+      margin-bottom: 0;
+    }
+    .card-bullets li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 7px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+    }
+    .gainer .card-bullets li::before { background: #137333; }
+    .loser .card-bullets li::before { background: #c5221f; }
+
+    /* Card Footer */
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid #f1f3f4;
+    }
+    .card-time {
+      font-size: 11px;
+      color: #80868b;
+    }
+    .card-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .gainer .card-badge {
+      background: #e6f4ea;
+      color: #137333;
+    }
+    .loser .card-badge {
+      background: #fce8e6;
+      color: #c5221f;
+    }
+
+    /* Section Separator */
+    .section-separator {
+      text-align: center;
+      padding: 24px 0;
+      position: relative;
+    }
+    .section-separator span {
+      background: #f1f3f4;
+      padding: 0 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #80868b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav-banner">
+    <div class="nav-items">
+      <a href="/" class="nav-item">Initiate Coverage</a>
+      <a href="/market.html" class="nav-item">Market Update</a>
+      <a href="/portfolio.html" class="nav-item active">Top Movers</a>
+      <a href="/thematic.html" class="nav-item">Thematic Investments</a>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1 class="page-title">Top Movers</h1>
+      <p class="page-subtitle">S&P 500 | February 4, 2026</p>
+    </div>
+
+    <div class="filter-pills">
+      <button class="pill active">All</button>
+      <button class="pill gainers">Gainers</button>
+      <button class="pill losers">Losers</button>
+    </div>
+
+    <div class="feed">
+      <!-- Gainers Section -->
+      <div class="feed-item gainer">
+        <div class="feed-card">
+          <div class="card-top">
+            <div class="stock-info">
+              <div class="stock-ticker">NVDA</div>
+              <div class="stock-name">NVIDIA Corporation</div>
+            </div>
+            <div class="stock-metrics">
+              <div class="stock-price">$892.45</div>
+              <div class="stock-change positive">+8.42%</div>
+            </div>
+          </div>
+          <div class="card-divider"></div>
+          <ul class="card-bullets">
+            <li>Strong Q4 earnings beat driven by data center AI chip demand, with revenue up 265% YoY</li>
+            <li>Leading GPU manufacturer for AI/ML workloads with dominant market share in data centers</li>
+          </ul>
+          <div class="card-footer">
+            <span class="card-time">4:00 PM ET</span>
+            <span class="card-badge">#1 Gainer</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="feed-item gainer">
+        <div class="feed-card">
+          <div class="card-top">
+            <div class="stock-info">
+              <div class="stock-ticker">AMD</div>
+              <div class="stock-name">Advanced Micro Devices</div>
+            </div>
+            <div class="stock-metrics">
+              <div class="stock-price">$178.32</div>
+              <div class="stock-change positive">+5.67%</div>
+            </div>
+          </div>
+          <div class="card-divider"></div>
+          <ul class="card-bullets">
+            <li>New MI300X AI accelerator gaining traction with hyperscalers, Microsoft Azure deployment announced</li>
+            <li>Semiconductor company competing in CPU and GPU markets for PCs, gaming, and data centers</li>
+          </ul>
+          <div class="card-footer">
+            <span class="card-time">4:00 PM ET</span>
+            <span class="card-badge">#2 Gainer</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="feed-item loser">
+        <div class="feed-card">
+          <div class="card-top">
+            <div class="stock-info">
+              <div class="stock-ticker">BA</div>
+              <div class="stock-name">Boeing Company</div>
+            </div>
+            <div class="stock-metrics">
+              <div class="stock-price">$187.23</div>
+              <div class="stock-change negative">-6.84%</div>
+            </div>
+          </div>
+          <div class="card-divider"></div>
+          <ul class="card-bullets">
+            <li>FAA extends 737 MAX production cap following door plug incident; delivery timeline at risk</li>
+            <li>Aerospace manufacturer producing commercial aircraft, defense systems, and space vehicles</li>
+          </ul>
+          <div class="card-footer">
+            <span class="card-time">4:00 PM ET</span>
+            <span class="card-badge">#1 Loser</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="feed-item gainer">
+        <div class="feed-card">
+          <div class="card-top">
+            <div class="stock-info">
+              <div class="stock-ticker">META</div>
+              <div class="stock-name">Meta Platforms Inc</div>
+            </div>
+            <div class="stock-metrics">
+              <div class="stock-price">$485.12</div>
+              <div class="stock-change positive">+4.23%</div>
+            </div>
+          </div>
+          <div class="card-divider"></div>
+          <ul class="card-bullets">
+            <li>First-ever dividend announcement and $50B buyback program signals confidence in cash generation</li>
+            <li>Social media giant operating Facebook, Instagram, WhatsApp with 3.9B monthly users</li>
+          </ul>
+          <div class="card-footer">
+            <span class="card-time">4:00 PM ET</span>
+            <span class="card-badge">#3 Gainer</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="feed-item loser">
+        <div class="feed-card">
+          <div class="card-top">
+            <div class="stock-info">
+              <div class="stock-ticker">PYPL</div>
+              <div class="stock-name">PayPal Holdings</div>
+            </div>
+            <div class="stock-metrics">
+              <div class="stock-price">$62.18</div>
+              <div class="stock-change negative">-5.21%</div>
+            </div>
+          </div>
+          <div class="card-divider"></div>
+          <ul class="card-bullets">
+            <li>Guidance disappointed as competition from Apple Pay and buy-now-pay-later intensifies</li>
+            <li>Digital payments platform enabling online transactions for consumers and merchants globally</li>
+          </ul>
+          <div class="card-footer">
+            <span class="card-time">4:00 PM ET</span>
+            <span class="card-badge">#2 Loser</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="feed-item gainer">
+        <div class="feed-card">
+          <div class="card-top">
+            <div class="stock-info">
+              <div class="stock-ticker">SMCI</div>
+              <div class="stock-name">Super Micro Computer</div>
+            </div>
+            <div class="stock-metrics">
+              <div class="stock-price">$1,024.56</div>
+              <div class="stock-change positive">+3.89%</div>
+            </div>
+          </div>
+          <div class="card-divider"></div>
+          <ul class="card-bullets">
+            <li>S&P 500 inclusion driving institutional buying; server demand for AI infrastructure remains strong</li>
+            <li>Enterprise server and storage solutions provider, key supplier for AI data centers</li>
+          </ul>
+          <div class="card-footer">
+            <span class="card-time">4:00 PM ET</span>
+            <span class="card-badge">#4 Gainer</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="feed-item loser">
+        <div class="feed-card">
+          <div class="card-top">
+            <div class="stock-info">
+              <div class="stock-ticker">CVS</div>
+              <div class="stock-name">CVS Health Corporation</div>
+            </div>
+            <div class="stock-metrics">
+              <div class="stock-price">$72.45</div>
+              <div class="stock-change negative">-4.56%</div>
+            </div>
+          </div>
+          <div class="card-divider"></div>
+          <ul class="card-bullets">
+            <li>Medicare Advantage margin pressure worse than expected; 2024 guidance cut significantly</li>
+            <li>Integrated healthcare company with pharmacy retail, PBM services, and health insurance</li>
+          </ul>
+          <div class="card-footer">
+            <span class="card-time">4:00 PM ET</span>
+            <span class="card-badge">#3 Loser</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="feed-item gainer">
+        <div class="feed-card">
+          <div class="card-top">
+            <div class="stock-info">
+              <div class="stock-ticker">MSFT</div>
+              <div class="stock-name">Microsoft Corporation</div>
+            </div>
+            <div class="stock-metrics">
+              <div class="stock-price">$415.67</div>
+              <div class="stock-change positive">+2.45%</div>
+            </div>
+          </div>
+          <div class="card-divider"></div>
+          <ul class="card-bullets">
+            <li>Azure cloud revenue accelerated to 30% growth on AI services adoption by enterprise customers</li>
+            <li>Global technology leader in cloud computing, productivity software, and AI infrastructure</li>
+          </ul>
+          <div class="card-footer">
+            <span class="card-time">4:00 PM ET</span>
+            <span class="card-badge">#5 Gainer</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="feed-item loser">
+        <div class="feed-card">
+          <div class="card-top">
+            <div class="stock-info">
+              <div class="stock-ticker">ENPH</div>
+              <div class="stock-name">Enphase Energy</div>
+            </div>
+            <div class="stock-metrics">
+              <div class="stock-price">$98.34</div>
+              <div class="stock-change negative">-3.92%</div>
+            </div>
+          </div>
+          <div class="card-divider"></div>
+          <ul class="card-bullets">
+            <li>European solar demand softening on interest rates; inventory destocking continues in Q1</li>
+            <li>Solar microinverter technology company enabling residential and commercial solar installations</li>
+          </ul>
+          <div class="card-footer">
+            <span class="card-time">4:00 PM ET</span>
+            <span class="card-badge">#4 Loser</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="feed-item loser">
+        <div class="feed-card">
+          <div class="card-top">
+            <div class="stock-info">
+              <div class="stock-ticker">DIS</div>
+              <div class="stock-name">Walt Disney Company</div>
+            </div>
+            <div class="stock-metrics">
+              <div class="stock-price">$108.92</div>
+              <div class="stock-change negative">-2.87%</div>
+            </div>
+          </div>
+          <div class="card-divider"></div>
+          <ul class="card-bullets">
+            <li>Streaming subscriber growth slowing; parks segment facing tough comps from post-COVID surge</li>
+            <li>Entertainment conglomerate with theme parks, streaming services, and media networks</li>
+          </ul>
+          <div class="card-footer">
+            <span class="card-time">4:00 PM ET</span>
+            <span class="card-badge">#5 Loser</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Simple filter functionality
+    document.querySelectorAll('.pill').forEach(pill => {
+      pill.addEventListener('click', function() {
+        document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        this.classList.add('active');
+
+        const items = document.querySelectorAll('.feed-item');
+        const filter = this.textContent.toLowerCase();
+
+        items.forEach(item => {
+          if (filter === 'all') {
+            item.style.display = 'block';
+          } else if (filter === 'gainers') {
+            item.style.display = item.classList.contains('gainer') ? 'block' : 'none';
+          } else if (filter === 'losers') {
+            item.style.display = item.classList.contains('loser') ? 'block' : 'none';
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

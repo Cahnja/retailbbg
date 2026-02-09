@@ -113,7 +113,7 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
-    .loading-text {
+    .loading-time {
       font-size: 14px;
       color: #888;
     }
@@ -281,6 +281,108 @@
       font-weight: 500;
     }
 
+    /* Key Debates Section */
+    .debates-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .debate-case {
+      padding: 20px;
+      border-radius: 4px;
+    }
+    .bull-case-box {
+      background: #e8f5e9;
+      border-left: 4px solid #2e7d32;
+    }
+    .bear-case-box {
+      background: #ffebee;
+      border-left: 4px solid #c62828;
+    }
+    .case-header {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .bull-case-box .case-header {
+      color: #2e7d32;
+    }
+    .bear-case-box .case-header {
+      color: #c62828;
+    }
+    .case-points {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .case-points li {
+      margin-bottom: 10px;
+      padding-left: 16px;
+      position: relative;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .bull-case-box .case-points li::before {
+      content: "+";
+      position: absolute;
+      left: 0;
+      color: #2e7d32;
+      font-weight: bold;
+    }
+    .bear-case-box .case-points li::before {
+      content: "-";
+      position: absolute;
+      left: 0;
+      color: #c62828;
+      font-weight: bold;
+    }
+
+    /* Management Q&A Section */
+    .qa-section {
+      margin-top: 32px;
+    }
+    .qa-item {
+      margin: 16px 0;
+      padding: 16px 20px;
+      background: #f8f9fa;
+      border-left: 3px solid #00205b;
+    }
+    .qa-analyst {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+    .qa-question {
+      font-weight: 600;
+      color: #00205b;
+      margin-bottom: 10px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .qa-answer {
+      color: #444;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .qa-answer::before {
+      content: "A: ";
+      font-weight: 600;
+      color: #00205b;
+    }
+
+    @media (max-width: 768px) {
+      .debates-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
     /* Content Sections */
     .review-section {
       margin-bottom: 28px;
@@ -334,10 +436,11 @@
 <body>
   <nav class="nav-banner">
     <div class="nav-items">
-      <a href="/" class="nav-item">Initiate Coverage</a>
       <a href="/market.html" class="nav-item">Market Update</a>
-      <a href="/portfolio.html" class="nav-item">Top Movers</a>
-      <a href="/thematic.html" class="nav-item">Thematic Investments</a>
+      <a href="/top-movers" class="nav-item">Top Movers</a>
+      <a href="/portfolio" class="nav-item">Portfolio</a>
+      <a href="/ideageneration" class="nav-item">Idea Generation</a>
+      <a href="/index.html" class="nav-item">Initiation</a>
     </div>
   </nav>
 
@@ -351,17 +454,23 @@
     <div class="loading-container" id="loading">
       <div class="loading-title">Loading Earnings Review for <strong id="loading-ticker"></strong></div>
       <div class="spinner"></div>
-      <div class="loading-text">Generating Goldman Sachs style analysis...</div>
+      <div class="loading-time">Generating... <span id="loading-timer">0:00</span></div>
     </div>
 
     <div class="page" id="report-page"></div>
   </div>
 
   <script>
-    // Get ticker and priceMove from URL parameters
+    // Get ticker from URL path (clean URL) or query parameters (legacy)
     const urlParams = new URLSearchParams(window.location.search);
-    const ticker = urlParams.get('ticker');
-    const priceMove = urlParams.get('priceMove') || '+0%';
+    let ticker = urlParams.get('ticker');
+    let priceMove = urlParams.get('priceMove') || '+0%';
+
+    // Check for clean URL format: /pltr-earnings
+    const pathMatch = window.location.pathname.match(/^\/([a-zA-Z]+)-earnings$/i);
+    if (pathMatch) {
+      ticker = pathMatch[1].toUpperCase();
+    }
 
     // Set up back link based on referrer
     const backLink = document.getElementById('back-link');
@@ -370,7 +479,7 @@
     } else if (urlParams.get('from') === 'market') {
       backLink.href = '/market.html';
     } else {
-      backLink.href = '/portfolio.html';
+      backLink.href = '/top-movers';
     }
 
     // Update loading ticker
@@ -384,12 +493,38 @@
     const loadingEl = document.getElementById('loading');
     const reportPage = document.getElementById('report-page');
 
+    // Timer variables
+    let loadingTimer = null;
+    let loadingStartTime = null;
+
+    function startLoadingTimer() {
+      loadingStartTime = Date.now();
+      const timerEl = document.getElementById('loading-timer');
+
+      loadingTimer = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - loadingStartTime) / 1000);
+        const minutes = Math.floor(elapsed / 60);
+        const seconds = elapsed % 60;
+        timerEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      }, 1000);
+    }
+
+    function stopLoadingTimer() {
+      if (loadingTimer) {
+        clearInterval(loadingTimer);
+        loadingTimer = null;
+      }
+    }
+
     // Fetch and display earnings review
     async function loadEarningsReview() {
       if (!ticker) {
         loadingEl.innerHTML = '<div class="error">No ticker specified. Please provide a ticker parameter.</div>';
         return;
       }
+
+      // Start the timer
+      startLoadingTimer();
 
       try {
         const response = await fetch(`/api/earnings-review/${ticker}?priceMove=${encodeURIComponent(priceMove)}`);
@@ -404,6 +539,7 @@
 
       } catch (error) {
         console.error('Error fetching earnings review:', error);
+        stopLoadingTimer();
         loadingEl.innerHTML = `<div class="error">
           <h3>Unable to load earnings review</h3>
           <p>${error.message}</p>
@@ -413,10 +549,11 @@
     }
 
     function renderReport(data) {
+      stopLoadingTimer();
       const priceClass = priceMove.startsWith('-') ? 'negative' : 'positive';
 
-      // Parse the review content into sections
-      const reviewContent = parseReviewContent(data.review);
+      // Check if data is in new structured format or old text format
+      const isNewFormat = data.headline && data.keyTakeaways;
 
       // Build the HTML
       let html = `
@@ -433,8 +570,13 @@
         </div>
       `;
 
-      // Add the parsed content
-      html += reviewContent;
+      if (isNewFormat) {
+        // New structured format
+        html += renderStructuredReport(data);
+      } else {
+        // Legacy text format - parse the review content
+        html += parseReviewContent(data.review);
+      }
 
       // Add meta info
       html += `
@@ -456,8 +598,98 @@
       reportPage.classList.add('visible');
     }
 
+    function renderStructuredReport(data) {
+      let html = '';
+
+      // Headline Box
+      if (data.headline) {
+        html += `
+          <div class="headline-box">
+            <div class="headline-label">Headline</div>
+            <div class="headline-text">${escapeHtml(data.headline)}</div>
+          </div>
+        `;
+      }
+
+      // Key Takeaways
+      if (data.keyTakeaways && data.keyTakeaways.length > 0) {
+        html += `<h2>Key Takeaways</h2><ul>`;
+        for (const takeaway of data.keyTakeaways) {
+          html += `<li>${escapeHtml(takeaway)}</li>`;
+        }
+        html += `</ul>`;
+      }
+
+      // Key Debates (Bull/Bear)
+      if (data.keyDebates && (data.keyDebates.bullCase?.length > 0 || data.keyDebates.bearCase?.length > 0)) {
+        html += `<h2>Key Debates</h2>`;
+        html += `<div class="debates-container">`;
+
+        // Bull Case
+        if (data.keyDebates.bullCase && data.keyDebates.bullCase.length > 0) {
+          html += `
+            <div class="debate-case bull-case-box">
+              <div class="case-header">Bull Case</div>
+              <ul class="case-points">
+          `;
+          for (const point of data.keyDebates.bullCase) {
+            html += `<li>${escapeHtml(point)}</li>`;
+          }
+          html += `</ul></div>`;
+        }
+
+        // Bear Case
+        if (data.keyDebates.bearCase && data.keyDebates.bearCase.length > 0) {
+          html += `
+            <div class="debate-case bear-case-box">
+              <div class="case-header">Bear Case</div>
+              <ul class="case-points">
+          `;
+          for (const point of data.keyDebates.bearCase) {
+            html += `<li>${escapeHtml(point)}</li>`;
+          }
+          html += `</ul></div>`;
+        }
+
+        html += `</div>`;
+      }
+
+      // Why It's Moving
+      if (data.whyItsMoving) {
+        html += `<h2>Why It's Moving</h2>`;
+        html += `<p>${escapeHtml(data.whyItsMoving)}</p>`;
+      }
+
+      // Our View
+      if (data.ourView) {
+        html += `<h2>Our View</h2>`;
+        html += `<p>${escapeHtml(data.ourView)}</p>`;
+      }
+
+      // Management Q&A
+      if (data.managementQA && data.managementQA.length > 0) {
+        html += `<h2>Management Q&A</h2>`;
+        html += `<p style="font-style: italic; color: #666; margin-bottom: 16px;">Selected questions from the earnings call that reveal key debates and management thinking.</p>`;
+        html += `<div class="qa-section">`;
+
+        for (const qa of data.managementQA) {
+          html += `
+            <div class="qa-item">
+              <div class="qa-analyst">${escapeHtml(qa.analyst || 'Analyst')}</div>
+              <div class="qa-question">Q: ${escapeHtml(qa.question)}</div>
+              <div class="qa-answer">${escapeHtml(qa.answer)}</div>
+            </div>
+          `;
+        }
+
+        html += `</div>`;
+      }
+
+      return html;
+    }
+
     function parseReviewContent(review) {
-      // Convert markdown-style formatting to HTML with proper structure
+      // Legacy: Convert markdown-style formatting to HTML with proper structure
       let html = review;
 
       // Extract headline if present (first bold text or **Headline:** section)

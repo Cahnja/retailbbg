@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Approach 1 - Few-shot - AVGO Report</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Times New Roman', Georgia, serif;
+      background: #fafafa;
+      color: #1a1a1a;
+      line-height: 1.7;
+    }
+
+    .page {
+      background: white;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 48px 56px;
+      box-shadow: 0 0 40px rgba(0,0,0,0.08);
+    }
+
+    /* Header */
+    .report-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 3px solid #00205b;
+      padding-bottom: 20px;
+      margin-bottom: 28px;
+    }
+    .header-left {
+      flex: 1;
+    }
+    .report-type {
+      font-family: Arial, sans-serif;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #00205b;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    .company-name {
+      font-size: 38px;
+      font-weight: bold;
+      color: #00205b;
+      margin-bottom: 4px;
+    }
+    .ticker-info {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      color: #666;
+    }
+    .header-right {
+      text-align: right;
+      font-family: Arial, sans-serif;
+    }
+    .price {
+      font-size: 32px;
+      font-weight: bold;
+      color: #1a1a1a;
+    }
+    .rating-badge {
+      display: inline-block;
+      background: #00205b;
+      color: white;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin-top: 8px;
+    }
+
+    /* Investment Thesis Box */
+    .thesis-box {
+      background: #00205b;
+      color: white;
+      padding: 24px 28px;
+      margin-bottom: 32px;
+    }
+    .thesis-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .thesis-icon {
+      width: 26px;
+      height: 26px;
+      background: white;
+      color: #00205b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 15px;
+      margin-right: 12px;
+      font-family: Arial, sans-serif;
+    }
+    .thesis-label {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      opacity: 0.8;
+    }
+    .thesis-text {
+      font-size: 17px;
+      line-height: 1.6;
+    }
+    .thesis-text strong {
+      color: #7dd3fc;
+    }
+
+    /* Section Headers */
+    h2 {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #00205b;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 8px;
+      margin-top: 40px;
+      margin-bottom: 18px;
+    }
+
+    /* Sub-section Headers */
+    h3 {
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: #00205b;
+      margin-top: 28px;
+      margin-bottom: 12px;
+    }
+    h3 .num {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      background: #00205b;
+      color: white;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 28px;
+      font-size: 13px;
+      margin-right: 10px;
+    }
+
+    h4 {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: #444;
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+
+    /* Body Text */
+    p {
+      margin-bottom: 14px;
+      text-align: justify;
+      font-size: 15px;
+    }
+
+    /* Key Insight Box (light blue) */
+    .insight-box {
+      background: #f0f4f8;
+      border-left: 4px solid #00205b;
+      padding: 16px 20px;
+      margin: 24px 0;
+    }
+    .insight-label {
+      font-family: Arial, sans-serif;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #00205b;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .insight-text {
+      font-style: italic;
+      color: #333;
+      font-size: 15px;
+    }
+
+    /* Customer/Partner Boxes */
+    .customer-box {
+      background: #f0f7ff;
+      border-left: 4px solid #2196f3;
+      padding: 14px 18px;
+      margin: 14px 0;
+      border-radius: 0 4px 4px 0;
+    }
+    .customer-box strong {
+      color: #1565c0;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+    .customer-box p {
+      margin: 8px 0 0 0;
+      font-size: 14px;
+    }
+
+    /* Competitor Section */
+    .competitor-box {
+      background: #fff8e1;
+      border-left: 4px solid #ff9800;
+      padding: 14px 18px;
+      margin: 14px 0;
+      border-radius: 0 4px 4px 0;
+    }
+    .competitor-box strong {
+      color: #e65100;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+    .competitor-box p {
+      margin: 8px 0 0 0;
+      font-size: 14px;
+    }
+
+    /* Key Debates */
+    .debate-box {
+      background: #f5f5f5;
+      border-left: 4px solid #00205b;
+      padding: 16px 20px;
+      margin: 16px 0;
+      border-radius: 0 4px 4px 0;
+    }
+    .debate-question {
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #00205b;
+      margin-bottom: 12px;
+    }
+    .bull-case {
+      color: #2e7d32;
+      margin: 8px 0;
+      font-size: 14px;
+    }
+    .bull-case strong {
+      font-family: Arial, sans-serif;
+    }
+    .bear-case {
+      color: #c62828;
+      margin: 8px 0;
+      font-size: 14px;
+    }
+    .bear-case strong {
+      font-family: Arial, sans-serif;
+    }
+
+    /* Data Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+    }
+    .data-table th {
+      background: #00205b;
+      color: white;
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 11px;
+    }
+    .data-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .data-table tr:nth-child(even) {
+      background: #f8f9fa;
+    }
+    .data-table .number {
+      text-align: right;
+      font-weight: 500;
+    }
+
+    /* Lists */
+    ul, ol {
+      margin: 14px 0 14px 24px;
+      font-size: 15px;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+
+    /* Valuation Box */
+    .valuation-summary {
+      background: #e8f5e9;
+      border: 1px solid #81c784;
+      padding: 18px 22px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .valuation-summary strong {
+      color: #2e7d32;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Risk Box */
+    .risk-box {
+      background: #ffebee;
+      border-left: 4px solid #ef5350;
+      padding: 14px 18px;
+      margin: 14px 0;
+      border-radius: 0 4px 4px 0;
+    }
+    .risk-box strong {
+      color: #c62828;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <html>
+  <body>
+    <div class="report-header">
+      <div class="header-left">
+        <div class="company-name">Broadcom Inc.</div>
+        <div class="ticker-info">NYSE: AVGO</div>
+      </div>
+      <div class="header-right">
+        <div class="price">$850</div>
+        <div class="rating-badge">Buy</div>
+      </div>
+    </div>
+    
+    <div class="thesis-box">
+      <div class="thesis-header">
+        <div class="thesis-icon">📈</div>
+        <div class="thesis-label">Investment Thesis</div>
+      </div>
+      <div class="thesis-text">
+        Leading edge in semiconductor solutions with unparalleled cash flow capabilities. Strategic acquisition of VMware elevates the software segment, driving long-term growth in the fast-evolving infrastructure software markets. Positioned advantageously as AI networking demands surge. Currently undervalued against intrinsic metrics, despite exceptional capital management.
+      </div>
+    </div>
+    
+    <h2>Business Overview</h2>
+    <p>Broadcom Inc. is a premier technology company innovating and marketing semiconductor and infrastructure software solutions worldwide. Operating through Semiconductor Solutions (approximately 55% of revenue post-VMware) and Infrastructure Software (approximately 45% of revenue), Broadcom is positioned at the nexus of technology evolution.</p>
+
+    <h2>Thesis Details</h2>
+    <h3><span class="num">1</span> Dominance in Semiconductor Solutions</h3>
+    <p>With a robust portfolio in networking, broadband, and storage, the semiconductor segment is poised for accelerated growth, capturing the market shift towards AI and IoT applications.</p>
+
+    <h3><span class="num">2</span> Strategic VMware Acquisition</h3>
+    <p>The $61 billion VMware acquisition is a game changer, catapulting Broadcom into a leadership position in the hybrid cloud and virtualization software industries, merging superior hardware and software capabilities.</p>
+
+    <h3><span class="num">3</span> Exceptional Capital Allocation</h3>
+    <p>Known for its disciplined capital management, Broadcom consistently returns value to shareholders through strategic buybacks and a dividend yield of 3.5%.</p>
+
+    <h2>Key Customers & Partnerships</h2>
+    <div class="customer-box">
+      <strong>Apple Inc.</strong>
+      <p>A key client, Apple's relationship with Broadcom encompasses components for its flagship devices, extending to 2023.</p>
+    </div>
+    <div class="customer-box">
+      <strong>Alphabet Inc. (Google)</strong>
+      <p>Partnering on data center expansion, enhancing AI and networking efficiency, crucial for Google's cloud growth.</p>
+    </div>
+    <div class="customer-box">
+      <strong>AT&T Inc.</strong>
+      <p>Strategic alliance in broadband solutions furthers 5G infrastructure, leaning into the future of telecommunications.</p>
+    </div>
+
+    <h2>Competitive Positioning</h2>
+    <div class="competitor-box">
+      <strong>Qualcomm Inc.</strong>
+      <p>While focused on mobile, lacks the diversified portfolio and VMware’s software leverage.</p>
+    </div>
+    <div class="competitor-box">
+      <strong>NVIDIA Corp.</strong>
+      <p>Leader in graphics processing but lacks Broadcom’s extensive networking and infrastructure capabilities.</p>
+    </div>
+    <div class="competitor-box">
+      <strong>Intel Corp.</strong>
+      <p>Dominant in processors, yet Broadcom’s software acquisitions provide a diversification edge.</p>
+    </div>
+
+    <h2>Key Debates</h2>
+    <div class="debate-box">
+      <div class="debate-question">Can Broadcom sustain its margin growth?</div>
+      <div class="bull-case">Yes. Increased software revenue mix and operational efficiencies promise robust margin expansion.</div>
+      <div class="bear-case">Margins face pressure due to potential supply chain disruptions and competitive semiconductor pricing.</div>
+    </div>
+    <div class="debate-box">
+      <div class="debate-question">Will regulatory hurdles impede the VMware acquisition?</div>
+      <div class="bull-case">Previous high-profile deals have cleared, suggesting regulatory approval is likely.</div>
+      <div class="bear-case">Antitrust concerns could elongate approval, delaying strategic integration.</div>
+    </div>
+    <div class="debate-box">
+      <div class="debate-question">Is Broadcom too reliant on Apple?</div>
+      <div class="bull-case">Diversified customer base mitigates risk, with strategic efforts in enterprise and cloud offerings.</div>
+      <div class="bear-case">Loss of exclusivity with Apple could significantly impact short-term revenue.</div>
+    </div>
+
+    <h2>Management Quality</h2>
+    <p>Under CEO Hock Tan, Broadcom has executed a series of transformative acquisitions, positioning itself as a technology leader. Tan's strategic foresight in balancing organic and inorganic growth has propelled the company’s success.</p>
+
+    <h2>Retail Sentiment</h2>
+    <p>Retail investors view Broadcom favorably, drawn to its solid dividend performance and aggressive growth through strategic acquisitions. Continued positive sentiment is expected as AI integration progresses.</p>
+
+    <h2>Financial Analysis</h2>
+    <div class="data-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th class="number">FY2023</th>
+            <th class="number">FY2024E</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Revenue (Billions)</td>
+            <td class="number">$37.85</td>
+            <td class="number">$40.1</td>
+          </tr>
+          <tr>
+            <td>EBITDA Margin</td>
+            <td class="number">60%</td>
+            <td class="number">62%</td>
+          </tr>
+          <tr>
+            <td>FCF (Billions)</td>
+            <td class="number">$16.8</td>
+            <td class="number">$18.0</td>
+          </tr>
+          <tr>
+            <td>EPS</td>
+            <td class="number">$40</td>
+            <td class="number">$44.5</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <h2>Valuation</h2>
+    <div class="valuation-summary">
+      <p>Broadcom trades at a 18x FY2024E earnings multiple, a discount compared to peers within the technology sector. With projected cash flow growth and robust profit margins, the intrinsic value signals the stock is undervalued, providing an attractive entry point.</p>
+    </div>
+
+    <h2>Key Risks</h2>
+    <div class="risk-box">
+      <strong>Supply Chain Vulnerabilities</strong>
+      <p>Potential disruptions could delay product delivery, impacting financial performance.</p>
+    </div>
+    <div class="risk-box">
+      <strong>Regulatory Approval</strong>
+      <p>Ongoing antitrust reviews challenge the timely completion of VMware integration.</p>
+    </div>
+    <div class="risk-box">
+      <strong>Market Competition</strong>
+      <p>Heightened competition may erode pricing power, influencing market share.</p>
+    </div>
+    <div class="risk-box">
+      <strong>Customer Concentration</strong>
+      <p>Heavy reliance on top clients like Apple poses revenue concentration risks.</p>
+    </div>
+
+    <h2>Conclusion</h2>
+    <p>Broadcom stands as a formidable entity in the technology sphere, displaying a synergy of hardware excellence and innovative software expansion. As the VMware integration enhances its infrastructure capabilities and AI tailwinds bolster its operational breadth, Broadcom offers significant upside potential. We recommend a "Buy" stance, prioritizing it within tech-heavy portfolios for compelling valuation upside and strategic industry positioning.</p>
+  </body>
+</html>
+  </div>
+</body>
+</html>

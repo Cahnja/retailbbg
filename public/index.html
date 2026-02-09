@@ -13,6 +13,50 @@
       line-height: 1.7;
     }
 
+    /* Navigation Banner - V8: Compact with pill-style active state */
+    .nav-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #00205b;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    .nav-items {
+      display: flex;
+      gap: 6px;
+      padding: 0 8px;
+    }
+    .nav-item {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      padding: 6px 16px;
+      border-radius: 16px;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    .nav-item:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .nav-item.active {
+      color: #00205b;
+      background: white;
+      font-weight: 600;
+    }
+    .nav-item.active::after {
+      display: none;
+    }
+
     /* Landing Page */
     .landing {
       min-height: 100vh;
@@ -21,6 +65,7 @@
       justify-content: center;
       align-items: center;
       padding: 20px;
+      padding-top: 76px;
       background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
     }
     .landing-content {
@@ -91,29 +136,13 @@
       font-size: 15px;
       color: #666;
     }
-    .portfolio-link {
-      display: inline-block;
-      margin-top: 20px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      font-size: 14px;
-      color: #00205b;
-      text-decoration: none;
-      padding: 8px 16px;
-      border: 1px solid #00205b;
-      border-radius: 20px;
-      transition: background 0.2s, color 0.2s;
-    }
-    .portfolio-link:hover {
-      background: #00205b;
-      color: white;
-    }
-
     /* Report Wrapper */
     .report-wrapper {
       display: none;
       max-width: 900px;
       margin: 0 auto;
       padding: 20px;
+      padding-top: 76px;
     }
     .report-wrapper.visible {
       display: block;
@@ -743,6 +772,16 @@
   </style>
 </head>
 <body>
+  <nav class="nav-banner">
+    <div class="nav-items">
+      <a href="/market.html" class="nav-item">Market Update</a>
+      <a href="/top-movers" class="nav-item">Top Movers</a>
+      <a href="/portfolio" class="nav-item">Portfolio</a>
+      <a href="/ideageneration" class="nav-item">Idea Generation</a>
+      <a href="/index.html" class="nav-item active">Initiation</a>
+    </div>
+  </nav>
+
   <div class="landing" id="landing">
     <div class="landing-content">
       <div class="logo">Initiation of Coverage</div>
@@ -751,7 +790,6 @@
         <button id="generate">GO</button>
       </div>
       <p class="subtitle">Generate hedge fund-style research reports</p>
-      <a href="/portfolio.html" class="portfolio-link">Portfolio Update →</a>
     </div>
   </div>
 
@@ -888,6 +926,35 @@
     backLink.addEventListener('click', (e) => {
       e.preventDefault();
       showLanding();
+      // Reset URL to initiation page when going back to landing
+      history.pushState({}, '', '/index.html');
+    });
+
+    // Check URL for ticker on page load (clean URL routing)
+    (function checkUrlForTicker() {
+      const path = window.location.pathname;
+      if (path.length > 1 && !path.includes('.')) {
+        const ticker = path.substring(1).toUpperCase();
+        // Validate ticker format (1-5 uppercase letters)
+        if (ticker && /^[A-Z]{1,5}$/.test(ticker)) {
+          tickerInput.value = ticker;
+          generateReport(); // Auto-generate report
+        }
+      }
+    })();
+
+    // Handle browser back/forward navigation
+    window.addEventListener('popstate', (e) => {
+      const path = window.location.pathname;
+      if (path === '/' || path === '') {
+        showLanding();
+      } else if (path.length > 1 && !path.includes('.')) {
+        const ticker = path.substring(1).toUpperCase();
+        if (ticker && /^[A-Z]{1,5}$/.test(ticker)) {
+          tickerInput.value = ticker;
+          generateReport();
+        }
+      }
     });
 
     // Chat handlers
@@ -1004,8 +1071,14 @@
           currentReport = data.report;
           showReport(data.html || convertToHTML(data.report, ticker));
 
-          // Show regenerate link (always available)
+          // Update URL to clean format (e.g., /tsla)
+          history.pushState({ticker: ticker}, '', '/' + ticker.toLowerCase());
+
+          // Show regenerate link
           regenerateLink.style.display = 'inline';
+          regenerateLink.textContent = 'Generate New';
+          regenerateLink.style.color = '#00205b';
+          regenerateLink.style.fontWeight = 'normal';
         }
       } catch (error) {
         stopLoadingTimer();

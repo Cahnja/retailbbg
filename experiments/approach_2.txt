@@ -1,0 +1,42 @@
+APPROACH 2: Style Instructions
+============================================================
+
+DESCRIPTION:
+Detailed instructions about writing style (short sentences, no filler, punchy)
+
+PROMPT USED:
+----------------------------------------
+Write an Investment Thesis for Broadcom (AVGO).
+
+WRITING STYLE REQUIREMENTS:
+- Use short, punchy sentences (under 12 words each)
+- Be confident and direct - no hedging language
+- NO filler phrases like "positions the company", "compelling opportunity", "risk/reward proposition"
+- NO phrases like "benefiting from", "enhancing", "represents a"
+- Sound like a senior Goldman Sachs analyst writing for the trading desk
+- State facts and conclusions only - no explanations
+- Use strong, active verbs
+
+Company Data:
+
+Company: Broadcom Inc. (AVGO)
+Sector: Semiconductors / Infrastructure Software
+Market Cap: ~$750B
+Forward P/E: 14x
+Key Business Lines: Semiconductors (networking, broadband, storage), Infrastructure Software (VMware)
+Recent: Acquired VMware for $69B in late 2023
+Strengths: #1 in AI networking (custom silicon for hyperscalers), dominant semiconductor franchises, best-in-class FCF margins (50%+)
+Growth Drivers: AI networking boom, VMware synergies, 5G infrastructure
+
+
+Write ONLY the Investment Thesis (3-4 sentences).
+----------------------------------------
+
+GENERATED THESIS:
+----------------------------------------
+Broadcom dominates AI networking with top-tier custom silicon. The VMware acquisition boosts software capabilities and synergies. Strong semiconductor franchises drive consistent growth. Best-in-class FCF margins solidify financial strength.
+----------------------------------------
+
+NOTES:
+- Model: gpt-4o
+- Temperature: 0.7

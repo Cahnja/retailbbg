@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Update - Dashboard Layout (V2)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            color: #202124;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Navigation Banner - 40px height */
+        .nav-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #00205b;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-items {
+            display: flex;
+            gap: 6px;
+            padding: 0 8px;
+        }
+
+        .nav-item {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            padding: 6px 16px;
+            border-radius: 16px;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item.active {
+            color: #00205b;
+            background: white;
+            font-weight: 600;
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+            padding-top: 64px;
+            min-height: calc(100vh - 40px);
+        }
+
+        /* Left Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar-card {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e8eaed;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+            color: white;
+            padding: 16px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-content {
+            padding: 0;
+        }
+
+        /* Index Items */
+        .index-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f1f3f4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .index-item:last-child {
+            border-bottom: none;
+        }
+
+        .index-info {
+            flex: 1;
+        }
+
+        .index-name {
+            font-size: 12px;
+            font-weight: 500;
+            color: #5f6368;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 4px;
+        }
+
+        .index-price {
+            font-size: 20px;
+            font-weight: 700;
+            color: #202124;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .index-change {
+            text-align: right;
+        }
+
+        .change-value {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 4px;
+        }
+
+        .change-value.positive {
+            color: #137333;
+        }
+
+        .change-value.negative {
+            color: #c5221f;
+        }
+
+        .change-points {
+            font-size: 11px;
+            color: #80868b;
+            margin-top: 2px;
+        }
+
+        /* Quick Stats */
+        .stat-item {
+            padding: 14px 20px;
+            border-bottom: 1px solid #f1f3f4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #5f6368;
+        }
+
+        .stat-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: #202124;
+        }
+
+        .stat-value.positive {
+            color: #137333;
+        }
+
+        .stat-value.negative {
+            color: #c5221f;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .page-header {
+            padding: 8px 0;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1e3a5f;
+            margin-bottom: 4px;
+        }
+
+        .page-subtitle {
+            font-size: 13px;
+            color: #5f6368;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            background: #137333;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Drivers Panel */
+        .drivers-panel {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e8eaed;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            flex: 1;
+        }
+
+        .drivers-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e8eaed;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .drivers-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e3a5f;
+        }
+
+        .drivers-count {
+            font-size: 12px;
+            color: #5f6368;
+            background: #e8f0f7;
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+
+        .drivers-list {
+            padding: 0;
+            list-style: none;
+        }
+
+        .driver-item {
+            padding: 18px 24px;
+            border-bottom: 1px solid #f1f3f4;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .driver-item:last-child {
+            border-bottom: none;
+        }
+
+        .driver-item:hover {
+            background: #f8fafc;
+        }
+
+        .driver-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 18px;
+        }
+
+        .driver-icon.macro {
+            background: #e8f0f7;
+        }
+
+        .driver-icon.tech {
+            background: #e6f4ea;
+        }
+
+        .driver-icon.bonds {
+            background: #fef7e0;
+        }
+
+        .driver-icon.earnings {
+            background: #fce8e6;
+        }
+
+        .driver-icon.commodities {
+            background: #f3e8fd;
+        }
+
+        .driver-icon.financials {
+            background: #e0f7fa;
+        }
+
+        .driver-content {
+            flex: 1;
+        }
+
+        .driver-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #3c4043;
+            margin-bottom: 8px;
+        }
+
+        .driver-highlight {
+            font-weight: 600;
+            color: #1e3a5f;
+        }
+
+        .driver-positive {
+            color: #137333;
+            font-weight: 600;
+        }
+
+        .driver-negative {
+            color: #c5221f;
+            font-weight: 600;
+        }
+
+        .driver-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 11px;
+            color: #80868b;
+        }
+
+        .driver-tag {
+            background: #f1f3f4;
+            color: #5f6368;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .driver-arrow {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2d5a87;
+            opacity: 0;
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+            align-self: center;
+        }
+
+        .driver-item:hover .driver-arrow {
+            opacity: 1;
+        }
+
+        /* Side Panel Overlay */
+        .panel-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .panel-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Side Panel */
+        .side-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 480px;
+            max-width: 100%;
+            height: 100vh;
+            background: #ffffff;
+            z-index: 2001;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+            transform: translateX(100%);
+            transition: transform 0.3s ease-out;
+        }
+
+        .side-panel.active {
+            transform: translateX(0);
+        }
+
+        /* Panel Header */
+        .panel-header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
+            padding: 24px;
+            color: white;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .panel-close-button {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .panel-close-button:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .panel-close-button svg {
+            width: 20px;
+            height: 20px;
+            color: white;
+        }
+
+        .panel-label {
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            margin-bottom: 8px;
+        }
+
+        .panel-title {
+            font-size: 20px;
+            font-weight: 600;
+            line-height: 1.4;
+            padding-right: 40px;
+            margin: 0;
+        }
+
+        .panel-meta {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .meta-item svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Panel Content */
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .panel-section {
+            margin-bottom: 24px;
+        }
+
+        .panel-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .panel-section-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #1e3a5f;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e8f0f7;
+        }
+
+        .section-content {
+            color: #444;
+            line-height: 1.7;
+            font-size: 15px;
+        }
+
+        .section-content p {
+            margin-bottom: 12px;
+        }
+
+        .section-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-content strong {
+            color: #1e3a5f;
+            font-weight: 600;
+        }
+
+        /* Key Points Box */
+        .key-points {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            border-left: 4px solid #2d5a87;
+        }
+
+        .key-points ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .key-points li {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .key-points li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 14px;
+            width: 8px;
+            height: 8px;
+            background: #2d5a87;
+            border-radius: 50%;
+        }
+
+        .key-points li:not(:last-child) {
+            border-bottom: 1px solid #e8f0f7;
+        }
+
+        /* Panel Footer */
+        .panel-footer {
+            padding: 16px 24px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            flex-shrink: 0;
+        }
+
+        .panel-footer-btn {
+            width: 100%;
+            background: #1e3a5f;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .panel-footer-btn:hover {
+            background: #2d5a87;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .sidebar-card {
+                flex: 1;
+                min-width: 280px;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .side-panel {
+                width: 100%;
+            }
+
+            .dashboard {
+                padding: 16px;
+                padding-top: 56px;
+            }
+
+            .sidebar-card {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav-banner">
+        <div class="nav-items">
+            <a href="/" class="nav-item">Home</a>
+            <a href="/market.html" class="nav-item active">Market Update</a>
+            <a href="/portfolio.html" class="nav-item">Top Movers</a>
+            <a href="/thematic.html" class="nav-item">Idea Gen</a>
+        </div>
+    </nav>
+
+    <div class="dashboard">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <!-- Index Prices -->
+            <div class="sidebar-card">
+                <div class="sidebar-header">Major Indices</div>
+                <div class="sidebar-content">
+                    <div class="index-item">
+                        <div class="index-info">
+                            <div class="index-name">S&P 500</div>
+                            <div class="index-price">5,234.18</div>
+                        </div>
+                        <div class="index-change">
+                            <div class="change-value positive">
+                                <span>&#9650;</span> +1.23%
+                            </div>
+                            <div class="change-points">+63.42</div>
+                        </div>
+                    </div>
+                    <div class="index-item">
+                        <div class="index-info">
+                            <div class="index-name">Nasdaq</div>
+                            <div class="index-price">16,742.39</div>
+                        </div>
+                        <div class="index-change">
+                            <div class="change-value positive">
+                                <span>&#9650;</span> +1.87%
+                            </div>
+                            <div class="change-points">+307.25</div>
+                        </div>
+                    </div>
+                    <div class="index-item">
+                        <div class="index-info">
+                            <div class="index-name">Dow Jones</div>
+                            <div class="index-price">39,156.72</div>
+                        </div>
+                        <div class="index-change">
+                            <div class="change-value negative">
+                                <span>&#9660;</span> -0.34%
+                            </div>
+                            <div class="change-points">-133.87</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="sidebar-card">
+                <div class="sidebar-header">Quick Stats</div>
+                <div class="sidebar-content">
+                    <div class="stat-item">
+                        <span class="stat-label">10Y Treasury</span>
+                        <span class="stat-value negative">3.85% (-15bps)</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">VIX</span>
+                        <span class="stat-value">14.23</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">USD/EUR</span>
+                        <span class="stat-value">1.0842</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">WTI Crude</span>
+                        <span class="stat-value negative">$72.45 (-2.8%)</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Gold</span>
+                        <span class="stat-value positive">$2,048 (+0.8%)</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Bitcoin</span>
+                        <span class="stat-value positive">$67,234 (+3.2%)</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Market Update</h1>
+                <p class="page-subtitle">
+                    <span class="live-dot"></span>
+                    Last updated: Feb 4, 2026 at 10:32 AM EST
+                </p>
+            </div>
+
+            <div class="drivers-panel">
+                <div class="drivers-header">
+                    <span class="drivers-title">What's Moving Markets</span>
+                    <span class="drivers-count">6 updates</span>
+                </div>
+
+                <ul class="drivers-list">
+                    <li class="driver-item" onclick="openPanel('Fed signals potential rate cuts as inflation cools to 2.4% YoY')">
+                        <div class="driver-icon macro">&#128200;</div>
+                        <div class="driver-content">
+                            <div class="driver-text">
+                                <span class="driver-highlight">Fed signals potential rate cuts</span> as inflation cools to <span class="driver-positive">2.4% YoY</span>, nearing 2% target
+                            </div>
+                            <div class="driver-meta">
+                                <span class="driver-tag">Macro</span>
+                                <span>9:45 AM EST</span>
+                            </div>
+                        </div>
+                        <div class="driver-arrow">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </li>
+
+                    <li class="driver-item" onclick="openPanel('NVIDIA surges +8.2% on AI chip demand guidance')">
+                        <div class="driver-icon tech">&#128187;</div>
+                        <div class="driver-content">
+                            <div class="driver-text">
+                                <span class="driver-highlight">NVIDIA surges</span> <span class="driver-positive">+8.2%</span> on stronger-than-expected AI chip demand guidance
+                            </div>
+                            <div class="driver-meta">
+                                <span class="driver-tag">Technology</span>
+                                <span>9:32 AM EST</span>
+                            </div>
+                        </div>
+                        <div class="driver-arrow">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </li>
+
+                    <li class="driver-item" onclick="openPanel('Treasury yields drop 15bps as bond market rallies')">
+                        <div class="driver-icon bonds">&#128176;</div>
+                        <div class="driver-content">
+                            <div class="driver-text">
+                                Treasury yields <span class="driver-negative">drop 15bps</span> to 3.85% as bond market rallies on rate cut expectations
+                            </div>
+                            <div class="driver-meta">
+                                <span class="driver-tag">Fixed Income</span>
+                                <span>9:28 AM EST</span>
+                            </div>
+                        </div>
+                        <div class="driver-arrow">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </li>
+
+                    <li class="driver-item" onclick="openPanel('Apple announces $100B buyback program')">
+                        <div class="driver-icon earnings">&#127823;</div>
+                        <div class="driver-content">
+                            <div class="driver-text">
+                                <span class="driver-highlight">Apple announces $100B buyback</span> program, largest in corporate history, shares <span class="driver-positive">+3.4%</span>
+                            </div>
+                            <div class="driver-meta">
+                                <span class="driver-tag">Earnings</span>
+                                <span>9:15 AM EST</span>
+                            </div>
+                        </div>
+                        <div class="driver-arrow">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </li>
+
+                    <li class="driver-item" onclick="openPanel('Oil prices fall on OPEC+ supply concerns')">
+                        <div class="driver-icon commodities">&#128738;</div>
+                        <div class="driver-content">
+                            <div class="driver-text">
+                                Oil prices <span class="driver-negative">fall -2.8%</span> on OPEC+ supply concerns and stronger dollar
+                            </div>
+                            <div class="driver-meta">
+                                <span class="driver-tag">Commodities</span>
+                                <span>8:45 AM EST</span>
+                            </div>
+                        </div>
+                        <div class="driver-arrow">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </li>
+
+                    <li class="driver-item" onclick="openPanel('Regional banks rally on improved earnings outlook')">
+                        <div class="driver-icon financials">&#127974;</div>
+                        <div class="driver-content">
+                            <div class="driver-text">
+                                Regional banks <span class="driver-positive">rally +4.1%</span> on improved earnings outlook and deposit stabilization
+                            </div>
+                            <div class="driver-meta">
+                                <span class="driver-tag">Financials</span>
+                                <span>8:30 AM EST</span>
+                            </div>
+                        </div>
+                        <div class="driver-arrow">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 18l6-6-6-6"/>
+                            </svg>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </main>
+    </div>
+
+    <!-- Side Panel Overlay -->
+    <div class="panel-overlay" id="panel-overlay" onclick="closePanel()"></div>
+
+    <!-- Side Panel -->
+    <div class="side-panel" id="side-panel">
+        <div class="panel-header">
+            <button class="panel-close-button" onclick="closePanel()" aria-label="Close panel">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <div class="panel-label">Market Driver Analysis</div>
+            <h1 class="panel-title" id="panel-title">Fed signals potential rate cuts as inflation cools</h1>
+            <div class="panel-meta">
+                <span class="meta-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span id="panel-time">9:45 AM EST</span>
+                </span>
+                <span class="meta-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                    High Impact
+                </span>
+            </div>
+        </div>
+
+        <div class="panel-content" id="panel-content">
+            <div class="panel-section">
+                <h2 class="panel-section-title">Key Takeaways</h2>
+                <div class="key-points">
+                    <ul>
+                        <li><strong>Rate cuts could begin Q2 2026</strong> if inflation trend continues</li>
+                        <li>Core PCE inflation at <strong>2.4% YoY</strong>, nearing 2% target</li>
+                        <li>10-year Treasury yield <strong>down 15bps to 3.85%</strong></li>
+                        <li>Equity markets rallying on dovish signals</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h2 class="panel-section-title">Analysis</h2>
+                <div class="section-content">
+                    <p>
+                        Federal Reserve officials indicated at their latest policy meeting that <strong>interest rate cuts could begin as early as the second quarter</strong> if inflation continues its downward trajectory. The shift in tone marks a significant pivot from the hawkish stance maintained throughout much of the previous year.
+                    </p>
+                    <p>
+                        Recent economic data has bolstered the case for monetary easing. <strong>Core PCE inflation fell to 2.4% year-over-year</strong>, approaching the Fed's 2% target for the first time since early 2021.
+                    </p>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h2 class="panel-section-title">Market Impact</h2>
+                <div class="section-content">
+                    <p>
+                        Market participants have responded enthusiastically to the dovish signals. Treasury yields declined across the curve, with <strong>the 10-year yield falling 15 basis points to 3.85%</strong>. Equity markets rallied broadly, led by rate-sensitive sectors.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-footer">
+            <button class="panel-footer-btn" onclick="closePanel()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        const panelOverlay = document.getElementById('panel-overlay');
+        const sidePanel = document.getElementById('side-panel');
+        const panelTitle = document.getElementById('panel-title');
+
+        function openPanel(title) {
+            panelTitle.textContent = title;
+            panelOverlay.classList.add('active');
+            sidePanel.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePanel() {
+            panelOverlay.classList.remove('active');
+            sidePanel.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && sidePanel.classList.contains('active')) {
+                closePanel();
+            }
+        });
+    </script>
+</body>
+</html>

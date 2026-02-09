@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report Option A2 - Black & Gold</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Times New Roman', Georgia, serif;
+      background: #fff;
+      color: #1a1a1a;
+      line-height: 1.6;
+      padding: 40px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .report-header {
+      border-bottom: 1px solid #1a1a1a;
+      padding-bottom: 24px;
+      margin-bottom: 30px;
+    }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    .report-type {
+      font-family: Arial, sans-serif;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: #1a1a1a;
+      background: #c9a227;
+      padding: 6px 14px;
+      font-weight: 600;
+    }
+    .date {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      color: #666;
+    }
+    .company-name {
+      font-size: 48px;
+      font-weight: normal;
+      color: #1a1a1a;
+      letter-spacing: -1px;
+    }
+    .ticker-line {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      color: #666;
+      margin-top: 6px;
+    }
+
+    /* Key Metrics */
+    .metrics-row {
+      display: flex;
+      border: 1px solid #e0e0e0;
+      margin-bottom: 30px;
+    }
+    .metric {
+      flex: 1;
+      padding: 18px 20px;
+      border-right: 1px solid #e0e0e0;
+      font-family: Arial, sans-serif;
+    }
+    .metric:last-child {
+      border-right: none;
+    }
+    .metric-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #888;
+      margin-bottom: 6px;
+    }
+    .metric-value {
+      font-size: 22px;
+      font-weight: bold;
+      color: #1a1a1a;
+    }
+    .metric-value.rating {
+      color: #c9a227;
+    }
+
+    /* Thesis */
+    .thesis-box {
+      background: #1a1a1a;
+      color: white;
+      padding: 28px 32px;
+      margin-bottom: 36px;
+      position: relative;
+    }
+    .thesis-box::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: #c9a227;
+    }
+    .thesis-label {
+      font-family: Arial, sans-serif;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #c9a227;
+      margin-bottom: 14px;
+    }
+    .thesis-text {
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    /* Sections */
+    h2 {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #1a1a1a;
+      margin-top: 44px;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #c9a227;
+    }
+
+    p {
+      margin-bottom: 16px;
+      text-align: justify;
+      font-size: 15px;
+    }
+
+    .highlight {
+      background: #faf6e9;
+      padding: 16px 20px;
+      margin: 24px 0;
+      border-left: 3px solid #c9a227;
+      font-style: italic;
+    }
+
+    h3 {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-top: 28px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="report-header">
+    <div class="header-top">
+      <div class="report-type">Initiation of Coverage</div>
+      <div class="date">February 3, 2026</div>
+    </div>
+    <div class="company-name">Broadcom Inc.</div>
+    <div class="ticker-line">NASDAQ: AVGO · Semiconductors · $185.32</div>
+  </div>
+
+  <div class="metrics-row">
+    <div class="metric">
+      <div class="metric-label">Rating</div>
+      <div class="metric-value rating">BUY</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Price Target</div>
+      <div class="metric-value">$220</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Market Cap</div>
+      <div class="metric-value">$774B</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Upside</div>
+      <div class="metric-value">+19%</div>
+    </div>
+  </div>
+
+  <div class="thesis-box">
+    <div class="thesis-label">Investment Thesis</div>
+    <div class="thesis-text">
+      Buy AVGO. Dominant semiconductor franchise with unmatched FCF generation. VMware acquisition transforms the business into an infrastructure software powerhouse. AI networking tailwinds accelerating. Trading at discount to intrinsic value despite best-in-class capital allocation.
+    </div>
+  </div>
+
+  <h2>Business Overview</h2>
+  <p>
+    Broadcom Inc. is a global technology leader that designs, develops, and supplies semiconductor and infrastructure software solutions. The company operates through two segments: Semiconductor Solutions and Infrastructure Software.
+  </p>
+  <p>
+    Founded in 1961 as a division of Hewlett-Packard, the company has grown through strategic acquisitions including Brocade, CA Technologies, and most recently VMware in a landmark $69 billion deal that closed in November 2023.
+  </p>
+
+  <div class="highlight">
+    Broadcom's semiconductor business generates 50%+ gross margins with minimal capex requirements, resulting in industry-leading free cash flow conversion.
+  </div>
+
+  <h2>Thesis Details</h2>
+
+  <h3>1. AI Networking Leadership</h3>
+  <p>
+    Broadcom's custom AI accelerators (XPUs) and networking solutions position the company at the center of hyperscaler AI infrastructure buildouts. The company has design wins with three of the four major cloud providers.
+  </p>
+
+  <h3>2. VMware Integration</h3>
+  <p>
+    The VMware acquisition provides Broadcom with a recurring revenue software business that complements its semiconductor operations. Management targets $8.5B in run-rate synergies within three years.
+  </p>
+
+  <h2>Key Risks</h2>
+  <p>
+    Customer concentration remains elevated with Apple representing approximately 20% of semiconductor revenue. Integration execution risk on VMware. Cyclical exposure to enterprise IT spending.
+  </p>
+</body>
+</html>

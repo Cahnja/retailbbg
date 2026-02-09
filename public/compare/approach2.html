@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Approach 2 - Style Instructions - AVGO Report</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Times New Roman', Georgia, serif;
+      background: #fafafa;
+      color: #1a1a1a;
+      line-height: 1.7;
+    }
+
+    .page {
+      background: white;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 48px 56px;
+      box-shadow: 0 0 40px rgba(0,0,0,0.08);
+    }
+
+    /* Header */
+    .report-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 3px solid #00205b;
+      padding-bottom: 20px;
+      margin-bottom: 28px;
+    }
+    .header-left {
+      flex: 1;
+    }
+    .report-type {
+      font-family: Arial, sans-serif;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #00205b;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    .company-name {
+      font-size: 38px;
+      font-weight: bold;
+      color: #00205b;
+      margin-bottom: 4px;
+    }
+    .ticker-info {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      color: #666;
+    }
+    .header-right {
+      text-align: right;
+      font-family: Arial, sans-serif;
+    }
+    .price {
+      font-size: 32px;
+      font-weight: bold;
+      color: #1a1a1a;
+    }
+    .rating-badge {
+      display: inline-block;
+      background: #00205b;
+      color: white;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin-top: 8px;
+    }
+
+    /* Investment Thesis Box */
+    .thesis-box {
+      background: #00205b;
+      color: white;
+      padding: 24px 28px;
+      margin-bottom: 32px;
+    }
+    .thesis-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .thesis-icon {
+      width: 26px;
+      height: 26px;
+      background: white;
+      color: #00205b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 15px;
+      margin-right: 12px;
+      font-family: Arial, sans-serif;
+    }
+    .thesis-label {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      opacity: 0.8;
+    }
+    .thesis-text {
+      font-size: 17px;
+      line-height: 1.6;
+    }
+    .thesis-text strong {
+      color: #7dd3fc;
+    }
+
+    /* Section Headers */
+    h2 {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #00205b;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 8px;
+      margin-top: 40px;
+      margin-bottom: 18px;
+    }
+
+    /* Sub-section Headers */
+    h3 {
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: #00205b;
+      margin-top: 28px;
+      margin-bottom: 12px;
+    }
+    h3 .num {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      background: #00205b;
+      color: white;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 28px;
+      font-size: 13px;
+      margin-right: 10px;
+    }
+
+    h4 {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: #444;
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+
+    /* Body Text */
+    p {
+      margin-bottom: 14px;
+      text-align: justify;
+      font-size: 15px;
+    }
+
+    /* Key Insight Box (light blue) */
+    .insight-box {
+      background: #f0f4f8;
+      border-left: 4px solid #00205b;
+      padding: 16px 20px;
+      margin: 24px 0;
+    }
+    .insight-label {
+      font-family: Arial, sans-serif;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #00205b;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .insight-text {
+      font-style: italic;
+      color: #333;
+      font-size: 15px;
+    }
+
+    /* Customer/Partner Boxes */
+    .customer-box {
+      background: #f0f7ff;
+      border-left: 4px solid #2196f3;
+      padding: 14px 18px;
+      margin: 14px 0;
+      border-radius: 0 4px 4px 0;
+    }
+    .customer-box strong {
+      color: #1565c0;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+    .customer-box p {
+      margin: 8px 0 0 0;
+      font-size: 14px;
+    }
+
+    /* Competitor Section */
+    .competitor-box {
+      background: #fff8e1;
+      border-left: 4px solid #ff9800;
+      padding: 14px 18px;
+      margin: 14px 0;
+      border-radius: 0 4px 4px 0;
+    }
+    .competitor-box strong {
+      color: #e65100;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+    .competitor-box p {
+      margin: 8px 0 0 0;
+      font-size: 14px;
+    }
+
+    /* Key Debates */
+    .debate-box {
+      background: #f5f5f5;
+      border-left: 4px solid #00205b;
+      padding: 16px 20px;
+      margin: 16px 0;
+      border-radius: 0 4px 4px 0;
+    }
+    .debate-question {
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #00205b;
+      margin-bottom: 12px;
+    }
+    .bull-case {
+      color: #2e7d32;
+      margin: 8px 0;
+      font-size: 14px;
+    }
+    .bull-case strong {
+      font-family: Arial, sans-serif;
+    }
+    .bear-case {
+      color: #c62828;
+      margin: 8px 0;
+      font-size: 14px;
+    }
+    .bear-case strong {
+      font-family: Arial, sans-serif;
+    }
+
+    /* Data Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+    }
+    .data-table th {
+      background: #00205b;
+      color: white;
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 11px;
+    }
+    .data-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .data-table tr:nth-child(even) {
+      background: #f8f9fa;
+    }
+    .data-table .number {
+      text-align: right;
+      font-weight: 500;
+    }
+
+    /* Lists */
+    ul, ol {
+      margin: 14px 0 14px 24px;
+      font-size: 15px;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+
+    /* Valuation Box */
+    .valuation-summary {
+      background: #e8f5e9;
+      border: 1px solid #81c784;
+      padding: 18px 22px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .valuation-summary strong {
+      color: #2e7d32;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Risk Box */
+    .risk-box {
+      background: #ffebee;
+      border-left: 4px solid #ef5350;
+      padding: 14px 18px;
+      margin: 14px 0;
+      border-radius: 0 4px 4px 0;
+    }
+    .risk-box strong {
+      color: #c62828;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <html>
+  <body>
+    <div class="report-header">
+      <div class="header-left">
+        <span class="company-name">Broadcom Inc.</span>
+        <span class="ticker-info">NASDAQ: AVGO</span>
+      </div>
+      <div class="header-right">
+        <span class="price">$900.20</span>
+        <span class="rating-badge">Buy</span>
+      </div>
+    </div>
+
+    <h2>Business Overview</h2>
+    <div class="insight-box">
+      <span class="insight-label">Overview</span>
+      <div class="insight-text">
+        Broadcom dominates semiconductor and software sectors globally. It generated $33.2 billion revenue in FY2022. It maintains leadership in wired infrastructure, enterprise software, and wireless communications.
+      </div>
+    </div>
+
+    <div class="thesis-box">
+      <div class="thesis-header">
+        <span class="thesis-icon">T1</span>
+        <span class="thesis-label">Investment Thesis</span>
+      </div>
+      <div class="thesis-text">
+        <h3><span class="num">1</span> Cloud Infrastructure</h3>
+        Broadcom accelerates cloud storage solutions. It commands a 45% market share.
+
+        <h3><span class="num">2</span> Software Expansion</h3>
+        Software solutions contribute 22% of revenues. Growth outpaces the industry average of 8%.
+
+        <h3><span class="num">3</span> 5G Leadership</h3>
+        Broadcom is a key supplier for 5G components. The 5G segment grows 30% annually.
+      </div>
+    </div>
+
+    <h2>Key Customers & Partnerships</h2>
+    <div class="customer-box">
+      <strong>Apple Inc.</strong>
+      <p>Apple accounts for 20% of Broadcom's revenue. It provides exclusive RF components.</p>
+      
+      <strong>Google LLC</strong>
+      <p>Broadcom collaborates on data center infrastructure. Partnership supports AI platform growth.</p>
+      
+      <strong>Amazon Web Services</strong>
+      <p>Supplies custom chip solutions. Strengthens presence in cloud service market.</p>
+    </div>
+
+    <h2>Competitive Positioning</h2>
+    <div class="competitor-box">
+      <strong>Qualcomm</strong>
+      <p>Qualcomm focuses on mobile chipsets. Broadcom dominates broader infrastructure markets.</p>
+      
+      <strong>Intel</strong>
+      <p>Intel leads in CPUs. Broadcom excels in diversified semiconductor segments.</p>
+      
+      <strong>NVIDIA</strong>
+      <p>NVIDIA specializes in gaming GPUs. Broadcom's enterprise solutions form a competitive edge.</p>
+    </div>
+
+    <h2>Key Debates</h2>
+    <div class="debate-box">
+      <div class="debate-question">
+        <strong>Can Broadcom sustain its margin expansion?</strong>
+      </div>
+      <div class="bull-case">
+        Broadcom’s cost control measures increase operating margins by 200 bps.
+      </div>
+      <div class="bear-case">
+        Price competition in semiconductors may compress margins by next year.
+      </div>
+
+      <div class="debate-question">
+        <strong>Will software sector growth offset semiconductor cyclicality?</strong>
+      </div>
+      <div class="bull-case">
+        Software growth stabilizes revenue streams with recurring contracts.
+      </div>
+      <div class="bear-case">
+        Economic downturn risks slowing enterprise software investments.
+      </div>
+
+      <div class="debate-question">
+        <strong>Is Broadcom's valuation justified at current multiples?</strong>
+      </div>
+      <div class="bull-case">
+        Broadcom’s P/E ratio aligns with tech sector averages, reflecting solid growth prospects.
+      </div>
+      <div class="bear-case">
+        Any market downturn could prompt multiple contraction.
+      </div>
+    </div>
+
+    <h2>Management Quality</h2>
+    <div class="insight-box">
+      <span class="insight-label">Insight</span>
+      <div class="insight-text">
+        CEO Hock Tan consistently drives strategic acquisitions. His leadership underpins revenue and EPS growth.
+      </div>
+    </div>
+
+    <h2>Retail Sentiment</h2>
+    <div class="insight-box">
+      <span class="insight-label">Insight</span>
+      <div class="insight-text">
+        Strong social media buzz fuels positive retail sentiment. Investors praise dividend policy and acquisition strategies.
+      </div>
+    </div>
+
+    <h2>Financial Analysis</h2>
+    <div class="data-table">
+      <table>
+        <tr>
+          <th>Metrics</th>
+          <th class="number">FY2020</th>
+          <th class="number">FY2021</th>
+          <th class="number">FY2022</th>
+        </tr>
+        <tr>
+          <td>Revenue (Billion USD)</td>
+          <td class="number">23.9</td>
+          <td class="number">27.4</td>
+          <td class="number">33.2</td>
+        </tr>
+        <tr>
+          <td>Net Income (Billion USD)</td>
+          <td class="number">5.7</td>
+          <td class="number">6.5</td>
+          <td class="number">8.1</td>
+        </tr>
+        <tr>
+          <td>EPS (USD)</td>
+          <td class="number">13.43</td>
+          <td class="number">15.85</td>
+          <td class="number">19.28</td>
+        </tr>
+        <tr>
+          <td>Dividend Yield (%)</td>
+          <td class="number">3.24</td>
+          <td class="number">3.51</td>
+          <td class="number">3.75</td>
+        </tr>
+      </table>
+    </div>
+
+    <h2>Valuation</h2>
+    <div class="valuation-summary">
+      Broadcom trades at 18x forward earnings. It reflects robust revenue growth and high margins.
+    </div>
+
+    <h2>Key Risks</h2>
+    <div class="risk-box">
+      <strong>Supply Chain Disruptions</strong>
+      <p>Ongoing chip shortages impact production capabilities and revenue.</p>
+
+      <strong>Regulatory Challenges</strong>
+      <p>Acquisitions could face antitrust scrutiny, affecting strategic growth plans.</p>
+
+      <strong>Currency Fluctuations</strong>
+      <p>Foreign currency exposure could lead to earnings volatility.</p>
+
+      <strong>Cybersecurity Threats</strong>
+      <p>Increased cyber threats could impact enterprise software operations.</p>
+    </div>
+
+    <h2>Conclusion</h2>
+    <div class="insight-box">
+      <span class="insight-label">Summary</span>
+      <div class="insight-text">
+        Broadcom shows market leadership across diversified segments. Strong financials and strategic acquisitions drive our bullish stance.
+      </div>
+    </div>
+  </body>
+</html>
+  </div>
+</body>
+</html>

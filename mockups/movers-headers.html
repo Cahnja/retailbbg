@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Top Movers Header Mockups</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f8f9fa;
+      padding: 40px;
+      color: #202124;
+    }
+
+    h1 {
+      font-size: 24px;
+      color: #1e3a5f;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 16px;
+      color: #666;
+      font-weight: 500;
+      margin-bottom: 30px;
+    }
+
+    .mockup-section {
+      margin-bottom: 60px;
+    }
+
+    .mockup-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1e3a5f;
+      margin-bottom: 16px;
+      padding: 8px 12px;
+      background: #e8f0f7;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .movers-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      max-width: 900px;
+    }
+
+    .column {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    /* Sample table content */
+    .sample-content {
+      padding: 16px;
+      color: #999;
+      font-size: 13px;
+      border-top: 1px solid #eee;
+    }
+
+    /* ========================================
+       OPTION A: Current (for comparison)
+       ======================================== */
+    .option-a .column-header {
+      font-family: Arial, sans-serif;
+      padding: 16px 20px;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .option-a .gainers .column-header {
+      background: #006600;
+      color: white;
+    }
+    .option-a .losers .column-header {
+      background: #c00;
+      color: white;
+    }
+
+    /* ========================================
+       OPTION B: Left border accent
+       ======================================== */
+    .option-b .column-header {
+      font-family: Arial, sans-serif;
+      padding: 16px 20px;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: #f8f9fa;
+      color: #1e3a5f;
+      border-left: 4px solid;
+    }
+    .option-b .gainers .column-header {
+      border-left-color: #16a34a;
+    }
+    .option-b .losers .column-header {
+      border-left-color: #dc2626;
+    }
+
+    /* ========================================
+       OPTION C: Subtle tinted background
+       ======================================== */
+    .option-c .column-header {
+      font-family: Arial, sans-serif;
+      padding: 16px 20px;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .option-c .gainers .column-header {
+      background: #f0fdf4;
+      color: #166534;
+      border-bottom: 2px solid #16a34a;
+    }
+    .option-c .losers .column-header {
+      background: #fef2f2;
+      color: #991b1b;
+      border-bottom: 2px solid #dc2626;
+    }
+
+    /* ========================================
+       OPTION D: Navy headers with pill accent
+       ======================================== */
+    .option-d .column-header {
+      font-family: Arial, sans-serif;
+      padding: 16px 20px;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: #1e3a5f;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .option-d .column-header .accent-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .option-d .gainers .accent-dot {
+      background: #4ade80;
+    }
+    .option-d .losers .accent-dot {
+      background: #f87171;
+    }
+
+    /* ========================================
+       OPTION E: Minimal with icon
+       ======================================== */
+    .option-e .column-header {
+      font-family: Arial, sans-serif;
+      padding: 16px 20px;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: white;
+      color: #1e3a5f;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .option-e .column-header .arrow {
+      font-size: 18px;
+      font-weight: 400;
+    }
+    .option-e .gainers .arrow {
+      color: #16a34a;
+    }
+    .option-e .losers .arrow {
+      color: #dc2626;
+    }
+
+    /* ========================================
+       OPTION F: Gradient accent bar
+       ======================================== */
+    .option-f .column-header {
+      font-family: Arial, sans-serif;
+      padding: 16px 20px;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      background: white;
+      color: #1e3a5f;
+      position: relative;
+    }
+    .option-f .column-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+    .option-f .gainers .column-header::after {
+      background: linear-gradient(90deg, #16a34a, #4ade80);
+    }
+    .option-f .losers .column-header::after {
+      background: linear-gradient(90deg, #dc2626, #f87171);
+    }
+
+    /* ========================================
+       OPTION G: Tag style
+       ======================================== */
+    .option-g .column-header {
+      font-family: Arial, sans-serif;
+      padding: 16px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      background: #f8f9fa;
+      color: #1e3a5f;
+      display: flex;
+      align-items: center;
+    }
+    .option-g .column-header .tag {
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .option-g .gainers .tag {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .option-g .losers .tag {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+  </style>
+</head>
+<body>
+  <h1>Top Movers Header Options</h1>
+  <h2>Alternatives to the current green/red full-width headers</h2>
+
+  <!-- Option A: Current -->
+  <div class="mockup-section option-a">
+    <div class="mockup-label">Option A: Current Design (for comparison)</div>
+    <div class="movers-grid">
+      <div class="column gainers">
+        <div class="column-header">Top Gainers</div>
+        <div class="sample-content">Stock rows would appear here...</div>
+      </div>
+      <div class="column losers">
+        <div class="column-header">Top Losers</div>
+        <div class="sample-content">Stock rows would appear here...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B: Left border accent -->
+  <div class="mockup-section option-b">
+    <div class="mockup-label">Option B: Left Border Accent</div>
+    <div class="movers-grid">
+      <div class="column gainers">
+        <div class="column-header">Top Gainers</div>
+        <div class="sample-content">Stock rows would appear here...</div>
+      </div>
+      <div class="column losers">
+        <div class="column-header">Top Losers</div>
+        <div class="sample-content">Stock rows would appear here...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option C: Subtle tinted background -->
+  <div class="mockup-section option-c">
+    <div class="mockup-label">Option C: Subtle Tinted Background</div>
+    <div class="movers-grid">
+      <div class="column gainers">
+        <div class="column-header">Top Gainers</div>
+        <div class="sample-content">Stock rows would appear here...</div>
+      </div>
+      <div class="column losers">
+        <div class="column-header">Top Losers</div>
+        <div class="sample-content">Stock rows would appear here...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option D: Navy headers with pill accent -->
+  <div class="mockup-section option-d">
+    <div class="mockup-label">Option D: Navy Headers with Dot Accent</div>
+    <div class="movers-grid">
+      <div class="column gainers">
+        <div class="column-header"><span class="accent-dot"></span> Top Gainers</div>
+        <div class="sample-content">Stock rows would appear here...</div>
+      </div>
+      <div class="column losers">
+        <div class="column-header"><span class="accent-dot"></span> Top Losers</div>
+        <div class="sample-content">Stock rows would appear here...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option E: Minimal with icon -->
+  <div class="mockup-section option-e">
+    <div class="mockup-label">Option E: Minimal with Arrow Icon</div>
+    <div class="movers-grid">
+      <div class="column gainers">
+        <div class="column-header"><span class="arrow">↑</span> Top Gainers</div>
+        <div class="sample-content">Stock rows would appear here...</div>
+      </div>
+      <div class="column losers">
+        <div class="column-header"><span class="arrow">↓</span> Top Losers</div>
+        <div class="sample-content">Stock rows would appear here...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option F: Gradient accent bar -->
+  <div class="mockup-section option-f">
+    <div class="mockup-label">Option F: Bottom Gradient Bar</div>
+    <div class="movers-grid">
+      <div class="column gainers">
+        <div class="column-header">Top Gainers</div>
+        <div class="sample-content">Stock rows would appear here...</div>
+      </div>
+      <div class="column losers">
+        <div class="column-header">Top Losers</div>
+        <div class="sample-content">Stock rows would appear here...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option G: Tag style -->
+  <div class="mockup-section option-g">
+    <div class="mockup-label">Option G: Tag/Chip Style</div>
+    <div class="movers-grid">
+      <div class="column gainers">
+        <div class="column-header"><span class="tag">Top Gainers</span></div>
+        <div class="sample-content">Stock rows would appear here...</div>
+      </div>
+      <div class="column losers">
+        <div class="column-header"><span class="tag">Top Losers</span></div>
+        <div class="sample-content">Stock rows would appear here...</div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

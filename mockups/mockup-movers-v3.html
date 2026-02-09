@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Top Movers - Two Column Split</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #fafafa;
+      color: #202124;
+      line-height: 1.5;
+    }
+
+    /* Navigation Banner - 40px pill tabs */
+    .nav-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #00205b;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .nav-items {
+      display: flex;
+      gap: 6px;
+    }
+    .nav-item {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      padding: 6px 16px;
+      border-radius: 16px;
+      transition: all 0.2s ease;
+    }
+    .nav-item:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .nav-item.active {
+      color: #00205b;
+      background: white;
+      font-weight: 600;
+    }
+
+    /* Main Content - Full Width Split */
+    .main-content {
+      display: flex;
+      min-height: calc(100vh - 40px);
+      margin-top: 40px;
+    }
+
+    /* Column Panels */
+    .panel {
+      flex: 1;
+      padding: 40px;
+      overflow-y: auto;
+    }
+    .panel.gainers {
+      background: #ffffff;
+      border-right: 1px solid #e8eaed;
+    }
+    .panel.losers {
+      background: #fafafa;
+    }
+
+    /* Panel Headers */
+    .panel-header {
+      margin-bottom: 32px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid;
+    }
+    .gainers .panel-header {
+      border-color: #137333;
+    }
+    .losers .panel-header {
+      border-color: #c5221f;
+    }
+    .panel-title {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .gainers .panel-title { color: #137333; }
+    .losers .panel-title { color: #c5221f; }
+    .panel-subtitle {
+      font-size: 12px;
+      color: #80868b;
+    }
+
+    /* Stock Items */
+    .stock-item {
+      padding: 20px 0;
+      border-bottom: 1px solid #e8eaed;
+    }
+    .stock-item:last-child {
+      border-bottom: none;
+    }
+    .stock-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .stock-left {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+    .stock-ticker {
+      font-size: 16px;
+      font-weight: 700;
+      color: #202124;
+    }
+    .stock-name {
+      font-size: 13px;
+      color: #5f6368;
+    }
+    .stock-right {
+      text-align: right;
+    }
+    .stock-price {
+      font-size: 15px;
+      font-weight: 600;
+      color: #202124;
+    }
+    .stock-change {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .gainers .stock-change { color: #137333; }
+    .losers .stock-change { color: #c5221f; }
+
+    /* Bullet Points */
+    .stock-bullets {
+      padding-left: 2px;
+    }
+    .bullet {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 13px;
+      color: #3c4043;
+      margin-bottom: 6px;
+      line-height: 1.5;
+    }
+    .bullet:last-child {
+      margin-bottom: 0;
+    }
+    .bullet::before {
+      content: "";
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      margin-top: 8px;
+      flex-shrink: 0;
+    }
+    .gainers .bullet::before { background: #137333; }
+    .losers .bullet::before { background: #c5221f; }
+
+    /* Update time */
+    .update-time {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      color: #80868b;
+      background: rgba(255,255,255,0.9);
+      padding: 6px 16px;
+      border-radius: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+    @media (max-width: 900px) {
+      .main-content {
+        flex-direction: column;
+      }
+      .panel.gainers {
+        border-right: none;
+        border-bottom: 1px solid #e8eaed;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav-banner">
+    <div class="nav-items">
+      <a href="/" class="nav-item">Initiate Coverage</a>
+      <a href="/market.html" class="nav-item">Market Update</a>
+      <a href="/portfolio.html" class="nav-item active">Top Movers</a>
+      <a href="/thematic.html" class="nav-item">Thematic Investments</a>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <!-- Gainers Panel -->
+    <div class="panel gainers">
+      <div class="panel-header">
+        <h2 class="panel-title">Top 5 Gainers</h2>
+        <p class="panel-subtitle">S&P 500 Index</p>
+      </div>
+
+      <div class="stock-item">
+        <div class="stock-header">
+          <div class="stock-left">
+            <span class="stock-ticker">NVDA</span>
+            <span class="stock-name">NVIDIA Corporation</span>
+          </div>
+          <div class="stock-right">
+            <div class="stock-price">$892.45</div>
+            <div class="stock-change">+8.42%</div>
+          </div>
+        </div>
+        <div class="stock-bullets">
+          <div class="bullet">Strong Q4 earnings beat driven by data center AI chip demand, revenue up 265% YoY</div>
+          <div class="bullet">Leading GPU manufacturer for AI/ML workloads with dominant data center market share</div>
+        </div>
+      </div>
+
+      <div class="stock-item">
+        <div class="stock-header">
+          <div class="stock-left">
+            <span class="stock-ticker">AMD</span>
+            <span class="stock-name">Advanced Micro Devices</span>
+          </div>
+          <div class="stock-right">
+            <div class="stock-price">$178.32</div>
+            <div class="stock-change">+5.67%</div>
+          </div>
+        </div>
+        <div class="stock-bullets">
+          <div class="bullet">New MI300X AI accelerator gaining traction with hyperscalers, Microsoft Azure deal announced</div>
+          <div class="bullet">Semiconductor company competing in CPU and GPU markets for PCs, gaming, and data centers</div>
+        </div>
+      </div>
+
+      <div class="stock-item">
+        <div class="stock-header">
+          <div class="stock-left">
+            <span class="stock-ticker">META</span>
+            <span class="stock-name">Meta Platforms Inc</span>
+          </div>
+          <div class="stock-right">
+            <div class="stock-price">$485.12</div>
+            <div class="stock-change">+4.23%</div>
+          </div>
+        </div>
+        <div class="stock-bullets">
+          <div class="bullet">First-ever dividend announcement and $50B buyback program signals confidence in cash generation</div>
+          <div class="bullet">Social media giant operating Facebook, Instagram, WhatsApp with 3.9B monthly users</div>
+        </div>
+      </div>
+
+      <div class="stock-item">
+        <div class="stock-header">
+          <div class="stock-left">
+            <span class="stock-ticker">SMCI</span>
+            <span class="stock-name">Super Micro Computer</span>
+          </div>
+          <div class="stock-right">
+            <div class="stock-price">$1,024.56</div>
+            <div class="stock-change">+3.89%</div>
+          </div>
+        </div>
+        <div class="stock-bullets">
+          <div class="bullet">S&P 500 inclusion driving institutional buying; server demand for AI infrastructure strong</div>
+          <div class="bullet">Enterprise server and storage solutions provider, key supplier for AI data centers</div>
+        </div>
+      </div>
+
+      <div class="stock-item">
+        <div class="stock-header">
+          <div class="stock-left">
+            <span class="stock-ticker">MSFT</span>
+            <span class="stock-name">Microsoft Corporation</span>
+          </div>
+          <div class="stock-right">
+            <div class="stock-price">$415.67</div>
+            <div class="stock-change">+2.45%</div>
+          </div>
+        </div>
+        <div class="stock-bullets">
+          <div class="bullet">Azure cloud revenue accelerated to 30% growth on AI services adoption by enterprises</div>
+          <div class="bullet">Global technology leader in cloud computing, productivity software, and AI infrastructure</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Losers Panel -->
+    <div class="panel losers">
+      <div class="panel-header">
+        <h2 class="panel-title">Top 5 Losers</h2>
+        <p class="panel-subtitle">S&P 500 Index</p>
+      </div>
+
+      <div class="stock-item">
+        <div class="stock-header">
+          <div class="stock-left">
+            <span class="stock-ticker">BA</span>
+            <span class="stock-name">Boeing Company</span>
+          </div>
+          <div class="stock-right">
+            <div class="stock-price">$187.23</div>
+            <div class="stock-change">-6.84%</div>
+          </div>
+        </div>
+        <div class="stock-bullets">
+          <div class="bullet">FAA extends 737 MAX production cap following door plug incident; delivery timeline at risk</div>
+          <div class="bullet">Aerospace manufacturer producing commercial aircraft, defense systems, and space vehicles</div>
+        </div>
+      </div>
+
+      <div class="stock-item">
+        <div class="stock-header">
+          <div class="stock-left">
+            <span class="stock-ticker">PYPL</span>
+            <span class="stock-name">PayPal Holdings</span>
+          </div>
+          <div class="stock-right">
+            <div class="stock-price">$62.18</div>
+            <div class="stock-change">-5.21%</div>
+          </div>
+        </div>
+        <div class="stock-bullets">
+          <div class="bullet">Guidance disappointed as competition from Apple Pay and buy-now-pay-later intensifies</div>
+          <div class="bullet">Digital payments platform enabling online transactions for consumers and merchants globally</div>
+        </div>
+      </div>
+
+      <div class="stock-item">
+        <div class="stock-header">
+          <div class="stock-left">
+            <span class="stock-ticker">CVS</span>
+            <span class="stock-name">CVS Health Corporation</span>
+          </div>
+          <div class="stock-right">
+            <div class="stock-price">$72.45</div>
+            <div class="stock-change">-4.56%</div>
+          </div>
+        </div>
+        <div class="stock-bullets">
+          <div class="bullet">Medicare Advantage margin pressure worse than expected; 2024 guidance cut significantly</div>
+          <div class="bullet">Integrated healthcare company with pharmacy retail, PBM services, and health insurance</div>
+        </div>
+      </div>
+
+      <div class="stock-item">
+        <div class="stock-header">
+          <div class="stock-left">
+            <span class="stock-ticker">ENPH</span>
+            <span class="stock-name">Enphase Energy</span>
+          </div>
+          <div class="stock-right">
+            <div class="stock-price">$98.34</div>
+            <div class="stock-change">-3.92%</div>
+          </div>
+        </div>
+        <div class="stock-bullets">
+          <div class="bullet">European solar demand softening on interest rates; inventory destocking continues in Q1</div>
+          <div class="bullet">Solar microinverter technology company enabling residential and commercial installations</div>
+        </div>
+      </div>
+
+      <div class="stock-item">
+        <div class="stock-header">
+          <div class="stock-left">
+            <span class="stock-ticker">DIS</span>
+            <span class="stock-name">Walt Disney Company</span>
+          </div>
+          <div class="stock-right">
+            <div class="stock-price">$108.92</div>
+            <div class="stock-change">-2.87%</div>
+          </div>
+        </div>
+        <div class="stock-bullets">
+          <div class="bullet">Streaming subscriber growth slowing; parks segment facing tough comps from post-COVID surge</div>
+          <div class="bullet">Entertainment conglomerate with theme parks, streaming services, and media networks</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="update-time">Updated Feb 4, 2026 4:00 PM ET</div>
+</body>
+</html>

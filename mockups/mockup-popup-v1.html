@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Update Detail - Clean Card Style</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: rgba(0, 0, 0, 0.5);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+
+        .popup-card {
+            position: relative;
+            z-index: 2;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+            max-width: 600px;
+            width: 100%;
+            padding: 32px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close-button {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #f5f5f5;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .close-button:hover {
+            background: #e0e0e0;
+        }
+
+        .close-button svg {
+            width: 16px;
+            height: 16px;
+            color: #666;
+        }
+
+        .header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding-right: 32px;
+        }
+
+        .header-icon {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-icon svg {
+            width: 24px;
+            height: 24px;
+            color: white;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a1a1a;
+            line-height: 1.4;
+        }
+
+        .content {
+            color: #333;
+            line-height: 1.7;
+        }
+
+        .content p {
+            margin-bottom: 16px;
+        }
+
+        .content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .content strong {
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .timestamp {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #eee;
+            font-size: 13px;
+            color: #888;
+        }
+
+        /* Loading State */
+        .loading {
+            display: none;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .loading-content {
+            display: none;
+        }
+
+        .loading.active + .loaded-content {
+            display: none;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+        }
+
+        .skeleton-title {
+            height: 24px;
+            width: 80%;
+            margin-bottom: 24px;
+        }
+
+        .skeleton-line {
+            height: 16px;
+            margin-bottom: 12px;
+        }
+
+        .skeleton-line:nth-child(2) { width: 100%; }
+        .skeleton-line:nth-child(3) { width: 95%; }
+        .skeleton-line:nth-child(4) { width: 88%; }
+        .skeleton-line:nth-child(5) { width: 92%; }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .popup-card {
+                padding: 24px;
+            }
+
+            .header-title {
+                font-size: 18px;
+            }
+
+            .content {
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+
+    <div class="popup-card">
+        <button class="close-button" onclick="closePopup()">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+
+        <!-- Loading State -->
+        <div class="loading" id="loadingState">
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-line"></div>
+            <div class="skeleton skeleton-line"></div>
+            <div class="skeleton skeleton-line"></div>
+            <div class="skeleton skeleton-line"></div>
+            <div class="skeleton skeleton-line" style="width: 60%;"></div>
+        </div>
+
+        <!-- Loaded Content -->
+        <div class="loaded-content">
+            <div class="header">
+                <div class="header-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                </div>
+                <h1 class="header-title">Fed signals potential rate cuts as inflation cools</h1>
+            </div>
+
+            <div class="content">
+                <p>
+                    Federal Reserve officials indicated at their latest policy meeting that <strong>interest rate cuts could begin as early as the second quarter</strong> if inflation continues its downward trajectory. The shift in tone marks a significant pivot from the hawkish stance maintained throughout much of the previous year.
+                </p>
+                <p>
+                    Recent economic data has bolstered the case for monetary easing. <strong>Core PCE inflation fell to 2.4% year-over-year</strong>, approaching the Fed's 2% target for the first time since early 2021. Meanwhile, the labor market has shown signs of gradual cooling without triggering significant job losses, achieving what economists call a "soft landing" scenario.
+                </p>
+                <p>
+                    Market participants have responded enthusiastically to the dovish signals. Treasury yields declined across the curve, with <strong>the 10-year yield falling 15 basis points to 3.85%</strong>. Equity markets rallied broadly, led by rate-sensitive sectors including real estate and utilities.
+                </p>
+                <p>
+                    However, Fed Chair Powell cautioned that <strong>the path forward remains data-dependent</strong>. Officials emphasized they will need to see sustained progress on inflation before committing to a specific timeline for rate reductions. The next inflation report, due in two weeks, will be closely watched for confirmation of the disinflationary trend.
+                </p>
+            </div>
+
+            <div class="timestamp">
+                Updated: February 4, 2026 at 9:45 AM EST
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function closePopup() {
+            document.querySelector('.popup-card').style.animation = 'fadeOut 0.2s ease-out forwards';
+            setTimeout(() => {
+                alert('Popup closed');
+            }, 200);
+        }
+
+        // Demo: Toggle loading state
+        function toggleLoading() {
+            const loading = document.getElementById('loadingState');
+            loading.classList.toggle('active');
+        }
+
+        // Simulate loading on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const loading = document.getElementById('loadingState');
+            loading.classList.add('active');
+            setTimeout(() => {
+                loading.classList.remove('active');
+            }, 1500);
+        });
+    </script>
+
+    <style>
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+</body>
+</html>

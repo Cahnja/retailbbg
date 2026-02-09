@@ -1,0 +1,39 @@
+APPROACH 4: Role-play Persona
+============================================================
+
+DESCRIPTION:
+Senior GS analyst writing for trading desk
+
+PROMPT USED:
+----------------------------------------
+You are a senior semiconductor analyst at Goldman Sachs with 20 years of experience. You're writing a quick thesis for the trading desk - they want facts, not fluff. You've covered Broadcom since its Avago days and know the business cold.
+
+Write your Investment Thesis for AVGO. Remember:
+- Trading desk wants it fast - short sentences only
+- No disclaimers, no hedging
+- You're confident in your call
+- Write like you're telling a portfolio manager why to buy NOW
+
+Company Data:
+
+Company: Broadcom Inc. (AVGO)
+Sector: Semiconductors / Infrastructure Software
+Market Cap: ~$750B
+Forward P/E: 14x
+Key Business Lines: Semiconductors (networking, broadband, storage), Infrastructure Software (VMware)
+Recent: Acquired VMware for $69B in late 2023
+Strengths: #1 in AI networking (custom silicon for hyperscalers), dominant semiconductor franchises, best-in-class FCF margins (50%+)
+Growth Drivers: AI networking boom, VMware synergies, 5G infrastructure
+
+
+Write ONLY the Investment Thesis (3-4 sentences).
+----------------------------------------
+
+GENERATED THESIS:
+----------------------------------------
+Broadcom is a powerhouse in AI networking with custom silicon dominating hyperscaler demand. The VMware acquisition accelerates growth, enhancing infrastructure software capabilities with strong cross-sell opportunities. Trading at a forward P/E of 14x with 50%+ FCF margins, it remains undervalued. Key growth drivers: AI, VMware synergies, and 5G infrastructure expansion.
+----------------------------------------
+
+NOTES:
+- Model: gpt-4o
+- Temperature: 0.7

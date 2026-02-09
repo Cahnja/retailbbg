@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Top Movers - Unified Style V2 (Card/Timeline Layout)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f8f9fa;
+      color: #202124;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Navigation Banner - Matching Market Update */
+    .nav-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #00205b;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-items {
+      display: flex;
+      gap: 6px;
+      padding: 0 8px;
+    }
+
+    .nav-item {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      padding: 6px 16px;
+      border-radius: 16px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-item.active {
+      color: #00205b;
+      background: white;
+      font-weight: 600;
+    }
+
+    /* Main Content - Market Update Style */
+    .main-content {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 32px;
+      padding-top: 72px;
+    }
+
+    /* Page Header - Market Update Style */
+    .page-header {
+      margin-bottom: 32px;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 600;
+      color: #1e3a5f;
+      margin-bottom: 8px;
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      color: #5f6368;
+      font-weight: 400;
+    }
+
+    /* Timestamp - Market Update Style */
+    .timestamp {
+      font-size: 12px;
+      color: #80868b;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background: #137333;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Index Selector - Refined Style */
+    .index-selector-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .index-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #1e3a5f;
+    }
+
+    .index-selector {
+      font-size: 14px;
+      padding: 10px 36px 10px 14px;
+      border: 1px solid #e8eaed;
+      border-radius: 8px;
+      background: white;
+      color: #1a1a1a;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235f6368' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      min-width: 180px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .index-selector:hover {
+      border-color: #2d5a87;
+    }
+
+    .index-selector:focus {
+      outline: none;
+      border-color: #2d5a87;
+      box-shadow: 0 0 0 3px rgba(45, 90, 135, 0.1);
+    }
+
+    /* Section Header - Market Update Style */
+    .section-header {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e8f0f7;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-header.gainers {
+      color: #137333;
+    }
+
+    .section-header.losers {
+      color: #c5221f;
+    }
+
+    .section-header svg {
+      width: 16px;
+      height: 16px;
+      margin-right: 8px;
+    }
+
+    .section-header-left {
+      display: flex;
+      align-items: center;
+    }
+
+    /* Timeline Feed - Market Update Style */
+    .timeline-feed {
+      position: relative;
+      margin-bottom: 40px;
+    }
+
+    .timeline-feed::before {
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+    }
+
+    .timeline-feed.gainers::before {
+      background: linear-gradient(180deg, #137333 0%, #e8f0f7 100%);
+    }
+
+    .timeline-feed.losers::before {
+      background: linear-gradient(180deg, #c5221f 0%, #e8f0f7 100%);
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-left: 40px;
+      padding-bottom: 24px;
+      cursor: pointer;
+    }
+
+    .timeline-item:last-child {
+      padding-bottom: 0;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: 0;
+      top: 6px;
+      width: 14px;
+      height: 14px;
+      background: #ffffff;
+      border: 3px solid;
+      border-radius: 50%;
+      z-index: 1;
+      transition: all 0.2s;
+    }
+
+    .timeline-feed.gainers .timeline-dot {
+      border-color: #137333;
+    }
+
+    .timeline-feed.losers .timeline-dot {
+      border-color: #c5221f;
+    }
+
+    .timeline-item:hover .timeline-dot {
+      transform: scale(1.2);
+    }
+
+    .timeline-feed.gainers .timeline-item:hover .timeline-dot {
+      background: #137333;
+    }
+
+    .timeline-feed.losers .timeline-item:hover .timeline-dot {
+      background: #c5221f;
+    }
+
+    /* Stock Card - Market Update Timeline Card Style */
+    .stock-card {
+      background: #ffffff;
+      border-radius: 12px;
+      border: 1px solid #e8eaed;
+      padding: 20px;
+      border-left: 4px solid;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .timeline-feed.gainers .stock-card {
+      border-left-color: #137333;
+    }
+
+    .timeline-feed.losers .stock-card {
+      border-left-color: #c5221f;
+    }
+
+    .timeline-item:hover .stock-card {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      transform: translateX(4px);
+    }
+
+    .timeline-feed.gainers .timeline-item:hover .stock-card {
+      border-left-color: #0d5c28;
+    }
+
+    .timeline-feed.losers .timeline-item:hover .stock-card {
+      border-left-color: #9c1b19;
+    }
+
+    /* Stock Card Header */
+    .stock-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .stock-info {
+      flex: 1;
+    }
+
+    .stock-ticker {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1e3a5f;
+    }
+
+    .stock-name {
+      font-size: 13px;
+      color: #5f6368;
+      margin-top: 2px;
+    }
+
+    .stock-metrics {
+      text-align: right;
+    }
+
+    .stock-change {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .stock-change.positive {
+      color: #137333;
+    }
+
+    .stock-change.negative {
+      color: #c5221f;
+    }
+
+    .stock-price {
+      font-size: 13px;
+      color: #5f6368;
+      margin-top: 2px;
+    }
+
+    /* Stock Card Body - Explanation */
+    .stock-explanation {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #3c4043;
+      margin-bottom: 16px;
+    }
+
+    /* Explanation bullets */
+    .explanation-bullets {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .explanation-bullets li {
+      margin-bottom: 8px;
+      line-height: 1.6;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .explanation-bullets li:last-child {
+      margin-bottom: 0;
+    }
+
+    .explanation-bullets li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 8px;
+      width: 6px;
+      height: 6px;
+      background: #2d5a87;
+      border-radius: 50%;
+    }
+
+    /* Stock Card Footer */
+    .stock-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 12px;
+      border-top: 1px solid #e8f0f7;
+    }
+
+    .stock-tags {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .driver-tag {
+      background: #e8f0f7;
+      color: #1e3a5f;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+      font-size: 11px;
+    }
+
+    .impact-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 500;
+      font-size: 11px;
+    }
+
+    .impact-badge.high {
+      color: #c5221f;
+    }
+
+    .impact-badge.medium {
+      color: #ea8600;
+    }
+
+    .impact-badge svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .earnings-link a {
+      font-size: 12px;
+      color: #00205b;
+      text-decoration: none;
+      background: #e8f0fe;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .earnings-link a:hover {
+      background: #c2d9fc;
+    }
+
+    /* Arrow indicator */
+    .stock-arrow {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #2d5a87;
+      background: #f8fafc;
+      border-radius: 8px;
+      flex-shrink: 0;
+      opacity: 0;
+      transition: opacity 0.2s;
+      margin-left: 16px;
+    }
+
+    .timeline-item:hover .stock-arrow {
+      opacity: 1;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 24px 16px;
+        padding-top: 64px;
+      }
+
+      .stock-header {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .stock-metrics {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav-banner">
+    <div class="nav-items">
+      <a href="#" class="nav-item">Market Update</a>
+      <a href="#" class="nav-item active">Top Movers</a>
+      <a href="#" class="nav-item">Portfolio</a>
+      <a href="#" class="nav-item">Idea Generation</a>
+      <a href="#" class="nav-item">Initiation</a>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1 class="page-title">Top Movers</h1>
+      <p class="page-subtitle">Today's biggest gainers and losers with AI-powered analysis</p>
+    </div>
+
+    <div class="index-selector-wrapper">
+      <label class="index-label" for="index-select">Index</label>
+      <select id="index-select" class="index-selector">
+        <option value="sp500">S&P 500</option>
+        <option value="nasdaq">Nasdaq 100</option>
+        <option value="dow">Dow Jones 30</option>
+      </select>
+    </div>
+
+    <div class="timestamp">
+      <span class="live-dot"></span>
+      <span>Last updated: Feb 4, 2026 at 3:45 PM EST</span>
+    </div>
+
+    <!-- Top Gainers Section -->
+    <div class="section-header gainers">
+      <div class="section-header-left">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+        </svg>
+        Top Gainers
+      </div>
+    </div>
+
+    <div class="timeline-feed gainers">
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="stock-card">
+          <div class="stock-header">
+            <div class="stock-info">
+              <div class="stock-ticker">NVDA</div>
+              <div class="stock-name">NVIDIA Corporation</div>
+            </div>
+            <div class="stock-metrics">
+              <div class="stock-change positive">+8.24%</div>
+              <div class="stock-price">$892.45 (+$68.12)</div>
+            </div>
+          </div>
+          <div class="stock-explanation">
+            <ul class="explanation-bullets">
+              <li>Shares surged following strong Q4 earnings beat with data center revenue up 409% YoY.</li>
+              <li>CEO Jensen Huang announced expanded AI chip production capacity for H100 and B100 GPUs.</li>
+              <li>Multiple analyst upgrades with price targets raised to $1,000+.</li>
+            </ul>
+          </div>
+          <div class="stock-footer">
+            <div class="stock-tags">
+              <span class="driver-tag">Earnings</span>
+              <span class="impact-badge high">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                </svg>
+                High Impact
+              </span>
+            </div>
+            <div class="earnings-link">
+              <a href="#">See Earnings Review</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="stock-card">
+          <div class="stock-header">
+            <div class="stock-info">
+              <div class="stock-ticker">META</div>
+              <div class="stock-name">Meta Platforms Inc</div>
+            </div>
+            <div class="stock-metrics">
+              <div class="stock-change positive">+5.67%</div>
+              <div class="stock-price">$534.21 (+$28.65)</div>
+            </div>
+          </div>
+          <div class="stock-explanation">
+            <ul class="explanation-bullets">
+              <li>Company announced first-ever dividend and $50B stock buyback program.</li>
+              <li>Reality Labs losses narrowing as Quest 3 sales exceed expectations.</li>
+            </ul>
+          </div>
+          <div class="stock-footer">
+            <div class="stock-tags">
+              <span class="driver-tag">Corporate Action</span>
+              <span class="impact-badge high">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                </svg>
+                High Impact
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="stock-card">
+          <div class="stock-header">
+            <div class="stock-info">
+              <div class="stock-ticker">AMD</div>
+              <div class="stock-name">Advanced Micro Devices</div>
+            </div>
+            <div class="stock-metrics">
+              <div class="stock-change positive">+4.12%</div>
+              <div class="stock-price">$178.34 (+$7.06)</div>
+            </div>
+          </div>
+          <div class="stock-explanation">
+            <ul class="explanation-bullets">
+              <li>MI300X AI chip orders reportedly doubled from major cloud providers.</li>
+              <li>Benefiting from NVIDIA supply constraints driving customers to seek alternatives.</li>
+            </ul>
+          </div>
+          <div class="stock-footer">
+            <div class="stock-tags">
+              <span class="driver-tag">Technology</span>
+              <span class="impact-badge medium">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                Medium Impact
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Losers Section -->
+    <div class="section-header losers">
+      <div class="section-header-left">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6"/>
+        </svg>
+        Top Losers
+      </div>
+    </div>
+
+    <div class="timeline-feed losers">
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="stock-card">
+          <div class="stock-header">
+            <div class="stock-info">
+              <div class="stock-ticker">BA</div>
+              <div class="stock-name">Boeing Company</div>
+            </div>
+            <div class="stock-metrics">
+              <div class="stock-change negative">-6.82%</div>
+              <div class="stock-price">$198.76 (-$14.56)</div>
+            </div>
+          </div>
+          <div class="stock-explanation">
+            <ul class="explanation-bullets">
+              <li>FAA announced expanded investigation into 737 MAX quality control issues.</li>
+              <li>Production rate cuts expected to impact Q1 deliveries significantly.</li>
+              <li>Multiple airlines reported concerns about delivery timeline delays.</li>
+            </ul>
+          </div>
+          <div class="stock-footer">
+            <div class="stock-tags">
+              <span class="driver-tag">Regulatory</span>
+              <span class="impact-badge high">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                </svg>
+                High Impact
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="stock-card">
+          <div class="stock-header">
+            <div class="stock-info">
+              <div class="stock-ticker">NFLX</div>
+              <div class="stock-name">Netflix Inc</div>
+            </div>
+            <div class="stock-metrics">
+              <div class="stock-change negative">-4.23%</div>
+              <div class="stock-price">$562.89 (-$24.89)</div>
+            </div>
+          </div>
+          <div class="stock-explanation">
+            <ul class="explanation-bullets">
+              <li>Subscriber guidance for Q1 came in below analyst expectations.</li>
+              <li>Increased content spending weighing on near-term margin outlook.</li>
+            </ul>
+          </div>
+          <div class="stock-footer">
+            <div class="stock-tags">
+              <span class="driver-tag">Earnings</span>
+              <span class="impact-badge medium">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                Medium Impact
+              </span>
+            </div>
+            <div class="earnings-link">
+              <a href="#">See Earnings Review</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="stock-card">
+          <div class="stock-header">
+            <div class="stock-info">
+              <div class="stock-ticker">DIS</div>
+              <div class="stock-name">Walt Disney Company</div>
+            </div>
+            <div class="stock-metrics">
+              <div class="stock-change negative">-3.56%</div>
+              <div class="stock-price">$112.45 (-$4.15)</div>
+            </div>
+          </div>
+          <div class="stock-explanation">
+            <ul class="explanation-bullets">
+              <li>Disney+ subscriber growth slowing in key international markets.</li>
+              <li>Theme park attendance projections lowered for summer season.</li>
+            </ul>
+          </div>
+          <div class="stock-footer">
+            <div class="stock-tags">
+              <span class="driver-tag">Consumer</span>
+              <span class="impact-badge medium">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                Medium Impact
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

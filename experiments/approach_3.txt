@@ -1,0 +1,46 @@
+APPROACH 3: Negative Examples
+============================================================
+
+DESCRIPTION:
+Shows what NOT to write alongside what TO write
+
+PROMPT USED:
+----------------------------------------
+Write an Investment Thesis for Broadcom (AVGO).
+
+DO NOT write like this (BAD - too verbose, generic, filler-laden):
+"Broadcom commands a dominant position in semiconductors with industry-leading FCF generation, benefiting from secular trends in AI and 5G. Its acquisition of VMware positions the company as an infrastructure software leader, enhancing revenue diversification and synergies. Despite trading at 14x forward earnings, AVGO presents a compelling risk/reward proposition."
+
+Problems with the bad example:
+- "commands a dominant position" - wordy
+- "benefiting from secular trends" - filler
+- "positions the company" - corporate speak
+- "enhancing revenue diversification and synergies" - buzzwords
+- "compelling risk/reward proposition" - cliche
+
+WRITE like this (GOOD - punchy, direct, confident):
+"[Company] dominates [market]. [Key catalyst] transforms the business. [Growth driver] accelerating. Trading at discount to intrinsic value."
+
+Company Data:
+
+Company: Broadcom Inc. (AVGO)
+Sector: Semiconductors / Infrastructure Software
+Market Cap: ~$750B
+Forward P/E: 14x
+Key Business Lines: Semiconductors (networking, broadband, storage), Infrastructure Software (VMware)
+Recent: Acquired VMware for $69B in late 2023
+Strengths: #1 in AI networking (custom silicon for hyperscalers), dominant semiconductor franchises, best-in-class FCF margins (50%+)
+Growth Drivers: AI networking boom, VMware synergies, 5G infrastructure
+
+
+Write ONLY the Investment Thesis (3-4 sentences). Be punchy and direct.
+----------------------------------------
+
+GENERATED THESIS:
+----------------------------------------
+Broadcom dominates semiconductors and infrastructure software. The VMware acquisition transforms its software capabilities, boosting synergies and diversification. AI networking and 5G infrastructure accelerate growth. AVGO trades at a discount to intrinsic value.
+----------------------------------------
+
+NOTES:
+- Model: gpt-4o
+- Temperature: 0.7

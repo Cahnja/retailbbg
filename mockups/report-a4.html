@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report Option A4 - Refined Classic</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Times New Roman', Georgia, serif;
+      background: #fafafa;
+      color: #1a1a1a;
+      line-height: 1.65;
+    }
+
+    .page {
+      background: white;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 48px 56px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.05);
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 24px;
+    }
+    .header-left {
+      flex: 1;
+    }
+    .report-type {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #00205b;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    .company-name {
+      font-size: 38px;
+      color: #00205b;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .ticker-info {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 13px;
+      color: #666;
+    }
+    .header-right {
+      text-align: right;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+    .price {
+      font-size: 32px;
+      font-weight: bold;
+      color: #1a1a1a;
+    }
+    .rating-badge {
+      display: inline-block;
+      background: #00205b;
+      color: white;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin-top: 8px;
+    }
+
+    /* Metrics */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1px;
+      background: #ddd;
+      border: 1px solid #ddd;
+      margin-bottom: 28px;
+    }
+    .metric {
+      background: white;
+      padding: 14px 16px;
+      text-align: center;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+    .metric-label {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #888;
+      margin-bottom: 6px;
+    }
+    .metric-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    /* Thesis */
+    .thesis {
+      background: #00205b;
+      color: white;
+      padding: 24px 28px;
+      margin-bottom: 32px;
+    }
+    .thesis-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .thesis-icon {
+      width: 24px;
+      height: 24px;
+      background: white;
+      color: #00205b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+      margin-right: 12px;
+    }
+    .thesis-label {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      opacity: 0.8;
+    }
+    .thesis-text {
+      font-size: 17px;
+      line-height: 1.6;
+    }
+    .thesis-text strong {
+      color: #7dd3fc;
+    }
+
+    /* Sections */
+    h2 {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #00205b;
+      margin-top: 40px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+    }
+    h2::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 18px;
+      background: #00205b;
+      margin-right: 12px;
+    }
+
+    p {
+      margin-bottom: 16px;
+      text-align: justify;
+      font-size: 15px;
+    }
+
+    .insight-box {
+      background: #f0f4f8;
+      border-left: 4px solid #00205b;
+      padding: 16px 20px;
+      margin: 24px 0;
+    }
+    .insight-label {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #00205b;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .insight-text {
+      font-style: italic;
+      color: #333;
+    }
+
+    h3 {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-top: 28px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div class="header-left">
+        <div class="report-type">Initiation of Coverage</div>
+        <div class="company-name">Broadcom Inc.</div>
+        <div class="ticker-info">NASDAQ: AVGO · Semiconductors</div>
+      </div>
+      <div class="header-right">
+        <div class="price">$185.32</div>
+        <div class="rating-badge">BUY · PT $220</div>
+      </div>
+    </div>
+
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-label">Market Cap</div>
+        <div class="metric-value">$774B</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">P/E (FY25)</div>
+        <div class="metric-value">24.5x</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">EV/EBITDA</div>
+        <div class="metric-value">18.2x</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Div Yield</div>
+        <div class="metric-value">1.4%</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Upside</div>
+        <div class="metric-value">+19%</div>
+      </div>
+    </div>
+
+    <div class="thesis">
+      <div class="thesis-header">
+        <div class="thesis-icon">!</div>
+        <div class="thesis-label">Investment Thesis</div>
+      </div>
+      <div class="thesis-text">
+        <strong>Buy AVGO.</strong> Dominant semiconductor franchise with unmatched FCF generation. VMware acquisition transforms the business into an infrastructure software powerhouse. AI networking tailwinds accelerating. Trading at discount to intrinsic value despite best-in-class capital allocation.
+      </div>
+    </div>
+
+    <h2>Business Overview</h2>
+    <p>
+      Broadcom Inc. is a global technology leader that designs, develops, and supplies semiconductor and infrastructure software solutions. The company operates through two segments: Semiconductor Solutions and Infrastructure Software.
+    </p>
+    <p>
+      Founded in 1961 as a division of Hewlett-Packard, the company has grown through strategic acquisitions including Brocade, CA Technologies, and most recently VMware in a landmark $69 billion deal that closed in November 2023.
+    </p>
+
+    <div class="insight-box">
+      <div class="insight-label">Key Insight</div>
+      <div class="insight-text">
+        Broadcom's semiconductor business generates 50%+ gross margins with minimal capex requirements, resulting in industry-leading free cash flow conversion.
+      </div>
+    </div>
+
+    <h2>Thesis Details</h2>
+
+    <h3>1. AI Networking Leadership</h3>
+    <p>
+      Broadcom's custom AI accelerators (XPUs) and networking solutions position the company at the center of hyperscaler AI infrastructure buildouts. The company has design wins with three of the four major cloud providers.
+    </p>
+
+    <h3>2. VMware Integration</h3>
+    <p>
+      The VMware acquisition provides Broadcom with a recurring revenue software business that complements its semiconductor operations. Management targets $8.5B in run-rate synergies within three years.
+    </p>
+
+    <h2>Key Risks</h2>
+    <p>
+      Customer concentration remains elevated with Apple representing approximately 20% of semiconductor revenue. Integration execution risk on VMware. Cyclical exposure to enterprise IT spending.
+    </p>
+  </div>
+</body>
+</html>

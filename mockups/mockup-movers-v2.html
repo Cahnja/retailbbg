@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Top Movers - Table Layout</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #ffffff;
+      color: #202124;
+      line-height: 1.5;
+    }
+
+    /* Navigation Banner - 40px pill tabs */
+    .nav-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #00205b;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .nav-items {
+      display: flex;
+      gap: 6px;
+    }
+    .nav-item {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      padding: 6px 16px;
+      border-radius: 16px;
+      transition: all 0.2s ease;
+    }
+    .nav-item:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .nav-item.active {
+      color: #00205b;
+      background: white;
+      font-weight: 600;
+    }
+
+    /* Main Content */
+    .main-content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 80px 24px 40px;
+    }
+
+    /* Page Header */
+    .page-header {
+      margin-bottom: 40px;
+      text-align: center;
+    }
+    .page-title {
+      font-size: 24px;
+      font-weight: 400;
+      color: #202124;
+      margin-bottom: 4px;
+    }
+    .page-subtitle {
+      font-size: 14px;
+      color: #5f6368;
+    }
+
+    /* Section */
+    .section {
+      margin-bottom: 48px;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .section-icon {
+      width: 20px;
+      height: 20px;
+    }
+    .section-icon.up { color: #137333; }
+    .section-icon.down { color: #c5221f; }
+    .section-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: #202124;
+    }
+
+    /* Table Styles - Google Finance inspired */
+    .movers-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .movers-table tbody tr {
+      border-bottom: 1px solid #e8eaed;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .movers-table tbody tr:hover {
+      background: #f8f9fa;
+    }
+    .movers-table td {
+      padding: 16px 0;
+      vertical-align: top;
+    }
+    .movers-table td:first-child {
+      width: 120px;
+    }
+    .movers-table td:last-child {
+      width: 100px;
+      text-align: right;
+    }
+
+    .stock-ticker {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a73e8;
+    }
+    .stock-name {
+      font-size: 12px;
+      color: #5f6368;
+      margin-top: 2px;
+    }
+    .stock-details {
+      padding-left: 16px;
+    }
+    .stock-catalyst {
+      font-size: 13px;
+      color: #3c4043;
+      margin-bottom: 4px;
+    }
+    .stock-description {
+      font-size: 12px;
+      color: #80868b;
+    }
+    .stock-price {
+      font-size: 14px;
+      font-weight: 500;
+      color: #202124;
+    }
+    .stock-change {
+      font-size: 13px;
+      font-weight: 500;
+      margin-top: 2px;
+    }
+    .stock-change.positive { color: #137333; }
+    .stock-change.negative { color: #c5221f; }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: #e8eaed;
+      margin: 8px 0 24px;
+    }
+
+    /* Update time */
+    .update-time {
+      text-align: center;
+      font-size: 12px;
+      color: #80868b;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav-banner">
+    <div class="nav-items">
+      <a href="/" class="nav-item">Initiate Coverage</a>
+      <a href="/market.html" class="nav-item">Market Update</a>
+      <a href="/portfolio.html" class="nav-item active">Top Movers</a>
+      <a href="/thematic.html" class="nav-item">Thematic Investments</a>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1 class="page-title">Top Movers</h1>
+      <p class="page-subtitle">S&P 500</p>
+    </div>
+
+    <!-- Gainers Section -->
+    <div class="section">
+      <div class="section-header">
+        <svg class="section-icon up" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M7 14l5-5 5 5H7z"/>
+        </svg>
+        <h2 class="section-title">Gainers</h2>
+      </div>
+      <table class="movers-table">
+        <tbody>
+          <tr>
+            <td>
+              <div class="stock-ticker">NVDA</div>
+              <div class="stock-name">NVIDIA Corp</div>
+            </td>
+            <td class="stock-details">
+              <div class="stock-catalyst">Strong Q4 earnings beat driven by data center AI chip demand</div>
+              <div class="stock-description">Leading GPU manufacturer for AI/ML workloads</div>
+            </td>
+            <td>
+              <div class="stock-price">$892.45</div>
+              <div class="stock-change positive">+8.42%</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="stock-ticker">AMD</div>
+              <div class="stock-name">AMD Inc</div>
+            </td>
+            <td class="stock-details">
+              <div class="stock-catalyst">MI300X AI accelerator gaining traction with hyperscalers</div>
+              <div class="stock-description">Semiconductor company for CPUs and GPUs</div>
+            </td>
+            <td>
+              <div class="stock-price">$178.32</div>
+              <div class="stock-change positive">+5.67%</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="stock-ticker">META</div>
+              <div class="stock-name">Meta Platforms</div>
+            </td>
+            <td class="stock-details">
+              <div class="stock-catalyst">First dividend and $50B buyback signals cash flow confidence</div>
+              <div class="stock-description">Social media giant with 3.9B monthly users</div>
+            </td>
+            <td>
+              <div class="stock-price">$485.12</div>
+              <div class="stock-change positive">+4.23%</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="stock-ticker">SMCI</div>
+              <div class="stock-name">Super Micro</div>
+            </td>
+            <td class="stock-details">
+              <div class="stock-catalyst">S&P 500 inclusion driving institutional buying</div>
+              <div class="stock-description">Enterprise servers for AI data centers</div>
+            </td>
+            <td>
+              <div class="stock-price">$1,024.56</div>
+              <div class="stock-change positive">+3.89%</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="stock-ticker">MSFT</div>
+              <div class="stock-name">Microsoft</div>
+            </td>
+            <td class="stock-details">
+              <div class="stock-catalyst">Azure cloud revenue accelerated on AI services adoption</div>
+              <div class="stock-description">Cloud computing and productivity software leader</div>
+            </td>
+            <td>
+              <div class="stock-price">$415.67</div>
+              <div class="stock-change positive">+2.45%</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Losers Section -->
+    <div class="section">
+      <div class="section-header">
+        <svg class="section-icon down" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M7 10l5 5 5-5H7z"/>
+        </svg>
+        <h2 class="section-title">Losers</h2>
+      </div>
+      <table class="movers-table">
+        <tbody>
+          <tr>
+            <td>
+              <div class="stock-ticker">BA</div>
+              <div class="stock-name">Boeing</div>
+            </td>
+            <td class="stock-details">
+              <div class="stock-catalyst">FAA extends 737 MAX production cap after door incident</div>
+              <div class="stock-description">Aerospace manufacturer of commercial aircraft</div>
+            </td>
+            <td>
+              <div class="stock-price">$187.23</div>
+              <div class="stock-change negative">-6.84%</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="stock-ticker">PYPL</div>
+              <div class="stock-name">PayPal</div>
+            </td>
+            <td class="stock-details">
+              <div class="stock-catalyst">Guidance disappointed amid Apple Pay and BNPL competition</div>
+              <div class="stock-description">Digital payments platform for online transactions</div>
+            </td>
+            <td>
+              <div class="stock-price">$62.18</div>
+              <div class="stock-change negative">-5.21%</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="stock-ticker">CVS</div>
+              <div class="stock-name">CVS Health</div>
+            </td>
+            <td class="stock-details">
+              <div class="stock-catalyst">Medicare Advantage margin pressure, 2024 guidance cut</div>
+              <div class="stock-description">Integrated healthcare with pharmacy and insurance</div>
+            </td>
+            <td>
+              <div class="stock-price">$72.45</div>
+              <div class="stock-change negative">-4.56%</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="stock-ticker">ENPH</div>
+              <div class="stock-name">Enphase Energy</div>
+            </td>
+            <td class="stock-details">
+              <div class="stock-catalyst">European solar demand softening on interest rates</div>
+              <div class="stock-description">Solar microinverter technology company</div>
+            </td>
+            <td>
+              <div class="stock-price">$98.34</div>
+              <div class="stock-change negative">-3.92%</div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="stock-ticker">DIS</div>
+              <div class="stock-name">Disney</div>
+            </td>
+            <td class="stock-details">
+              <div class="stock-catalyst">Streaming growth slowing, parks facing tough comps</div>
+              <div class="stock-description">Entertainment with parks, streaming, and media</div>
+            </td>
+            <td>
+              <div class="stock-price">$108.92</div>
+              <div class="stock-change negative">-2.87%</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="update-time">Market data as of February 4, 2026, 4:00 PM ET</div>
+  </main>
+</body>
+</html>

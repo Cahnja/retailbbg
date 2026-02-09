@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Approach Comparison - AVGO</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Times New Roman', Georgia, serif;
+      background: #fafafa;
+      color: #1a1a1a;
+      line-height: 1.7;
+      padding: 40px;
+    }
+    h1 {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      color: #00205b;
+      margin-bottom: 40px;
+    }
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .approach {
+      background: white;
+      padding: 30px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.08);
+    }
+    .approach-title {
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #00205b;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #00205b;
+    }
+    .approach-desc {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 20px;
+      font-style: italic;
+    }
+    .thesis-box {
+      background: #00205b;
+      color: white;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+    .thesis-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .thesis-icon {
+      width: 26px;
+      height: 26px;
+      background: white;
+      color: #00205b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 15px;
+      margin-right: 12px;
+      font-family: Arial, sans-serif;
+    }
+    .thesis-label {
+      font-family: Arial, sans-serif;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      opacity: 0.8;
+    }
+    .thesis-text {
+      font-size: 17px;
+      line-height: 1.6;
+    }
+    .target {
+      background: #f5f5f5;
+      padding: 20px;
+      margin-bottom: 40px;
+      max-width: 1400px;
+      margin: 0 auto 40px;
+      border-left: 4px solid #00205b;
+    }
+    .target-label {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #00205b;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .target-text {
+      font-style: italic;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Investment Thesis Comparison - Broadcom (AVGO)</h1>
+
+  <div class="target">
+    <div class="target-label">Target Style (Original Mockup)</div>
+    <div class="target-text">"Dominant semiconductor franchise with unmatched FCF generation. VMware acquisition transforms the business into an infrastructure software powerhouse. AI networking tailwinds accelerating. Trading at discount to intrinsic value despite best-in-class capital allocation."</div>
+  </div>
+
+  <div class="comparison">
+    <div class="approach">
+      <div class="approach-title">Approach 1: Few-shot Example (Grade: A-)</div>
+      <div class="approach-desc">Shows the AI an example of good writing and says "write like this"</div>
+      <div class="thesis-box">
+        <div class="thesis-header">
+          <div class="thesis-icon">!</div>
+          <div class="thesis-label">Investment Thesis</div>
+        </div>
+        <div class="thesis-text">
+          Dominant semiconductor powerhouse with unrivaled FCF generation. VMware acquisition elevates the business into an infrastructure software leader. AI networking surge and 5G infrastructure expansion driving growth. Trading at discount to intrinsic value despite superior capital allocation.
+        </div>
+      </div>
+      <p><strong>Why it works:</strong> Mirrors the sentence rhythm, maintains confident tone, follows the same structure, doesn't start with company name.</p>
+    </div>
+
+    <div class="approach">
+      <div class="approach-title">Approach 2: Style Instructions (Grade: B+)</div>
+      <div class="approach-desc">Detailed rules: "short sentences, no filler, use active verbs"</div>
+      <div class="thesis-box">
+        <div class="thesis-header">
+          <div class="thesis-icon">!</div>
+          <div class="thesis-label">Investment Thesis</div>
+        </div>
+        <div class="thesis-text">
+          Broadcom dominates AI networking with top-tier custom silicon. The VMware acquisition boosts software capabilities and synergies. Strong semiconductor franchises drive consistent growth. Best-in-class FCF margins solidify financial strength.
+        </div>
+      </div>
+      <p><strong>Why it's weaker:</strong> Starts with "Broadcom", uses "boosts...synergies" (filler feel), missing the valuation point.</p>
+    </div>
+  </div>
+</body>
+</html>
