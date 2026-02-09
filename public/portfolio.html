@@ -971,8 +971,12 @@
 
       const explanation = stock.explanation || 'Analysis not available.';
 
-      // Split explanation into sentences (split on period followed by space)
-      const sentences = explanation.split(/\.\s+/).filter(s => s.trim());
+      // Split explanation into sentences, but not on abbreviations like Inc., Corp., Ltd., Co.
+      // Strategy: temporarily protect abbreviations, split, then restore
+      const protectedExplanation = explanation
+        .replace(/\b(Inc|Corp|Ltd|Co|Dr|Mr|Ms|St|Jr|Sr|Vs)\.\s/g, '$1{{DOT}} ');
+      const sentences = protectedExplanation.split(/\.\s+/).filter(s => s.trim())
+        .map(s => s.replace(/\{\{DOT\}\}/g, '.'));
 
       // Create a unique stock key for panel lookup
       const stockKey = `${stock.ticker}|${stock.companyName}|${stock.changePercent}`;
