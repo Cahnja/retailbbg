@@ -728,7 +728,7 @@
       position: fixed;
       top: 0;
       right: 0;
-      width: 480px;
+      width: 560px;
       max-width: 100%;
       height: 100vh;
       background: #ffffff;
@@ -744,14 +744,6 @@
       transform: translateX(0);
     }
 
-    .panel-header {
-      background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%);
-      padding: 24px;
-      color: white;
-      position: relative;
-      flex-shrink: 0;
-    }
-
     .panel-close-button {
       position: absolute;
       top: 16px;
@@ -759,77 +751,24 @@
       width: 36px;
       height: 36px;
       border: none;
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.06);
+      border-radius: 50%;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: background-color 0.2s;
+      z-index: 1;
     }
 
     .panel-close-button:hover {
-      background: rgba(255, 255, 255, 0.25);
+      background: rgba(0, 0, 0, 0.1);
     }
 
     .panel-close-button svg {
-      width: 20px;
-      height: 20px;
-      color: white;
-    }
-
-    .panel-label {
-      font-family: Arial, sans-serif;
-      font-size: 12px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      opacity: 0.8;
-      margin-bottom: 8px;
-    }
-
-    .panel-title {
-      font-family: Arial, sans-serif;
-      font-size: 20px;
-      font-weight: 600;
-      line-height: 1.4;
-      padding-right: 40px;
-      margin: 0;
-    }
-
-    .panel-ticker {
-      font-family: Arial, sans-serif;
-      font-size: 14px;
-      opacity: 0.9;
-      margin-top: 4px;
-    }
-
-    .panel-meta {
-      display: flex;
-      gap: 16px;
-      margin-top: 16px;
-      font-family: Arial, sans-serif;
-      font-size: 13px;
-      opacity: 0.9;
-    }
-
-    .meta-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .meta-item svg {
-      width: 14px;
-      height: 14px;
-    }
-
-    .meta-item.positive {
-      color: #90EE90;
-    }
-
-    .meta-item.negative {
-      color: #FFB6C1;
+      width: 18px;
+      height: 18px;
+      color: #5f6368;
     }
 
     .panel-content {
@@ -838,6 +777,187 @@
       padding: 24px;
     }
 
+    /* Stock Header in Panel */
+    .chart-stock-header {
+      margin-bottom: 4px;
+    }
+
+    .chart-company-name {
+      font-size: 22px;
+      font-weight: 700;
+      color: #202124;
+      line-height: 1.3;
+      margin: 0;
+    }
+
+    .chart-exchange-ticker {
+      font-size: 13px;
+      color: #5f6368;
+      margin-top: 2px;
+    }
+
+    /* Price Display */
+    .chart-price-section {
+      margin: 12px 0 4px 0;
+    }
+
+    .chart-current-price {
+      font-size: 32px;
+      font-weight: 700;
+      color: #202124;
+      line-height: 1.2;
+    }
+
+    .chart-price-change {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .chart-price-change.positive {
+      color: #137333;
+    }
+
+    .chart-price-change.negative {
+      color: #c5221f;
+    }
+
+    .chart-price-change .today-label {
+      color: #5f6368;
+      font-weight: 400;
+    }
+
+    .chart-timestamp {
+      font-size: 12px;
+      color: #5f6368;
+      margin-top: 4px;
+    }
+
+    /* Timeframe Tabs */
+    .chart-timeframe-tabs {
+      display: flex;
+      gap: 0;
+      margin: 16px 0 8px 0;
+      border-bottom: 1px solid #e8eaed;
+    }
+
+    .chart-tab {
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #5f6368;
+      background: none;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      transition: color 0.2s;
+    }
+
+    .chart-tab:hover {
+      color: #202124;
+    }
+
+    .chart-tab.active {
+      color: #1a73e8;
+    }
+
+    .chart-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: #1a73e8;
+      border-radius: 3px 3px 0 0;
+    }
+
+    /* Chart Container */
+    .chart-container {
+      position: relative;
+      width: 100%;
+      height: 240px;
+      margin: 8px 0 20px 0;
+    }
+
+    .chart-container svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .chart-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #5f6368;
+      font-size: 14px;
+    }
+
+    .chart-loading .spinner {
+      margin-right: 8px;
+    }
+
+    /* Chart tooltip */
+    .chart-tooltip {
+      position: absolute;
+      background: #202124;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      white-space: nowrap;
+      z-index: 10;
+    }
+
+    .chart-tooltip.visible {
+      opacity: 1;
+    }
+
+    /* Key Stats Grid */
+    .key-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0;
+      border: 1px solid #e8eaed;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .stat-item {
+      padding: 12px 14px;
+      border-bottom: 1px solid #e8eaed;
+      border-right: 1px solid #e8eaed;
+    }
+
+    .stat-item:nth-child(3n) {
+      border-right: none;
+    }
+
+    .stat-item:nth-last-child(-n+3) {
+      border-bottom: none;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #5f6368;
+      margin-bottom: 2px;
+    }
+
+    .stat-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #202124;
+    }
+
+    /* AI Analysis Section */
     .panel-section {
       margin-bottom: 24px;
     }
@@ -872,31 +992,6 @@
     .section-content strong {
       color: #1e3a5f;
       font-weight: 600;
-    }
-
-    .panel-footer {
-      padding: 16px 24px;
-      background: #f8f9fa;
-      border-top: 1px solid #e0e0e0;
-      flex-shrink: 0;
-    }
-
-    .panel-footer-btn {
-      font-family: Arial, sans-serif;
-      width: 100%;
-      background: #1e3a5f;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      font-size: 14px;
-      font-weight: 500;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .panel-footer-btn:hover {
-      background: #2d5a87;
     }
 
     /* Loading Skeleton */
@@ -952,7 +1047,7 @@
       text-decoration: underline;
     }
 
-    @media (max-width: 520px) {
+    @media (max-width: 600px) {
       .side-panel {
         width: 100%;
       }
@@ -2122,33 +2217,360 @@
     }
 
     // ========================================
-    // Side Panel Functions
+    // Side Panel / Stock Chart Functions
     // ========================================
+    let currentPanelTicker = null;
+    let currentPanelRange = '1d';
+    let currentChartData = null;
+    let currentQuoteData = null;
+
+    function formatLargeNumber(num) {
+      if (num == null) return '--';
+      if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
+      if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+      if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+      return num.toLocaleString();
+    }
+
+    function formatPrice(price) {
+      if (price == null) return '--';
+      return price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function formatPercent(val) {
+      if (val == null) return '--';
+      return (val >= 0 ? '+' : '') + val.toFixed(2) + '%';
+    }
+
+    function formatDollarChange(val) {
+      if (val == null) return '--';
+      return (val >= 0 ? '+' : '') + val.toFixed(2);
+    }
+
     function getCurrentTime() {
       const now = new Date();
       return now.toLocaleString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-        timeZoneName: 'short'
+        month: 'short', day: 'numeric', year: 'numeric',
+        hour: 'numeric', minute: '2-digit', hour12: true, timeZoneName: 'short'
       });
     }
 
-    function showLoadingState() {
+    function openStockPanel(ticker, companyName, changePercent) {
+      currentPanelTicker = ticker;
+      currentPanelRange = '1d';
+
+      const panelOverlay = document.getElementById('panel-overlay');
+      const sidePanel = document.getElementById('side-panel');
       const panelContent = document.getElementById('panel-content');
+
+      // Show loading state
       panelContent.innerHTML = `
-        <div class="panel-loading">
-          <div class="skeleton-section">
-            <div class="skeleton skeleton-label"></div>
-            <div class="skeleton skeleton-line" style="width: 100%;"></div>
-            <div class="skeleton skeleton-line" style="width: 95%;"></div>
-            <div class="skeleton skeleton-line" style="width: 88%;"></div>
-          </div>
-          <div class="skeleton-section">
+        <div class="chart-stock-header">
+          <h1 class="chart-company-name">${escapeHtml(companyName)}</h1>
+          <div class="chart-exchange-ticker">${escapeHtml(ticker)}</div>
+        </div>
+        <div class="chart-price-section">
+          <div class="chart-current-price">--</div>
+        </div>
+        <div class="chart-timeframe-tabs" id="chart-tabs">
+          ${['1D','5D','1M','6M','YTD','1Y','5Y','Max'].map(t =>
+            `<button class="chart-tab${t === '1D' ? ' active' : ''}" data-range="${t.toLowerCase()}">${t}</button>`
+          ).join('')}
+        </div>
+        <div class="chart-container" id="chart-container">
+          <div class="chart-loading"><div class="spinner"></div>Loading chart...</div>
+        </div>
+        <div id="chart-stats-container"></div>
+        <div id="chart-analysis-container">
+          <div class="skeleton-section" style="margin-top:8px;">
             <div class="skeleton skeleton-label"></div>
             <div class="skeleton skeleton-line" style="width: 100%;"></div>
             <div class="skeleton skeleton-line" style="width: 92%;"></div>
             <div class="skeleton skeleton-line" style="width: 85%;"></div>
+          </div>
+        </div>
+      `;
+
+      panelOverlay.classList.add('active');
+      sidePanel.classList.add('active');
+      document.body.style.overflow = 'hidden';
+
+      // Attach tab click handlers
+      document.querySelectorAll('#chart-tabs .chart-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const range = tab.dataset.range;
+          if (range === currentPanelRange) return;
+          currentPanelRange = range;
+          document.querySelectorAll('#chart-tabs .chart-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          loadChartData(currentPanelTicker, range);
+        });
+      });
+
+      // Fetch chart data and AI analysis in parallel
+      loadChartData(ticker, '1d');
+      fetchStockExplanation(ticker, companyName, changePercent);
+    }
+
+    async function loadChartData(ticker, range) {
+      const chartContainer = document.getElementById('chart-container');
+      chartContainer.innerHTML = `<div class="chart-loading"><div class="spinner"></div>Loading chart...</div>`;
+
+      try {
+        const response = await fetch(`/api/stock-chart?ticker=${encodeURIComponent(ticker)}&range=${range}`);
+        if (!response.ok) throw new Error('Failed to load chart');
+
+        const data = await response.json();
+        currentChartData = data.chart;
+        currentQuoteData = data.quote;
+
+        // Update header with live quote data
+        updatePanelHeader(data.quote);
+
+        // Render chart
+        renderSVGChart(data.chart, data.quote, range);
+
+        // Render stats
+        renderKeyStats(data.quote);
+      } catch (err) {
+        console.error('Chart load error:', err);
+        chartContainer.innerHTML = `<div class="chart-loading" style="color:#c5221f;">Failed to load chart data</div>`;
+      }
+    }
+
+    function updatePanelHeader(quote) {
+      const nameEl = document.querySelector('.chart-company-name');
+      const exchangeEl = document.querySelector('.chart-exchange-ticker');
+      const priceSection = document.querySelector('.chart-price-section');
+
+      if (nameEl) nameEl.textContent = quote.companyName;
+      if (exchangeEl) exchangeEl.textContent = quote.exchange + ' : ' + quote.ticker;
+
+      const isPositive = quote.changeDollar >= 0;
+      const colorClass = isPositive ? 'positive' : 'negative';
+
+      if (priceSection) {
+        priceSection.innerHTML = `
+          <div class="chart-current-price">$${formatPrice(quote.price)}</div>
+          <div class="chart-price-change ${colorClass}">
+            <span>${formatDollarChange(quote.changeDollar)}</span>
+            <span>(${formatPercent(quote.changePercent)})</span>
+            <span class="today-label">today</span>
+          </div>
+          <div class="chart-timestamp">${getCurrentTime()}</div>
+        `;
+      }
+    }
+
+    function renderSVGChart(points, quote, range) {
+      const container = document.getElementById('chart-container');
+      if (!points || points.length < 2) {
+        container.innerHTML = `<div class="chart-loading" style="color:#5f6368;">No chart data available</div>`;
+        return;
+      }
+
+      const width = 510;
+      const height = 220;
+      const padLeft = 0;
+      const padRight = 65;
+      const padTop = 10;
+      const padBottom = 28;
+      const chartW = width - padLeft - padRight;
+      const chartH = height - padTop - padBottom;
+
+      const prices = points.map(p => p.price);
+      let minPrice = Math.min(...prices);
+      let maxPrice = Math.max(...prices);
+
+      // Include previous close in range for 1D view
+      const prevClose = quote.previousClose;
+      if (range === '1d' && prevClose != null) {
+        minPrice = Math.min(minPrice, prevClose);
+        maxPrice = Math.max(maxPrice, prevClose);
+      }
+
+      // Add small padding to price range
+      const priceRange = maxPrice - minPrice || 1;
+      minPrice -= priceRange * 0.05;
+      maxPrice += priceRange * 0.05;
+      const finalRange = maxPrice - minPrice;
+
+      const firstPrice = range === '1d' && prevClose != null ? prevClose : points[0].price;
+      const lastPrice = points[points.length - 1].price;
+      const isUp = lastPrice >= firstPrice;
+      const lineColor = isUp ? '#137333' : '#c5221f';
+      const fillColor = isUp ? 'rgba(19,115,51,0.08)' : 'rgba(197,34,31,0.08)';
+
+      // Scale functions
+      const xScale = (i) => padLeft + (i / (points.length - 1)) * chartW;
+      const yScale = (price) => padTop + ((maxPrice - price) / finalRange) * chartH;
+
+      // Build line path
+      let linePath = `M ${xScale(0)} ${yScale(points[0].price)}`;
+      for (let i = 1; i < points.length; i++) {
+        linePath += ` L ${xScale(i)} ${yScale(points[i].price)}`;
+      }
+
+      // Build fill path (area under line)
+      let fillPath = linePath;
+      fillPath += ` L ${xScale(points.length - 1)} ${padTop + chartH}`;
+      fillPath += ` L ${xScale(0)} ${padTop + chartH} Z`;
+
+      // Y-axis labels (5 ticks)
+      let yLabels = '';
+      let gridLines = '';
+      const numTicks = 5;
+      for (let i = 0; i <= numTicks; i++) {
+        const price = maxPrice - (i / numTicks) * finalRange;
+        const y = padTop + (i / numTicks) * chartH;
+        yLabels += `<text x="${width - padRight + 8}" y="${y + 4}" font-size="10" fill="#5f6368" font-family="Arial, sans-serif">${formatPrice(price)}</text>`;
+        gridLines += `<line x1="${padLeft}" y1="${y}" x2="${width - padRight}" y2="${y}" stroke="#f0f0f0" stroke-width="1"/>`;
+      }
+
+      // X-axis labels
+      let xLabels = '';
+      const numXLabels = 5;
+      for (let i = 0; i <= numXLabels; i++) {
+        const idx = Math.round((i / numXLabels) * (points.length - 1));
+        const x = xScale(idx);
+        const ts = points[idx].timestamp;
+        const d = new Date(ts);
+        let label;
+        if (range === '1d') {
+          label = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        } else if (range === '5d') {
+          label = d.toLocaleDateString('en-US', { weekday: 'short' });
+        } else if (range === '1m' || range === '6m' || range === 'ytd') {
+          label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        } else {
+          label = d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+        }
+        xLabels += `<text x="${x}" y="${height - 4}" font-size="10" fill="#5f6368" text-anchor="middle" font-family="Arial, sans-serif">${label}</text>`;
+      }
+
+      // Previous close line (only for 1D)
+      let prevCloseLine = '';
+      if (range === '1d' && prevClose != null) {
+        const pcY = yScale(prevClose);
+        prevCloseLine = `
+          <line x1="${padLeft}" y1="${pcY}" x2="${width - padRight}" y2="${pcY}" stroke="#9aa0a6" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="${width - padRight + 8}" y="${pcY + 4}" font-size="10" fill="#9aa0a6" font-family="Arial, sans-serif">Prev close</text>
+        `;
+      }
+
+      const svgId = 'stock-chart-svg';
+      const tooltipId = 'chart-tooltip';
+
+      container.innerHTML = `
+        <svg id="${svgId}" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet">
+          ${gridLines}
+          ${prevCloseLine}
+          <path d="${fillPath}" fill="${fillColor}"/>
+          <path d="${linePath}" fill="none" stroke="${lineColor}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+          ${yLabels}
+          ${xLabels}
+          <line id="chart-crosshair" x1="0" y1="${padTop}" x2="0" y2="${padTop + chartH}" stroke="#dadce0" stroke-width="1" visibility="hidden"/>
+          <circle id="chart-dot" cx="0" cy="0" r="4" fill="${lineColor}" stroke="white" stroke-width="2" visibility="hidden"/>
+          <rect id="chart-hover-area" x="${padLeft}" y="${padTop}" width="${chartW}" height="${chartH}" fill="transparent" cursor="crosshair"/>
+        </svg>
+        <div class="${tooltipId}" id="${tooltipId}"></div>
+      `;
+
+      // Add hover interactivity
+      const svg = document.getElementById(svgId);
+      const hoverArea = document.getElementById('chart-hover-area');
+      const crosshair = document.getElementById('chart-crosshair');
+      const dot = document.getElementById('chart-dot');
+      const tooltip = document.getElementById(tooltipId);
+
+      function handleHover(e) {
+        const rect = svg.getBoundingClientRect();
+        const svgX = ((e.clientX - rect.left) / rect.width) * width;
+        const relX = svgX - padLeft;
+        const idx = Math.round((relX / chartW) * (points.length - 1));
+        if (idx < 0 || idx >= points.length) return;
+
+        const px = xScale(idx);
+        const py = yScale(points[idx].price);
+
+        crosshair.setAttribute('x1', px);
+        crosshair.setAttribute('x2', px);
+        crosshair.setAttribute('visibility', 'visible');
+        dot.setAttribute('cx', px);
+        dot.setAttribute('cy', py);
+        dot.setAttribute('visibility', 'visible');
+
+        const d = new Date(points[idx].timestamp);
+        let timeStr;
+        if (range === '1d' || range === '5d') {
+          timeStr = d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+        } else {
+          timeStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        tooltip.textContent = `$${formatPrice(points[idx].price)}  ${timeStr}`;
+        tooltip.classList.add('visible');
+
+        // Position tooltip
+        const containerRect = container.getBoundingClientRect();
+        const tooltipX = (px / width) * containerRect.width;
+        const tooltipY = (py / height) * containerRect.height;
+        tooltip.style.left = Math.min(tooltipX - tooltip.offsetWidth / 2, containerRect.width - tooltip.offsetWidth - 4) + 'px';
+        tooltip.style.top = (tooltipY - 36) + 'px';
+      }
+
+      hoverArea.addEventListener('mousemove', handleHover);
+      hoverArea.addEventListener('mouseleave', () => {
+        crosshair.setAttribute('visibility', 'hidden');
+        dot.setAttribute('visibility', 'hidden');
+        tooltip.classList.remove('visible');
+      });
+    }
+
+    function renderKeyStats(quote) {
+      const container = document.getElementById('chart-stats-container');
+      if (!container) return;
+
+      const qtrDiv = quote.trailingAnnualDividendRate != null ? (quote.trailingAnnualDividendRate / 4).toFixed(2) : '--';
+      const divYield = quote.dividendYield != null ? quote.dividendYield.toFixed(2) + '%' : '--';
+
+      container.innerHTML = `
+        <div class="key-stats-grid">
+          <div class="stat-item">
+            <div class="stat-label">Open</div>
+            <div class="stat-value">${quote.open != null ? formatPrice(quote.open) : '--'}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">High</div>
+            <div class="stat-value">${quote.dayHigh != null ? formatPrice(quote.dayHigh) : '--'}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Low</div>
+            <div class="stat-value">${quote.dayLow != null ? formatPrice(quote.dayLow) : '--'}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Mkt cap</div>
+            <div class="stat-value">${formatLargeNumber(quote.marketCap)}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">P/E ratio</div>
+            <div class="stat-value">${quote.peRatio != null ? quote.peRatio.toFixed(2) : '--'}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">52-wk high</div>
+            <div class="stat-value">${quote.fiftyTwoWeekHigh != null ? formatPrice(quote.fiftyTwoWeekHigh) : '--'}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Div yield</div>
+            <div class="stat-value">${divYield}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">Qtrly Div Amt</div>
+            <div class="stat-value">${qtrDiv}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-label">52-wk low</div>
+            <div class="stat-value">${quote.fiftyTwoWeekLow != null ? formatPrice(quote.fiftyTwoWeekLow) : '--'}</div>
           </div>
         </div>
       `;
@@ -2160,7 +2582,7 @@
 
       return `
         <div class="panel-section">
-          <h2 class="section-title">Analysis</h2>
+          <h2 class="section-title">AI Analysis</h2>
           <div class="section-content">
             ${paragraphs.map(p => `<p>${p.trim()}</p>`).join('')}
           </div>
@@ -2168,31 +2590,32 @@
       `;
     }
 
-    function openStockPanel(ticker, companyName, changePercent) {
-      const panelOverlay = document.getElementById('panel-overlay');
-      const sidePanel = document.getElementById('side-panel');
-      const panelTitle = document.getElementById('panel-title');
-      const panelTicker = document.getElementById('panel-ticker');
-      const panelChange = document.getElementById('panel-change');
-      const panelChangeText = document.getElementById('panel-change-text');
-      const panelTime = document.getElementById('panel-time');
+    async function fetchStockExplanation(ticker, companyName, changePercent) {
+      const analysisContainer = document.getElementById('chart-analysis-container');
+      if (!analysisContainer) return;
 
-      const change = parseFloat(changePercent);
-      const isPositive = change >= 0;
+      try {
+        const params = new URLSearchParams({ ticker, companyName, changePercent });
+        const response = await fetch(`/api/stock-explanation-details?${params}`);
 
-      panelTitle.textContent = companyName;
-      panelTicker.textContent = ticker;
-      panelChangeText.textContent = (isPositive ? '+' : '') + change.toFixed(2) + '%';
-      panelChange.className = 'meta-item ' + (isPositive ? 'positive' : 'negative');
-      panelTime.textContent = getCurrentTime();
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          if (errorData.isQuotaError) {
+            throw new Error('quota');
+          }
+          throw new Error(errorData.message || 'Failed to fetch analysis');
+        }
 
-      showLoadingState();
-
-      panelOverlay.classList.add('active');
-      sidePanel.classList.add('active');
-      document.body.style.overflow = 'hidden';
-
-      fetchStockExplanation(ticker, companyName, changePercent);
+        const data = await response.json();
+        analysisContainer.innerHTML = renderAnalysis(data.analysis);
+      } catch (error) {
+        console.error('Error fetching stock explanation:', error);
+        let errorMsg = 'Unable to load analysis.';
+        if (error.message === 'quota') {
+          errorMsg = 'AI service quota exceeded. Please try again later.';
+        }
+        analysisContainer.innerHTML = `<div class="panel-error"><p>${errorMsg}</p></div>`;
+      }
     }
 
     function closePanel() {
@@ -2201,6 +2624,7 @@
       panelOverlay.classList.remove('active');
       sidePanel.classList.remove('active');
       document.body.style.overflow = '';
+      currentPanelTicker = null;
     }
 
     document.addEventListener('click', function(e) {
@@ -2215,66 +2639,20 @@
         closePanel();
       }
     });
-
-    async function fetchStockExplanation(ticker, companyName, changePercent) {
-      const panelContent = document.getElementById('panel-content');
-      try {
-        const params = new URLSearchParams({ ticker, companyName, changePercent });
-        const response = await fetch(`/api/stock-explanation-details?${params}`);
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          if (errorData.isQuotaError) {
-            throw new Error('quota');
-          }
-          throw new Error(errorData.message || 'Failed to fetch analysis');
-        }
-
-        const data = await response.json();
-        panelContent.innerHTML = renderAnalysis(data.analysis);
-      } catch (error) {
-        console.error('Error fetching stock explanation:', error);
-        let errorMsg = 'Unable to load detailed analysis. Please try again.';
-        if (error.message === 'quota') {
-          errorMsg = 'AI service quota exceeded. Please try again later.';
-        }
-        panelContent.innerHTML = `<div class="panel-error"><p>${errorMsg}</p></div>`;
-      }
-    }
   </script>
 
   <!-- Side Panel Overlay -->
   <div class="panel-overlay" id="panel-overlay"></div>
 
-  <!-- Stock Explanation Side Panel -->
+  <!-- Stock Chart Side Panel -->
   <div class="side-panel" id="side-panel">
-    <div class="panel-header">
-      <button class="panel-close-button" onclick="closePanel()" aria-label="Close panel">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-      <div class="panel-label">Stock Analysis</div>
-      <h1 class="panel-title" id="panel-title">Loading...</h1>
-      <div class="panel-ticker" id="panel-ticker"></div>
-      <div class="panel-meta">
-        <span class="meta-item" id="panel-change">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-          </svg>
-          <span id="panel-change-text">--</span>
-        </span>
-        <span class="meta-item">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span id="panel-time">--</span>
-        </span>
-      </div>
-    </div>
-    <div class="panel-content" id="panel-content"></div>
-    <div class="panel-footer">
-      <button class="panel-footer-btn" onclick="closePanel()">Close</button>
+    <button class="panel-close-button" onclick="closePanel()" aria-label="Close panel">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+    <div class="panel-content" id="panel-content">
+      <!-- Dynamically populated -->
     </div>
   </div>
 </body>

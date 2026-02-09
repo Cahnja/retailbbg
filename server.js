@@ -6813,6 +6813,120 @@ app.delete('/api/watchlists/:watchlistId/remove/:ticker', authenticateToken, (re
   }
 });
 
+// GET /api/stock-chart - Get chart data and quote for a stock
+app.get('/api/stock-chart', async (req, res) => {
+  try {
+    const ticker = (req.query.ticker || '').trim().toUpperCase();
+    const range = (req.query.range || '1d').toLowerCase();
+
+    if (!ticker) {
+      return res.status(400).json({ error: 'Ticker parameter required' });
+    }
+
+    const validRanges = ['1d', '5d', '1m', '6m', 'ytd', '1y', '5y', 'max'];
+    if (!validRanges.includes(range)) {
+      return res.status(400).json({ error: 'Invalid range. Use: 1d, 5d, 1m, 6m, ytd, 1y, 5y, max' });
+    }
+
+    // Determine interval and period1 based on range
+    let interval, period1;
+    const now = new Date();
+
+    switch (range) {
+      case '1d':
+        interval = '5m';
+        period1 = new Date(now);
+        period1.setDate(period1.getDate() - 1);
+        break;
+      case '5d':
+        interval = '15m';
+        period1 = new Date(now);
+        period1.setDate(period1.getDate() - 7);
+        break;
+      case '1m':
+        interval = '1d';
+        period1 = new Date(now);
+        period1.setMonth(period1.getMonth() - 1);
+        break;
+      case '6m':
+        interval = '1d';
+        period1 = new Date(now);
+        period1.setMonth(period1.getMonth() - 6);
+        break;
+      case 'ytd':
+        interval = '1d';
+        period1 = new Date(now.getFullYear(), 0, 1);
+        break;
+      case '1y':
+        interval = '1d';
+        period1 = new Date(now);
+        period1.setFullYear(period1.getFullYear() - 1);
+        break;
+      case '5y':
+        interval = '1wk';
+        period1 = new Date(now);
+        period1.setFullYear(period1.getFullYear() - 5);
+        break;
+      case 'max':
+        interval = '1mo';
+        period1 = new Date('1970-01-01');
+        break;
+    }
+
+    // Fetch quote and chart in parallel
+    const [quote, chartResult] = await Promise.all([
+      yahooFinance.quote(ticker),
+      yahooFinance.chart(ticker, {
+        period1: period1.toISOString().split('T')[0],
+        period2: now.toISOString().split('T')[0],
+        interval
+      })
+    ]);
+
+    if (!quote || quote.regularMarketPrice === undefined) {
+      return res.status(404).json({ error: 'Ticker not found' });
+    }
+
+    // Extract chart data points
+    const chartPoints = (chartResult?.quotes || [])
+      .filter(q => q.close != null && q.date != null)
+      .map(q => ({
+        timestamp: new Date(q.date).getTime(),
+        price: q.close
+      }));
+
+    // Build quote data
+    const quoteData = {
+      ticker,
+      companyName: quote.shortName || quote.longName || ticker,
+      exchange: quote.fullExchangeName || quote.exchange || '',
+      price: quote.regularMarketPrice,
+      changeDollar: quote.regularMarketChange || 0,
+      changePercent: quote.regularMarketChangePercent || 0,
+      previousClose: quote.regularMarketPreviousClose || null,
+      open: quote.regularMarketOpen || null,
+      dayHigh: quote.regularMarketDayHigh || null,
+      dayLow: quote.regularMarketDayLow || null,
+      marketCap: quote.marketCap || null,
+      peRatio: quote.trailingPE || null,
+      fiftyTwoWeekHigh: quote.fiftyTwoWeekHigh || null,
+      fiftyTwoWeekLow: quote.fiftyTwoWeekLow || null,
+      dividendYield: quote.dividendYield || null,
+      trailingAnnualDividendRate: quote.trailingAnnualDividendRate || null
+    };
+
+    res.json({
+      quote: quoteData,
+      chart: chartPoints,
+      range,
+      interval
+    });
+  } catch (error) {
+    console.error('Error fetching stock chart:', error.message);
+    res.status(500).json({ error: 'Failed to fetch stock chart data' });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
   console.log(`[Cache Warming] Auto-refresh enabled for Market Update & S&P 500 market movers`);
