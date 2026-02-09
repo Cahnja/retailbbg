@@ -4565,7 +4565,19 @@ async function fetchFearGreedData() {
     const fgData = data.fear_and_greed;
     const currentScore = Math.round(fgData.score);
     const previousClose = fgData.previous_close != null ? Math.round(fgData.previous_close) : null;
+    const previousOneWeek = fgData.previous_1_week != null ? Math.round(fgData.previous_1_week) : null;
     const previousOneMonth = fgData.previous_1_month != null ? Math.round(fgData.previous_1_month) : null;
+    const previousOneYear = fgData.previous_1_year != null ? Math.round(fgData.previous_1_year) : null;
+
+    // Extract historical time series for chart
+    let history = [];
+    if (data.fear_and_greed_historical && data.fear_and_greed_historical.data) {
+      history = data.fear_and_greed_historical.data.map(point => ({
+        timestamp: point.x,
+        score: Math.round(point.y),
+        rating: point.rating
+      }));
+    }
 
     const result = {
       current: {
@@ -4576,10 +4588,19 @@ async function fetchFearGreedData() {
         value: previousClose,
         label: getFearGreedLabel(previousClose)
       } : null,
+      lastWeek: previousOneWeek != null ? {
+        value: previousOneWeek,
+        label: getFearGreedLabel(previousOneWeek)
+      } : null,
       lastMonth: previousOneMonth != null ? {
         value: previousOneMonth,
         label: getFearGreedLabel(previousOneMonth)
-      } : null
+      } : null,
+      lastYear: previousOneYear != null ? {
+        value: previousOneYear,
+        label: getFearGreedLabel(previousOneYear)
+      } : null,
+      history: history
     };
 
     // Cache it
@@ -5178,16 +5199,18 @@ app.get('/api/stock-explanation-details', async (req, res) => {
     }
 
     // Web search to find why the stock moved (let GPT-4o figure it out)
-    const searchPrompt = `Why did ${companyName} (${ticker}) stock move ${direction} ${absChange}% ${dayReference}?
+    const searchPrompt = `${companyName} (${ticker}) stock is ${direction} ${absChange}% in the most recent trading session (${dayReference}). Find the SPECIFIC catalyst that caused THIS ${absChange}% move ${dayReference}.
 
-Search for the specific catalyst: earnings results, analyst upgrades/downgrades, deal announcements, FDA decisions, management changes, guidance updates, or other news that caused this move.
+IMPORTANT: Focus on TODAY's / the most recent session's news ONLY. Do not surface older news. The stock moved ${direction} ${absChange}% — find what caused THIS specific move.
+
+Search for: earnings results, earnings misses/beats, guidance changes, analyst upgrades/downgrades, deal announcements, FDA decisions, management changes, lawsuits, or other breaking news from ${dayReference}.
 
 Find:
 - The specific catalyst with exact details (analyst names, price targets, earnings numbers, deal values)
 - Relevant numbers, percentages, and data points
 - Context about the company and sector
 
-Provide specific facts and quotes from recent news.`;
+Provide specific facts and quotes from the most recent news about this move.`;
 
     if (isStream) sendSSE(res, { type: 'status', message: 'Searching for latest news...' });
 
@@ -5210,6 +5233,10 @@ RESEARCH:
 ${newsContext}
 
 Write 4 short paragraphs explaining why the stock moved. Be extremely concise and direct — every sentence must deliver new information.
+
+CRITICAL RULE: The stock moved ${direction} ${absChange}% — your explanation MUST be consistent with this direction. If the stock is DOWN, explain why it fell. If UP, explain why it rose. NEVER contradict the stated price movement.
+
+If you cannot find a specific catalyst in the RESEARCH above, say so honestly rather than discussing unrelated positive or negative news that contradicts the move direction. It is far better to say "no clear catalyst was identified" than to present bullish news for a stock that dropped, or bearish news for a stock that rallied.
 
 STYLE RULES:
 - Do NOT repeat the stock price change or percentage move — jump straight into the WHY.
