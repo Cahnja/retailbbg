@@ -802,7 +802,7 @@ app.get('/portfolio', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'watchlist.html'));
 });
 
-app.use(express.static('public'));
+app.use(express.static('public', { etag: false, maxAge: 0 }));
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
