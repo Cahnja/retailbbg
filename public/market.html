@@ -103,6 +103,7 @@
       transition: transform 0.2s, box-shadow 0.2s;
       position: relative;
       overflow: hidden;
+      cursor: pointer;
     }
 
     .index-card::before {
@@ -780,6 +781,262 @@
       to { transform: rotate(360deg); }
     }
 
+    /* Chart Panel Overlay */
+    .chart-panel-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.4);
+      z-index: 3000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .chart-panel-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Chart Side Panel */
+    .chart-side-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 560px;
+      max-width: 100%;
+      height: 100vh;
+      background: #ffffff;
+      z-index: 3001;
+      display: flex;
+      flex-direction: column;
+      box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+      transform: translateX(100%);
+      transition: transform 0.3s ease-out;
+    }
+
+    .chart-side-panel.active {
+      transform: translateX(0);
+    }
+
+    .chart-panel-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: rgba(0, 0, 0, 0.06);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s;
+      z-index: 1;
+    }
+
+    .chart-panel-close:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    .chart-panel-close svg {
+      width: 18px;
+      height: 18px;
+      color: #5f6368;
+    }
+
+    .chart-panel-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    /* Stock Header in Chart Panel */
+    .chart-stock-header {
+      margin-bottom: 4px;
+    }
+
+    .chart-company-name {
+      font-size: 22px;
+      font-weight: 700;
+      color: #202124;
+      line-height: 1.3;
+      margin: 0;
+    }
+
+    .chart-exchange-ticker {
+      font-size: 13px;
+      color: #5f6368;
+      margin-top: 2px;
+    }
+
+    /* Price Display */
+    .chart-price-section {
+      margin: 12px 0 4px 0;
+    }
+
+    .chart-current-price {
+      font-size: 32px;
+      font-weight: 700;
+      color: #202124;
+      line-height: 1.2;
+    }
+
+    .chart-price-change {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .chart-price-change.positive {
+      color: #137333;
+    }
+
+    .chart-price-change.negative {
+      color: #c5221f;
+    }
+
+    .chart-price-change .today-label {
+      color: #5f6368;
+      font-weight: 400;
+    }
+
+    .chart-timestamp {
+      font-size: 12px;
+      color: #5f6368;
+      margin-top: 4px;
+    }
+
+    /* Timeframe Tabs */
+    .chart-timeframe-tabs {
+      display: flex;
+      gap: 0;
+      margin: 16px 0 8px 0;
+      border-bottom: 1px solid #e8eaed;
+    }
+
+    .chart-tab {
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #5f6368;
+      background: none;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      transition: color 0.2s;
+    }
+
+    .chart-tab:hover {
+      color: #202124;
+    }
+
+    .chart-tab.active {
+      color: #1a73e8;
+    }
+
+    .chart-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: #1a73e8;
+      border-radius: 3px 3px 0 0;
+    }
+
+    /* Chart Container */
+    .chart-container {
+      position: relative;
+      width: 100%;
+      height: 240px;
+      margin: 8px 0 20px 0;
+    }
+
+    .chart-container svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .chart-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #5f6368;
+      font-size: 14px;
+    }
+
+    .chart-loading .spinner {
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+      margin-bottom: 0;
+    }
+
+    /* Chart tooltip */
+    .chart-tooltip {
+      position: absolute;
+      background: #202124;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      white-space: nowrap;
+      z-index: 10;
+    }
+
+    .chart-tooltip.visible {
+      opacity: 1;
+    }
+
+    /* Key Stats Grid */
+    .key-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0;
+      border: 1px solid #e8eaed;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .stat-item {
+      padding: 12px 14px;
+      border-bottom: 1px solid #e8eaed;
+      border-right: 1px solid #e8eaed;
+    }
+
+    .stat-item:nth-child(3n) {
+      border-right: none;
+    }
+
+    .stat-item:nth-last-child(-n+3) {
+      border-bottom: none;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #5f6368;
+      margin-bottom: 2px;
+    }
+
+    .stat-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #202124;
+    }
+
     /* Responsive */
     @media (max-width: 900px) {
       .indices-grid {
@@ -823,6 +1080,10 @@
         width: 100%;
       }
 
+      .chart-side-panel {
+        width: 100%;
+      }
+
       .panel-header {
         padding: 20px;
       }
@@ -832,6 +1093,10 @@
       }
 
       .panel-content {
+        padding: 20px;
+      }
+
+      .chart-panel-content {
         padding: 20px;
       }
     }
@@ -894,6 +1159,21 @@
       </div>
     </div>
   </main>
+
+  <!-- Chart Panel Overlay -->
+  <div class="chart-panel-overlay" id="chart-panel-overlay"></div>
+
+  <!-- Index Chart Side Panel -->
+  <div class="chart-side-panel" id="chart-side-panel">
+    <button class="chart-panel-close" onclick="closeChartPanel()" aria-label="Close chart panel">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+    <div class="chart-panel-content" id="chart-panel-content">
+      <!-- Dynamically populated -->
+    </div>
+  </div>
 
   <!-- Side Panel Overlay -->
   <div class="panel-overlay" id="panel-overlay"></div>
@@ -1023,14 +1303,24 @@
       return 'Market';
     }
 
+    // Map index names to Yahoo Finance tickers
+    const INDEX_TICKER_MAP = {
+      'S&P 500': '^GSPC',
+      'Nasdaq': '^IXIC',
+      'Dow Jones': '^DJI',
+      'Bitcoin': 'BTC-USD'
+    };
+
     function renderIndices(indices, bitcoin) {
       let cards = indices.map(index => {
         const isPositive = index.changePercent >= 0;
         const changeClass = isPositive ? 'positive' : 'negative';
         const arrow = isPositive ? '&#9650;' : '&#9660;';
+        const ticker = INDEX_TICKER_MAP[index.name] || '';
+        const safeName = index.name.replace(/&/g, '&amp;').replace(/'/g, "\\'");
 
         return `
-          <div class="index-card">
+          <div class="index-card" onclick="openIndexChart('${ticker}', '${safeName}')">
             <div class="index-name">${index.name}</div>
             <div class="index-change ${changeClass}">
               <span class="change-arrow">${arrow}</span>
@@ -1048,7 +1338,7 @@
         const arrow = isPositive ? '&#9650;' : '&#9660;';
 
         cards.push(`
-          <div class="index-card" id="bitcoin-card">
+          <div class="index-card" id="bitcoin-card" onclick="openIndexChart('BTC-USD', 'Bitcoin')">
             <div class="index-name">Bitcoin</div>
             <div class="index-change ${changeClass}">
               <span class="change-arrow">${arrow}</span>
@@ -1349,6 +1639,9 @@
 
     // Close panel with Escape key
     document.addEventListener('keydown', function(e) {
+      // If chart panel is open, let its handler take care of Escape
+      const chartPanel = document.getElementById('chart-side-panel');
+      if (e.key === 'Escape' && chartPanel && chartPanel.classList.contains('active')) return;
       if (e.key === 'Escape' && sidePanel.classList.contains('active')) {
         closePanel();
       }
@@ -1492,6 +1785,380 @@
 
     // Auto-refresh prices every 15 minutes
     setInterval(refreshPrices, 15 * 60 * 1000);
+
+    // ========================================
+    // Index Chart Panel Functions
+    // ========================================
+    let chartPanelTicker = null;
+    let chartPanelRange = '1d';
+    let chartData = null;
+    let chartQuoteData = null;
+
+    const chartPanelOverlay = document.getElementById('chart-panel-overlay');
+    const chartSidePanel = document.getElementById('chart-side-panel');
+    const chartPanelContent = document.getElementById('chart-panel-content');
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function formatChartPrice(price) {
+      if (price == null) return '--';
+      return price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function formatDollarChange(val) {
+      if (val == null) return '--';
+      return (val >= 0 ? '+' : '') + val.toFixed(2);
+    }
+
+    function formatLargeNumber(num) {
+      if (num == null) return '--';
+      if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
+      if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+      if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+      return num.toLocaleString();
+    }
+
+    function getChartTime() {
+      const now = new Date();
+      return now.toLocaleString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric',
+        hour: 'numeric', minute: '2-digit', hour12: true, timeZoneName: 'short'
+      });
+    }
+
+    function openIndexChart(ticker, name) {
+      if (!ticker) return;
+      chartPanelTicker = ticker;
+      chartPanelRange = '1d';
+
+      chartPanelContent.innerHTML = `
+        <div class="chart-stock-header">
+          <h1 class="chart-company-name">${escapeHtml(name)}</h1>
+          <div class="chart-exchange-ticker">${escapeHtml(ticker)}</div>
+        </div>
+        <div class="chart-price-section">
+          <div class="chart-current-price">--</div>
+        </div>
+        <div class="chart-timeframe-tabs" id="chart-tabs">
+          ${['1D','5D','1M','6M','YTD','1Y','5Y','Max'].map(t =>
+            `<button class="chart-tab${t === '1D' ? ' active' : ''}" data-range="${t.toLowerCase()}">${t}</button>`
+          ).join('')}
+        </div>
+        <div class="chart-container" id="chart-container">
+          <div class="chart-loading"><div class="spinner"></div>Loading chart...</div>
+        </div>
+        <div id="chart-stats-container"></div>
+      `;
+
+      chartPanelOverlay.classList.add('active');
+      chartSidePanel.classList.add('active');
+      document.body.style.overflow = 'hidden';
+
+      // Attach tab click handlers
+      document.querySelectorAll('#chart-tabs .chart-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const range = tab.dataset.range;
+          if (range === chartPanelRange) return;
+          chartPanelRange = range;
+          document.querySelectorAll('#chart-tabs .chart-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          loadIndexChartData(chartPanelTicker, range);
+        });
+      });
+
+      // Fetch chart data
+      loadIndexChartData(ticker, '1d');
+    }
+
+    async function loadIndexChartData(ticker, range) {
+      const chartContainer = document.getElementById('chart-container');
+      chartContainer.innerHTML = `<div class="chart-loading"><div class="spinner"></div>Loading chart...</div>`;
+
+      try {
+        const response = await fetch(`/api/stock-chart?ticker=${encodeURIComponent(ticker)}&range=${range}`);
+        if (!response.ok) throw new Error('Failed to load chart');
+
+        const data = await response.json();
+        chartData = data.chart;
+        chartQuoteData = data.quote;
+
+        // If 1D has no chart data (e.g. weekend/holiday), fall back to 5D
+        if (range === '1d' && (!data.chart || data.chart.length === 0)) {
+          return loadIndexChartData(ticker, '5d');
+        }
+
+        // Update header with live quote data
+        updateChartPanelHeader(data.quote);
+
+        // Render chart
+        renderIndexSVGChart(data.chart, data.quote, range);
+
+        // Render stats
+        renderIndexKeyStats(data.quote);
+      } catch (err) {
+        console.error('Chart load error:', err);
+        chartContainer.innerHTML = `<div class="chart-loading" style="color:#c5221f;">Failed to load chart data</div>`;
+      }
+    }
+
+    function updateChartPanelHeader(quote) {
+      const nameEl = document.querySelector('.chart-company-name');
+      const exchangeEl = document.querySelector('.chart-exchange-ticker');
+      const priceSection = document.querySelector('.chart-price-section');
+
+      if (nameEl) nameEl.textContent = quote.companyName;
+      if (exchangeEl) exchangeEl.textContent = quote.exchange + ' : ' + quote.ticker;
+
+      const isPositive = quote.changeDollar >= 0;
+      const colorClass = isPositive ? 'positive' : 'negative';
+
+      if (priceSection) {
+        const pricePrefix = quote.ticker === 'BTC-USD' ? '$' : '';
+        priceSection.innerHTML = `
+          <div class="chart-current-price">${pricePrefix}${formatChartPrice(quote.price)}</div>
+          <div class="chart-price-change ${colorClass}">
+            <span>${formatDollarChange(quote.changeDollar)}</span>
+            <span>(${formatPercent(quote.changePercent)})</span>
+            <span class="today-label">today</span>
+          </div>
+          <div class="chart-timestamp">${getChartTime()}</div>
+        `;
+      }
+    }
+
+    function renderIndexSVGChart(points, quote, range) {
+      const container = document.getElementById('chart-container');
+      if (!points || points.length < 2) {
+        container.innerHTML = `<div class="chart-loading" style="color:#5f6368;">No chart data available</div>`;
+        return;
+      }
+
+      const width = 510;
+      const height = 220;
+      const padLeft = 0;
+      const padRight = 65;
+      const padTop = 10;
+      const padBottom = 28;
+      const chartW = width - padLeft - padRight;
+      const chartH = height - padTop - padBottom;
+
+      const prices = points.map(p => p.price);
+      let minPrice = Math.min(...prices);
+      let maxPrice = Math.max(...prices);
+
+      // Include previous close in range for 1D view
+      const prevClose = quote.previousClose;
+      if (range === '1d' && prevClose != null) {
+        minPrice = Math.min(minPrice, prevClose);
+        maxPrice = Math.max(maxPrice, prevClose);
+      }
+
+      // Add small padding to price range
+      const priceRange = maxPrice - minPrice || 1;
+      minPrice -= priceRange * 0.05;
+      maxPrice += priceRange * 0.05;
+      const finalRange = maxPrice - minPrice;
+
+      const firstPrice = range === '1d' && prevClose != null ? prevClose : points[0].price;
+      const lastPrice = points[points.length - 1].price;
+      const isUp = lastPrice >= firstPrice;
+      const lineColor = isUp ? '#137333' : '#c5221f';
+      const fillColor = isUp ? 'rgba(19,115,51,0.08)' : 'rgba(197,34,31,0.08)';
+
+      // Scale functions
+      const xScale = (i) => padLeft + (i / (points.length - 1)) * chartW;
+      const yScale = (price) => padTop + ((maxPrice - price) / finalRange) * chartH;
+
+      // Build line path
+      let linePath = `M ${xScale(0)} ${yScale(points[0].price)}`;
+      for (let i = 1; i < points.length; i++) {
+        linePath += ` L ${xScale(i)} ${yScale(points[i].price)}`;
+      }
+
+      // Build fill path (area under line)
+      let fillPath = linePath;
+      fillPath += ` L ${xScale(points.length - 1)} ${padTop + chartH}`;
+      fillPath += ` L ${xScale(0)} ${padTop + chartH} Z`;
+
+      // Y-axis labels (5 ticks)
+      let yLabels = '';
+      let gridLines = '';
+      const numTicks = 5;
+      for (let i = 0; i <= numTicks; i++) {
+        const price = maxPrice - (i / numTicks) * finalRange;
+        const y = padTop + (i / numTicks) * chartH;
+        yLabels += `<text x="${width - padRight + 8}" y="${y + 4}" font-size="10" fill="#5f6368" font-family="Arial, sans-serif">${formatChartPrice(price)}</text>`;
+        gridLines += `<line x1="${padLeft}" y1="${y}" x2="${width - padRight}" y2="${y}" stroke="#f0f0f0" stroke-width="1"/>`;
+      }
+
+      // X-axis labels
+      let xLabels = '';
+      const numXLabels = 5;
+      for (let i = 0; i <= numXLabels; i++) {
+        const idx = Math.round((i / numXLabels) * (points.length - 1));
+        const x = xScale(idx);
+        const ts = points[idx].timestamp;
+        const d = new Date(ts);
+        let label;
+        if (range === '1d') {
+          label = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        } else if (range === '5d') {
+          label = d.toLocaleDateString('en-US', { weekday: 'short' });
+        } else if (range === '1m' || range === '6m' || range === 'ytd') {
+          label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        } else {
+          label = d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+        }
+        xLabels += `<text x="${x}" y="${height - 4}" font-size="10" fill="#5f6368" text-anchor="middle" font-family="Arial, sans-serif">${label}</text>`;
+      }
+
+      // Previous close line (only for 1D)
+      let prevCloseLine = '';
+      if (range === '1d' && prevClose != null) {
+        const pcY = yScale(prevClose);
+        prevCloseLine = `
+          <line x1="${padLeft}" y1="${pcY}" x2="${width - padRight}" y2="${pcY}" stroke="#9aa0a6" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="${width - padRight + 8}" y="${pcY + 4}" font-size="10" fill="#9aa0a6" font-family="Arial, sans-serif">Prev close</text>
+        `;
+      }
+
+      const svgId = 'index-chart-svg';
+      const tooltipId = 'index-chart-tooltip';
+
+      container.innerHTML = `
+        <svg id="${svgId}" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet">
+          ${gridLines}
+          ${prevCloseLine}
+          <path d="${fillPath}" fill="${fillColor}"/>
+          <path d="${linePath}" fill="none" stroke="${lineColor}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+          ${yLabels}
+          ${xLabels}
+          <line id="index-chart-crosshair" x1="0" y1="${padTop}" x2="0" y2="${padTop + chartH}" stroke="#dadce0" stroke-width="1" visibility="hidden"/>
+          <circle id="index-chart-dot" cx="0" cy="0" r="4" fill="${lineColor}" stroke="white" stroke-width="2" visibility="hidden"/>
+          <rect id="index-chart-hover-area" x="${padLeft}" y="${padTop}" width="${chartW}" height="${chartH}" fill="transparent" cursor="crosshair"/>
+        </svg>
+        <div class="chart-tooltip" id="${tooltipId}"></div>
+      `;
+
+      // Add hover interactivity
+      const svg = document.getElementById(svgId);
+      const hoverArea = document.getElementById('index-chart-hover-area');
+      const crosshair = document.getElementById('index-chart-crosshair');
+      const dot = document.getElementById('index-chart-dot');
+      const tooltip = document.getElementById(tooltipId);
+
+      function handleHover(e) {
+        const rect = svg.getBoundingClientRect();
+        const svgX = ((e.clientX - rect.left) / rect.width) * width;
+        const relX = svgX - padLeft;
+        const idx = Math.round((relX / chartW) * (points.length - 1));
+        if (idx < 0 || idx >= points.length) return;
+
+        const px = xScale(idx);
+        const py = yScale(points[idx].price);
+
+        crosshair.setAttribute('x1', px);
+        crosshair.setAttribute('x2', px);
+        crosshair.setAttribute('visibility', 'visible');
+        dot.setAttribute('cx', px);
+        dot.setAttribute('cy', py);
+        dot.setAttribute('visibility', 'visible');
+
+        const d = new Date(points[idx].timestamp);
+        let timeStr;
+        if (range === '1d' || range === '5d') {
+          timeStr = d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+        } else {
+          timeStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        tooltip.textContent = `$${formatChartPrice(points[idx].price)}  ${timeStr}`;
+        tooltip.classList.add('visible');
+
+        // Position tooltip
+        const containerRect = container.getBoundingClientRect();
+        const tooltipX = (px / width) * containerRect.width;
+        const tooltipY = (py / height) * containerRect.height;
+        tooltip.style.left = Math.min(tooltipX - tooltip.offsetWidth / 2, containerRect.width - tooltip.offsetWidth - 4) + 'px';
+        tooltip.style.top = (tooltipY - 36) + 'px';
+      }
+
+      hoverArea.addEventListener('mousemove', handleHover);
+      hoverArea.addEventListener('mouseleave', () => {
+        crosshair.setAttribute('visibility', 'hidden');
+        dot.setAttribute('visibility', 'hidden');
+        tooltip.classList.remove('visible');
+      });
+    }
+
+    function renderIndexKeyStats(quote) {
+      const container = document.getElementById('chart-stats-container');
+      if (!container) return;
+
+      const stats = [];
+
+      // Common stats for all indices
+      stats.push({ label: 'Open', value: quote.open != null ? formatChartPrice(quote.open) : '--' });
+      stats.push({ label: 'High', value: quote.dayHigh != null ? formatChartPrice(quote.dayHigh) : '--' });
+      stats.push({ label: 'Low', value: quote.dayLow != null ? formatChartPrice(quote.dayLow) : '--' });
+
+      // Market cap (only meaningful for BTC)
+      if (quote.marketCap != null) {
+        stats.push({ label: 'Mkt Cap', value: formatLargeNumber(quote.marketCap) });
+      }
+
+      // Previous close
+      stats.push({ label: 'Prev Close', value: quote.previousClose != null ? formatChartPrice(quote.previousClose) : '--' });
+
+      // 52-week range
+      stats.push({ label: '52-wk High', value: quote.fiftyTwoWeekHigh != null ? formatChartPrice(quote.fiftyTwoWeekHigh) : '--' });
+      stats.push({ label: '52-wk Low', value: quote.fiftyTwoWeekLow != null ? formatChartPrice(quote.fiftyTwoWeekLow) : '--' });
+
+      // P/E ratio (if available)
+      if (quote.peRatio != null) {
+        stats.push({ label: 'P/E Ratio', value: quote.peRatio.toFixed(2) });
+      }
+
+      // Ensure we have rows of 3
+      while (stats.length % 3 !== 0) {
+        stats.push({ label: '', value: '' });
+      }
+
+      container.innerHTML = `
+        <div class="key-stats-grid">
+          ${stats.map(s => `
+            <div class="stat-item">
+              <div class="stat-label">${s.label}</div>
+              <div class="stat-value">${s.value}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function closeChartPanel() {
+      chartPanelOverlay.classList.remove('active');
+      chartSidePanel.classList.remove('active');
+      document.body.style.overflow = '';
+      chartPanelTicker = null;
+    }
+
+    // Close chart panel when clicking overlay
+    chartPanelOverlay.addEventListener('click', function() {
+      closeChartPanel();
+    });
+
+    // Close chart panel with Escape key (if chart panel is open)
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && chartSidePanel.classList.contains('active')) {
+        closeChartPanel();
+        e.stopImmediatePropagation(); // Prevent driver panel Escape handler from also firing
+      }
+    });
   </script>
 </body>
 </html>
