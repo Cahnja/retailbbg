@@ -4174,6 +4174,30 @@ Important:
       return res.status(500).json({ error: 'No stocks found from WallStreetBets' });
     }
 
+    // Ensure we have exactly 5 stocks — retry summary if fewer
+    if (parsedStocks.length < 5) {
+      console.log(`Reddit favorites: only got ${parsedStocks.length} tickers, retrying for 5...`);
+      const retryResponse = await client.chat.completions.create({
+        model: 'gpt-4o',
+        max_tokens: 400,
+        messages: [{ role: 'user', content: summaryPrompt + `\n\nIMPORTANT: You MUST return exactly 5 stocks. You previously returned only ${parsedStocks.length}. Return 5 different trending WSB tickers.` }]
+      });
+      logTokenUsage('reddit-favorites', retryResponse.usage);
+      try {
+        const retryContent = retryResponse.choices[0].message.content.trim();
+        const retryMatch = retryContent.match(/\[[\s\S]*\]/);
+        if (retryMatch) {
+          const retryStocks = JSON.parse(retryMatch[0]);
+          if (retryStocks.length >= 5) {
+            parsedStocks = retryStocks.slice(0, 5);
+          }
+        }
+      } catch (retryErr) {
+        console.error('Reddit favorites retry parse failed:', retryErr.message);
+      }
+    }
+    parsedStocks = parsedStocks.slice(0, 5);
+
     // Generate thematic-style investment thesis for each stock (same approach as /api/thematic/:theme)
     console.log('Generating investment theses for Reddit favorites...');
     const batchSize = 3;
