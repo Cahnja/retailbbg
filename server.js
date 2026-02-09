@@ -4622,24 +4622,23 @@ Note: This market data is from ${timeContext}.
 RESEARCH:
 ${newsContext}
 
-Write 4 paragraphs of analysis. Include specific facts, numbers, percentages, and any important context. Each paragraph should flow naturally into the next.
+Write 3 short paragraphs. Be extremely concise and direct — every sentence must deliver new information.
 
-CRITICAL STYLE RULES:
-- Do NOT repeat the stock price change or percentage move — the user already sees this. Jump straight into the WHY.
-- Be fact-based. Include specific numbers (earnings, revenue, guidance, price targets) but NOT the stock's own price movement.
-- Short, punchy sentences. No filler.
-- Every sentence must be ADDITIVE - if it doesn't add new information, cut it.
-- NO generic investment advice like "investors should weigh risk-reward" or "long-term investors may view this as..."
-- NO hedging language or obvious statements.
-- Wrap the most important sentence in each paragraph with **bold** markdown.
-- Just four flowing paragraphs, no headers.`;
+STYLE RULES:
+- Do NOT repeat the stock price change or percentage move — jump straight into the WHY.
+- ONLY include facts from the RESEARCH above. Never invent numbers.
+- No throat-clearing ("The stock surged today due to several catalysts that excited the market"). Start with the actual catalyst.
+- No generic advice, hedging, or obvious statements.
+- Short, punchy sentences. Cut any sentence that doesn't add a new fact.
+- Wrap the single most important sentence in each paragraph with **bold** markdown.
+- Just three tight paragraphs, no headers.`;
 
     if (isStream) {
       sendSSE(res, { type: 'status', message: 'Generating analysis...' });
 
       const streamResponse = await client.chat.completions.create({
         model: 'gpt-4o',
-        max_tokens: 800,
+        max_tokens: 500,
         stream: true,
         messages: [{ role: 'user', content: analysisPrompt }]
       });
@@ -4676,7 +4675,7 @@ CRITICAL STYLE RULES:
     } else {
       const response = await client.chat.completions.create({
         model: 'gpt-4o',
-        max_tokens: 800,
+        max_tokens: 500,
         messages: [{ role: 'user', content: analysisPrompt }]
       });
       logTokenUsage('driver-details', response.usage);
@@ -4865,32 +4864,30 @@ Search for the specific catalyst behind this move. Provide specific facts, numbe
     const newsContext = searchResponse.output_text;
 
     // Generate 4-paragraph analysis based on search results
-    const analysisPrompt = `You are a senior equity analyst. Based on the research below, write a 4-paragraph analysis of why ${companyName} (${ticker}) moved ${direction} ${absChange}% ${dayReference}.
+    const analysisPrompt = `You are a senior equity analyst. Based on the research below, explain why ${companyName} (${ticker}) moved ${direction} ${absChange}% ${dayReference}.
 
 Note: This price data is from ${timeContext}.
 
 RESEARCH:
 ${newsContext}
 
-Write 4 paragraphs of analysis. Include the specific catalyst driving the move and any important context. Each paragraph should flow naturally into the next.
+Write 3 short paragraphs. Be extremely concise and direct — every sentence must deliver new information.
 
-CRITICAL STYLE RULES:
-- Do NOT repeat the stock price change or percentage move — the user already sees this. Jump straight into the WHY.
-- ONLY include facts that appear in the RESEARCH above. Never invent or assume earnings results, revenue figures, or other numbers not present in the research.
-- Be fact-based. Include specific numbers from the research but NOT the stock's own price movement.
-- Short, punchy sentences. No filler.
-- Every sentence must be ADDITIVE - if it doesn't add new information, cut it.
-- NO generic investment advice like "investors should weigh risk-reward" or "long-term investors may view this as..."
-- NO hedging language or obvious statements.
-- Wrap the most important sentence in each paragraph with **bold** markdown.
-- Just four flowing paragraphs, no headers.`;
+STYLE RULES:
+- Do NOT repeat the stock price change or percentage move — jump straight into the WHY.
+- ONLY include facts from the RESEARCH above. Never invent or assume earnings results, revenue figures, or other numbers not in the research.
+- No throat-clearing ("The stock surged today due to several catalysts that excited the market"). Start with the actual catalyst.
+- No generic advice, hedging, or obvious statements.
+- Short, punchy sentences. Cut any sentence that doesn't add a new fact.
+- Wrap the single most important sentence in each paragraph with **bold** markdown.
+- Just three tight paragraphs, no headers.`;
 
     if (isStream) {
       sendSSE(res, { type: 'status', message: 'Generating analysis...' });
 
       const streamResponse = await client.chat.completions.create({
         model: 'gpt-4o',
-        max_tokens: 800,
+        max_tokens: 500,
         stream: true,
         messages: [{ role: 'user', content: analysisPrompt }]
       });
@@ -4921,7 +4918,7 @@ CRITICAL STYLE RULES:
     } else {
       const response = await client.chat.completions.create({
         model: 'gpt-4o',
-        max_tokens: 800,
+        max_tokens: 500,
         messages: [{ role: 'user', content: analysisPrompt }]
       });
       logTokenUsage('stock-details', response.usage);
