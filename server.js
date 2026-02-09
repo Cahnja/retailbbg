@@ -4976,7 +4976,7 @@ function saveStockExplanationToCache(ticker, data) {
 
 // GET /api/stock-explanation-details
 app.get('/api/stock-explanation-details', async (req, res) => {
-  const { ticker, companyName, changePercent, stream } = req.query;
+  const { ticker, companyName, changePercent, stream, bullet } = req.query;
   const isStream = stream === 'true';
 
   if (!ticker || !companyName || !changePercent) {
@@ -5034,10 +5034,13 @@ app.get('/api/stock-explanation-details', async (req, res) => {
       dayReference = "today";
     }
 
-    // Web search for current news
-    const searchPrompt = `Search for more information about this stock move from ${dayReference}:
+    // Build search context from bullet (Top Movers explanation) or fallback
+    const bulletText = bullet || `${companyName} (${ticker}) moved ${direction} ${absChange}%`;
 
-"${companyName} (${ticker}) moved ${direction} ${absChange}%"
+    // Web search for more context (same approach as market drivers)
+    const searchPrompt = `Search for more information about this market news from ${dayReference}:
+
+"${bulletText}"
 
 Find:
 - Specific numbers, percentages, and data points
@@ -5057,30 +5060,26 @@ Provide specific facts and quotes from recent news.`;
 
     const newsContext = searchResponse.output_text;
 
-    // Fetch Finnhub headlines for additional context
-    if (isStream) sendSSE(res, { type: 'status', message: 'Fetching headlines...' });
-    const finnhubHeadlines = await getFinnhubNews(ticker);
-    console.log(`[Stock Details] Finnhub headlines for ${ticker}: ${finnhubHeadlines ? 'found' : 'none'}`);
+    // Generate 4-paragraph analysis (same prompt as market drivers)
+    const analysisPrompt = `You are a senior markets analyst. A user clicked on this market driver from ${dayReference}:
 
-    // Generate 4-paragraph analysis based on search results + Finnhub headlines
-    const analysisPrompt = `You are a Goldman Sachs equity research analyst. Explain why ${companyName} (${ticker}) is ${direction} today.
+"${bulletText}"
+
+Note: This market data is from ${timeContext}.
 
 RESEARCH:
 ${newsContext}
 
-HEADLINES:
-${finnhubHeadlines || 'No additional headlines available.'}
-
-Write 4 flowing paragraphs explaining the move.
+Write 4 short paragraphs. Be extremely concise and direct — every sentence must deliver new information.
 
 STYLE RULES:
-- Do NOT mention the stock's price change or percentage move — jump straight into the catalyst.
-- Fact-based and informative. No filler, no generic advice, no hedging.
-- Be specific with numbers, data points, analyst price targets, revenue figures, and margin estimates where available.
-- ONLY include facts from the RESEARCH and HEADLINES above. Never invent numbers.
-- No throat-clearing openers. Start paragraph 1 with the primary catalyst.
-- **Bold** the single most important sentence in each paragraph.
-- No headers — just 4 flowing paragraphs.`;
+- Do NOT repeat the stock price change or percentage move — jump straight into the WHY.
+- ONLY include facts from the RESEARCH above. Never invent numbers.
+- No throat-clearing ("The stock surged today due to several catalysts that excited the market"). Start with the actual catalyst.
+- No generic advice, hedging, or obvious statements.
+- Short, punchy sentences. Cut any sentence that doesn't add a new fact.
+- Wrap the single most important sentence in each paragraph with **bold** markdown.
+- Just four tight paragraphs, no headers.`;
 
     if (isStream) {
       sendSSE(res, { type: 'status', message: 'Generating analysis...' });
