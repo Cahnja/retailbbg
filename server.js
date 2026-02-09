@@ -154,7 +154,9 @@ function saveCompanyDescription(ticker, description) {
 
 function getCompanyDescription(ticker) {
   const descriptions = getCompanyDescriptions();
-  return descriptions[ticker.toUpperCase()]?.description || null;
+  const desc = descriptions[ticker.toUpperCase()]?.description || null;
+  // Sanitize cached descriptions in case they contain stray line breaks
+  return desc ? desc.replace(/[\r\n\u2028\u2029]+/g, ' ').replace(/\s+/g, ' ').trim() : null;
 }
 
 async function generateCompanyDescription(ticker, companyName) {
@@ -172,7 +174,7 @@ async function generateCompanyDescription(ticker, companyName) {
     logTokenUsage('company-descriptions', response.usage, 'gpt-4o-mini');
 
     let description = response.choices[0].message.content.trim();
-    description = description.replace(/^["']|["']$/g, '').replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim();
+    description = description.replace(/^["']|["']$/g, '').replace(/[\r\n\u2028\u2029]+/g, ' ').replace(/\s+/g, ' ').trim();
 
     // Cache permanently
     saveCompanyDescription(ticker, description);
@@ -3735,12 +3737,12 @@ Write ONE catalyst sentence:`;
       catalyst = response.choices[0].message.content.trim();
     }
 
-    // Clean up the catalyst
+    // Clean up the catalyst (strip all line break types: \r\n, \r, \n, Unicode line/paragraph separators)
     catalyst = catalyst
       .replace(/\*\*/g, '')
       .replace(/\*/g, '')
       .replace(/^["']|["']$/g, '')
-      .replace(/\n+/g, ' ')
+      .replace(/[\r\n\u2028\u2029]+/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
 
@@ -3754,8 +3756,8 @@ Write ONE catalyst sentence:`;
       catalyst = 'Recent market developments and trading activity driving the move.';
     }
 
-    // Combine catalyst + company description (strip any stray newlines)
-    const analysis = `${catalyst} ${companyDescription}`.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim();
+    // Combine catalyst + company description (strip all line break types)
+    const analysis = `${catalyst} ${companyDescription}`.replace(/[\r\n\u2028\u2029]+/g, ' ').replace(/\s+/g, ' ').trim();
 
     const result = {
       ticker,
