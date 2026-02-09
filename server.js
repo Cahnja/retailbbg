@@ -3787,7 +3787,7 @@ Write ONE specific catalyst sentence:`;
 // GET /api/market-movers - Returns Top 10 gainers and losers with pre-generated explanations
 // Accepts optional ?index= query param: sp500 (default), nasdaq, russell
 // Accepts optional ?refresh=true to force refresh (otherwise returns cached data)
-// New data is also generated during scheduled refresh times (9:31, 11:31, 1:31, 3:31, 4:00 PM ET)
+// New data is also generated during scheduled refresh times (9:31, 11:31, 1:31, 4:00 PM ET)
 app.get('/api/market-movers', async (req, res) => {
   // Get index from query param, default to sp500
   const indexParam = (req.query.index || 'sp500').toLowerCase();
@@ -3832,7 +3832,7 @@ app.get('/api/market-movers', async (req, res) => {
   console.log(`[Market Movers] No cache available for ${indexParam} - returning 503`);
   return res.status(503).json({
     error: 'Data not yet available. Please try again later.',
-    message: 'Market data is refreshed at 9:31 AM, 11:31 AM, 1:31 PM, 3:31 PM, and 4:00 PM ET.',
+    message: 'Market data is refreshed at 9:31 AM, 11:31 AM, 1:31 PM, and 4:00 PM ET.',
     index: indexParam,
     indexName
   });
@@ -5571,10 +5571,10 @@ app.get('/api/generate-company-descriptions', async (req, res) => {
 // AUTOMATIC CACHE WARMING FOR PORTFOLIO UPDATE & MARKET UPDATE
 // ============================================
 
-// Optimized refresh schedule: 5 times daily during market hours, S&P 500 only
-// Refresh times (ET): 9:31 AM, 11:31 AM, 1:31 PM, 3:31 PM, 4:00 PM (end of day)
+// Optimized refresh schedule: 4 times daily during market hours, S&P 500 only
+// Refresh times (ET): 9:31 AM, 11:31 AM, 1:31 PM, 4:00 PM (end of day)
 // This reduces API costs from ~10.6M tokens/day to ~296K tokens/day (97% reduction)
-const PORTFOLIO_REFRESH_TIMES = ['09:31', '11:31', '13:31', '15:31', '16:00']; // ET times - both Market Update & Top Movers
+const PORTFOLIO_REFRESH_TIMES = ['09:31', '11:31', '13:31', '16:00']; // ET times - both Market Update & Top Movers
 
 // Additional Market Update-only refresh times (does NOT refresh Top Movers)
 // 7:30 AM = pre-market summary, 6:00 PM = after-hours summary
@@ -5964,8 +5964,8 @@ async function checkAndRefreshPortfolio() {
 }
 
 // Cron-based scheduling (replaces unreliable interval checking)
-// Market Update + Top Movers: 9:31, 11:31, 1:31, 3:31 PM ET (Mon-Fri)
-cron.schedule('31 9,11,13,15 * * 1-5', async () => {
+// Market Update + Top Movers: 9:31, 11:31, 1:31 PM ET (Mon-Fri)
+cron.schedule('31 9,11,13 * * 1-5', async () => {
   console.log('[Cron] Running scheduled refresh: Market Update + Top Movers (all indices)');
   await refreshMarketUpdate();
   for (const index of ['sp500', 'nasdaq', 'russell']) {
@@ -5991,7 +5991,7 @@ cron.schedule('30 7,18 * * 1-5', async () => {
 }, { timezone: 'America/New_York' });
 
 // On server startup, just log cache status - DO NOT refresh
-// Cache warming only happens on scheduled times (9:31, 11:31, 1:31, 3:31, 4:00 PM ET)
+// Cache warming only happens on scheduled times (9:31, 11:31, 1:31, 4:00 PM ET)
 // This prevents excessive OpenAI API usage during development/deployments
 setTimeout(() => {
   const marketUpdateCache = getCachedMarketUpdate();
@@ -6941,6 +6941,6 @@ app.get('/api/stock-chart', async (req, res) => {
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
   console.log(`[Cache Warming] Auto-refresh enabled for Market Update & S&P 500 market movers`);
-  console.log(`[Cache Warming] Market Update: 7:30 AM, 9:31 AM, 11:31 AM, 1:31 PM, 3:31 PM, 4:00 PM, 6:00 PM ET`);
-  console.log(`[Cache Warming] Top Movers: 9:31 AM, 11:31 AM, 1:31 PM, 3:31 PM, 4:00 PM ET`);
+  console.log(`[Cache Warming] Market Update: 7:30 AM, 9:31 AM, 11:31 AM, 1:31 PM, 4:00 PM, 6:00 PM ET`);
+  console.log(`[Cache Warming] Top Movers: 9:31 AM, 11:31 AM, 1:31 PM, 4:00 PM ET`);
 });
