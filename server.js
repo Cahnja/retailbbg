@@ -5244,15 +5244,16 @@ Find:
 
 Provide specific facts and quotes from recent news.`;
 
-    const broadSearchPrompt = `What major news happened recently involving ${companyName} (${ticker}) or its industry that could affect its stock price?
+    const broadSearchPrompt = `Search for "${ticker} stock" and "${companyName} news" to find what's driving this stock ${dayReference}.
 
-Search broadly for:
-- Competitive threats: new products, services, or companies disrupting ${companyName}'s business
-- Industry news: regulatory changes, technology disruptions, or market shifts affecting the sector
-- Company-specific news: lawsuits, executive departures, contract wins/losses, strategic changes
-- Any other significant recent developments involving ${companyName} or its direct competitors
+Look beyond the obvious — the catalyst might be INDIRECT:
+- A competitor or tech company (AI, fintech, etc.) launching a product that disrupts ${companyName}'s business
+- An industry-wide threat, regulation, or technology shift
+- A major customer, partner, or peer company making news that impacts ${companyName}
 
-Provide specific facts, names, and details from recent news.`;
+Also search for any direct company news: earnings surprises, lawsuits, executive changes, or deal announcements.
+
+Report ALL recent news about ${ticker} with specific facts, names, dates, and details.`;
 
     if (isStream) sendSSE(res, { type: 'status', message: 'Searching for latest news...' });
 
