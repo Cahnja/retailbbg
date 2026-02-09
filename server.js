@@ -4861,23 +4861,21 @@ app.get('/api/stock-explanation-details', async (req, res) => {
     }
 
     // Web search for current news
-    const searchPrompt = `Why did ${companyName} (${ticker}) stock move ${direction} ${absChange}% ${dayReference}?
+    const searchPrompt = `Search for more information about this stock move from ${dayReference}:
 
-Note: This price move is from ${timeContext}.
+"${companyName} (${ticker}) moved ${direction} ${absChange}%"
 
-Search for:
-- Earnings results, guidance, and analyst reactions
-- Company announcements (acquisitions, products, partnerships)
-- Analyst upgrades/downgrades with price targets
-- Industry or macro factors affecting the stock
+Find:
+- Specific numbers, percentages, and data points
+- Company names and stock movements involved
 
-Provide specific facts, numbers, percentages, and quotes from recent news.`;
+Provide specific facts and quotes from recent news.`;
 
     if (isStream) sendSSE(res, { type: 'status', message: 'Searching for latest news...' });
 
     console.log(`[Stock Details] Web searching for ${ticker}... (time context: ${timeContext})`);
     const searchResponse = await client.responses.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o',
       tools: [{ type: 'web_search' }],
       input: searchPrompt
     });
@@ -4886,23 +4884,25 @@ Provide specific facts, numbers, percentages, and quotes from recent news.`;
     const newsContext = searchResponse.output_text;
 
     // Generate 4-paragraph analysis based on search results
-    const analysisPrompt = `You are a senior equity analyst. Based on the research below, write a 4-paragraph analysis of why ${companyName} (${ticker}) moved ${direction} ${absChange}% ${dayReference}.
+    const analysisPrompt = `You are a senior markets analyst. A user clicked on this stock move from ${dayReference}:
 
-Note: This price data is from ${timeContext}.
+"${companyName} (${ticker}) moved ${direction} ${absChange}%"
+
+Note: This market data is from ${timeContext}.
 
 RESEARCH:
 ${newsContext}
 
-Write 4 paragraphs of analysis. Include the specific catalyst driving the move, relevant numbers (EPS, revenue, guidance, price targets), and any important context. Each paragraph should flow naturally into the next.
+Write 4 short paragraphs. Be extremely concise and direct — every sentence must deliver new information.
 
-CRITICAL STYLE RULES:
-- Be fact-based. Include as many specific numbers/percentages as you can find.
-- Short, punchy sentences. No filler.
-- Every sentence must be ADDITIVE - if it doesn't add new information, cut it.
-- NO generic investment advice like "investors should weigh risk-reward" or "long-term investors may view this as..."
-- NO hedging language or obvious statements.
-- Wrap the most important sentence in each paragraph with **bold** markdown.
-- Just four flowing paragraphs, no headers.`;
+STYLE RULES:
+- Do NOT repeat the stock price change or percentage move — jump straight into the WHY.
+- ONLY include facts from the RESEARCH above. Never invent numbers.
+- No throat-clearing ("The stock surged today due to several catalysts that excited the market"). Start with the actual catalyst.
+- No generic advice, hedging, or obvious statements.
+- Short, punchy sentences. Cut any sentence that doesn't add a new fact.
+- Wrap the single most important sentence in each paragraph with **bold** markdown.
+- Just four tight paragraphs, no headers.`;
 
     if (isStream) {
       sendSSE(res, { type: 'status', message: 'Generating analysis...' });
@@ -6254,6 +6254,131 @@ app.get('/api/watchlist/prices', async (req, res) => {
   } catch (error) {
     console.error('Error fetching prices:', error);
     res.status(500).json({ error: 'Failed to fetch prices' });
+  }
+});
+
+// GET /api/watchlist/performance - Get multi-timeframe performance for stocks
+app.get('/api/watchlist/performance', async (req, res) => {
+  try {
+    const tickersParam = req.query.tickers;
+
+    if (!tickersParam) {
+      return res.status(400).json({ error: 'Tickers parameter required' });
+    }
+
+    const tickers = tickersParam.split(',').map(t => t.trim().toUpperCase()).filter(t => t);
+
+    if (tickers.length === 0) {
+      return res.status(400).json({ error: 'No valid tickers provided' });
+    }
+
+    if (tickers.length > 50) {
+      return res.status(400).json({ error: 'Maximum 50 tickers allowed' });
+    }
+
+    const now = new Date();
+    const currentYear = now.getFullYear();
+
+    // Calculate start dates for each timeframe
+    const fiveDaysAgo = new Date(now);
+    fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 7); // Go back 7 calendar days to ensure 5 trading days
+
+    const oneMonthAgo = new Date(now);
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+    const ytdStart = new Date(currentYear, 0, 1); // Jan 1 of current year
+
+    const oneYearAgo = new Date(now);
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+    // Find the earliest date we need (1Y)
+    const earliestDate = oneYearAgo;
+
+    const performance = {};
+
+    await Promise.all(tickers.map(async (ticker) => {
+      try {
+        // Fetch quote for current price and 1D change
+        const quote = await yahooFinance.quote(ticker);
+        if (!quote || quote.regularMarketPrice === undefined) {
+          performance[ticker] = null;
+          return;
+        }
+
+        const currentPrice = quote.regularMarketPrice;
+        const oneDayChange = quote.regularMarketChangePercent || 0;
+        const companyName = quote.shortName || quote.longName || ticker;
+
+        // Fetch historical chart data for longer timeframes
+        let chartResult;
+        try {
+          chartResult = await yahooFinance.chart(ticker, {
+            period1: earliestDate.toISOString().split('T')[0],
+            period2: now.toISOString().split('T')[0],
+            interval: '1d'
+          });
+        } catch (chartErr) {
+          console.error(`Failed to fetch chart for ${ticker}:`, chartErr.message);
+          // Fall back to just 1D data
+          performance[ticker] = {
+            price: currentPrice,
+            companyName,
+            '1D': oneDayChange,
+            '5D': null,
+            '1M': null,
+            'YTD': null,
+            '1Y': null
+          };
+          return;
+        }
+
+        const quotes = chartResult?.quotes || [];
+
+        // Helper to find the closest price on or after a given date
+        function findClosestPrice(targetDate) {
+          const targetTime = targetDate.getTime();
+          // Find the first quote on or after the target date
+          for (let i = 0; i < quotes.length; i++) {
+            const quoteDate = new Date(quotes[i].date);
+            if (quoteDate.getTime() >= targetTime - 86400000) { // Allow 1 day tolerance
+              if (quotes[i].close != null) {
+                return quotes[i].close;
+              }
+            }
+          }
+          return null;
+        }
+
+        // Calculate percentage changes
+        function calcChange(startPrice) {
+          if (startPrice == null || startPrice === 0) return null;
+          return ((currentPrice - startPrice) / startPrice) * 100;
+        }
+
+        const fiveDayPrice = findClosestPrice(fiveDaysAgo);
+        const oneMonthPrice = findClosestPrice(oneMonthAgo);
+        const ytdPrice = findClosestPrice(ytdStart);
+        const oneYearPrice = findClosestPrice(oneYearAgo);
+
+        performance[ticker] = {
+          price: currentPrice,
+          companyName,
+          '1D': oneDayChange,
+          '5D': calcChange(fiveDayPrice),
+          '1M': calcChange(oneMonthPrice),
+          'YTD': calcChange(ytdPrice),
+          '1Y': calcChange(oneYearPrice)
+        };
+      } catch (err) {
+        console.error(`Failed to fetch performance for ${ticker}:`, err.message);
+        performance[ticker] = null;
+      }
+    }));
+
+    res.json({ performance, asOf: new Date().toISOString() });
+  } catch (error) {
+    console.error('Error fetching performance:', error);
+    res.status(500).json({ error: 'Failed to fetch performance data' });
   }
 });
 
