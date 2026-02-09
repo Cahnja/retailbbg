@@ -1037,6 +1037,125 @@
       color: #202124;
     }
 
+    /* Fear & Greed Card */
+    .fear-greed-card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 20px 24px;
+      border: 1px solid #e8eaed;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      margin-bottom: 24px;
+    }
+
+    .fg-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .fg-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #5f6368;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .fg-main {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .fg-score {
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .fg-label-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .fg-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .fg-label {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .fg-bar-container {
+      margin: 16px 0 12px 0;
+    }
+
+    .fg-bar-track {
+      position: relative;
+      height: 10px;
+      border-radius: 5px;
+      background: linear-gradient(to right, #ea3943 0%, #f5a623 50%, #16c784 100%);
+    }
+
+    .fg-bar-indicator {
+      position: absolute;
+      top: 50%;
+      width: 18px;
+      height: 18px;
+      background: #202124;
+      border: 3px solid #ffffff;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+      transition: left 0.5s ease;
+    }
+
+    .fg-bar-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      font-size: 11px;
+      color: #80868b;
+      font-weight: 500;
+    }
+
+    .fg-comparisons {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .fg-comparison-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f8f9fa;
+      border: 1px solid #e8eaed;
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 12px;
+      color: #5f6368;
+    }
+
+    .fg-comparison-pill .fg-pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .fg-comparison-pill strong {
+      color: #3c4043;
+      font-weight: 600;
+    }
+
     /* Responsive */
     @media (max-width: 900px) {
       .indices-grid {
@@ -1134,6 +1253,32 @@
       <!-- Index Cards Grid - V1 Style -->
       <div class="indices-grid" id="indices-container">
         <!-- Index cards will be inserted here -->
+      </div>
+
+      <!-- Fear & Greed Index Card -->
+      <div class="fear-greed-card" id="fear-greed-card" style="display: none;">
+        <div class="fg-header">
+          <span class="fg-title">Fear & Greed Index</span>
+          <div class="fg-main">
+            <span class="fg-score" id="fg-score">--</span>
+            <div class="fg-label-group">
+              <span class="fg-dot" id="fg-dot"></span>
+              <span class="fg-label" id="fg-label">--</span>
+            </div>
+          </div>
+        </div>
+        <div class="fg-bar-container">
+          <div class="fg-bar-track">
+            <div class="fg-bar-indicator" id="fg-indicator" style="left: 50%;"></div>
+          </div>
+          <div class="fg-bar-labels">
+            <span>Extreme Fear</span>
+            <span>Extreme Greed</span>
+          </div>
+        </div>
+        <div class="fg-comparisons" id="fg-comparisons">
+          <!-- Yesterday and Last Month pills inserted here -->
+        </div>
       </div>
 
       <div class="timestamp" id="timestamp">
@@ -1702,6 +1847,60 @@
       }
     }
 
+    // ========================================
+    // Fear & Greed Index Functions
+    // ========================================
+
+    function getFearGreedColor(label) {
+      switch (label) {
+        case 'Extreme Fear': return '#ea3943';
+        case 'Fear': return '#ea3943';
+        case 'Neutral': return '#f5a623';
+        case 'Greed': return '#16c784';
+        case 'Extreme Greed': return '#16c784';
+        default: return '#5f6368';
+      }
+    }
+
+    async function loadFearGreedData() {
+      try {
+        const response = await fetch('/api/fear-greed');
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const card = document.getElementById('fear-greed-card');
+        const scoreEl = document.getElementById('fg-score');
+        const dotEl = document.getElementById('fg-dot');
+        const labelEl = document.getElementById('fg-label');
+        const indicator = document.getElementById('fg-indicator');
+        const comparisons = document.getElementById('fg-comparisons');
+
+        const color = getFearGreedColor(data.current.label);
+
+        scoreEl.textContent = data.current.value;
+        scoreEl.style.color = color;
+        dotEl.style.background = color;
+        labelEl.textContent = data.current.label;
+        labelEl.style.color = color;
+        indicator.style.left = data.current.value + '%';
+
+        let pills = '';
+        if (data.yesterday) {
+          const yColor = getFearGreedColor(data.yesterday.label);
+          pills += `<span class="fg-comparison-pill"><span class="fg-pill-dot" style="background:${yColor}"></span>Yesterday: <strong>${data.yesterday.label} - ${data.yesterday.value}</strong></span>`;
+        }
+        if (data.lastMonth) {
+          const mColor = getFearGreedColor(data.lastMonth.label);
+          pills += `<span class="fg-comparison-pill"><span class="fg-pill-dot" style="background:${mColor}"></span>Last Month: <strong>${data.lastMonth.label} - ${data.lastMonth.value}</strong></span>`;
+        }
+        comparisons.innerHTML = pills;
+
+        card.style.display = 'block';
+      } catch (error) {
+        console.error('Failed to load Fear & Greed data:', error);
+      }
+    }
+
     async function loadMarketData(forceRefresh = false) {
       loadingState.style.display = 'block';
       errorState.style.display = 'none';
@@ -1737,6 +1936,9 @@
 
         loadingState.style.display = 'none';
         contentContainer.style.display = 'block';
+
+        // Load Fear & Greed data in parallel (non-blocking)
+        loadFearGreedData();
       } catch (error) {
         console.error('Error loading market data:', error);
         loadingState.style.display = 'none';
@@ -1778,6 +1980,9 @@
         } else {
           cacheBadge.innerHTML = '';
         }
+
+        // Also refresh Fear & Greed data
+        loadFearGreedData();
       } catch (error) {
         console.error('Price auto-refresh failed:', error);
       }

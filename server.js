@@ -4504,6 +4504,91 @@ function enrichDriversWithEarningsInfo(drivers) {
   });
 }
 
+// ============================================
+// CNN FEAR & GREED INDEX API
+// ============================================
+
+let fearGreedCache = { data: null, cachedAt: 0 };
+const FEAR_GREED_CACHE_MAX_AGE_MS = 60 * 60 * 1000; // 1 hour
+
+function getFearGreedLabel(value) {
+  if (value <= 25) return 'Extreme Fear';
+  if (value <= 45) return 'Fear';
+  if (value <= 55) return 'Neutral';
+  if (value <= 75) return 'Greed';
+  return 'Extreme Greed';
+}
+
+async function fetchFearGreedData() {
+  // Check cache first
+  if (fearGreedCache.data && (Date.now() - fearGreedCache.cachedAt) < FEAR_GREED_CACHE_MAX_AGE_MS) {
+    return fearGreedCache.data;
+  }
+
+  try {
+    const response = await fetch('https://production.dataviz.cnn.io/index/fearandgreed/graphdata', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/json',
+        'Referer': 'https://www.cnn.com/markets/fear-and-greed'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`CNN API returned ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    // The CNN API returns fear_and_greed object with score and other data
+    const fgData = data.fear_and_greed;
+    const currentScore = Math.round(fgData.score);
+    const previousClose = fgData.previous_close != null ? Math.round(fgData.previous_close) : null;
+    const previousOneMonth = fgData.previous_1_month != null ? Math.round(fgData.previous_1_month) : null;
+
+    const result = {
+      current: {
+        value: currentScore,
+        label: getFearGreedLabel(currentScore)
+      },
+      yesterday: previousClose != null ? {
+        value: previousClose,
+        label: getFearGreedLabel(previousClose)
+      } : null,
+      lastMonth: previousOneMonth != null ? {
+        value: previousOneMonth,
+        label: getFearGreedLabel(previousOneMonth)
+      } : null
+    };
+
+    // Cache it
+    fearGreedCache = { data: result, cachedAt: Date.now() };
+    console.log(`Fear & Greed Index fetched: ${currentScore} (${result.current.label})`);
+
+    return result;
+  } catch (error) {
+    console.error('Error fetching Fear & Greed Index:', error.message);
+    // Return cached data even if expired, as fallback
+    if (fearGreedCache.data) {
+      return fearGreedCache.data;
+    }
+    return null;
+  }
+}
+
+app.get('/api/fear-greed', async (req, res) => {
+  try {
+    const data = await fetchFearGreedData();
+    if (!data) {
+      return res.status(503).json({ error: 'Fear & Greed data temporarily unavailable' });
+    }
+    res.json(data);
+  } catch (error) {
+    console.error('Fear & Greed API error:', error);
+    res.status(500).json({ error: 'Failed to fetch Fear & Greed data' });
+  }
+});
+
 // GET /api/market-update
 app.get('/api/market-update', async (req, res) => {
   const forceRefresh = req.query.refresh === 'true';
