@@ -4052,6 +4052,141 @@ Write in professional, confident Goldman Sachs analyst style. Be specific with f
 });
 
 // ============================================
+// Reddit Favorites API (WallStreetBets)
+// ============================================
+
+const REDDIT_CACHE_PATH = path.join(__dirname, 'cache', 'reddit-favorites.json');
+const REDDIT_CACHE_MAX_AGE_HOURS = 12;
+
+function getCachedRedditFavorites() {
+  if (!fs.existsSync(REDDIT_CACHE_PATH)) {
+    return null;
+  }
+
+  try {
+    const cached = JSON.parse(fs.readFileSync(REDDIT_CACHE_PATH, 'utf8'));
+    const ageMs = Date.now() - cached.cachedAt;
+    const ageHours = ageMs / (1000 * 60 * 60);
+
+    if (ageHours <= REDDIT_CACHE_MAX_AGE_HOURS) {
+      console.log(`Using cached Reddit favorites (cached ${ageHours.toFixed(1)} hours ago)`);
+      return cached.data;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error reading Reddit favorites cache:', error);
+    return null;
+  }
+}
+
+function saveRedditFavoritesToCache(data) {
+  const cacheData = {
+    data,
+    cachedAt: Date.now()
+  };
+
+  try {
+    fs.writeFileSync(REDDIT_CACHE_PATH, JSON.stringify(cacheData, null, 2));
+    console.log('Cached Reddit favorites data');
+  } catch (error) {
+    console.error('Error writing Reddit favorites cache:', error);
+  }
+}
+
+// GET /api/reddit-favorites
+app.get('/api/reddit-favorites', async (req, res) => {
+  // Check cache first
+  const cached = getCachedRedditFavorites();
+  if (cached) {
+    return res.json({ ...cached, cached: true });
+  }
+
+  try {
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+    console.log('Searching for WallStreetBets popular stocks...');
+    const searchPrompt = `Search for "wallstreetbets most popular stocks ${dateStr}", "reddit WSB trending tickers ${dateStr}", and "r/wallstreetbets what stocks are people buying". Find the top 5 most discussed and mentioned stock tickers on r/wallstreetbets right now. Look for DD posts, YOLO posts, and general discussion to identify which stocks the WSB community is most excited about.`;
+
+    const searchResponse = await client.responses.create({
+      model: 'gpt-4o',
+      tools: [{ type: 'web_search' }],
+      input: searchPrompt
+    });
+    if (searchResponse.usage) logTokenUsage('reddit-favorites', searchResponse.usage);
+
+    const searchResults = searchResponse.output_text;
+
+    console.log('Generating Reddit favorites summary...');
+    const summaryPrompt = `You are a financial analyst monitoring retail investor sentiment on Reddit's r/wallstreetbets. Based on this research, identify the top 5 most discussed/mentioned stock tickers on WallStreetBets right now.
+
+Research:
+${searchResults}
+
+For each stock, provide:
+1. The ticker symbol
+2. The full company name
+3. A one-sentence description of why WallStreetBets is talking about it (mention specific catalysts, DD thesis, or meme momentum)
+
+Return ONLY a JSON array with exactly 5 objects in this format:
+[
+  {"ticker": "SYMBOL", "companyName": "Full Company Name", "description": "One sentence about why WSB is discussing this stock."},
+  ...
+]
+
+Important:
+- Use real, currently traded US stock tickers only
+- Focus on stocks that are genuinely being discussed on WSB, not just popular stocks in general
+- The description should capture the WSB community's specific sentiment or thesis
+- Return ONLY the JSON array, no other text`;
+
+    const summaryResponse = await client.chat.completions.create({
+      model: 'gpt-4o',
+      max_tokens: 800,
+      messages: [{ role: 'user', content: summaryPrompt }]
+    });
+    logTokenUsage('reddit-favorites', summaryResponse.usage);
+
+    let stocks = [];
+    try {
+      const content = summaryResponse.choices[0].message.content.trim();
+      const jsonMatch = content.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        stocks = JSON.parse(jsonMatch[0]);
+      }
+    } catch (err) {
+      console.error('Failed to parse Reddit favorites:', err.message);
+      return res.status(500).json({ error: 'Failed to parse Reddit favorites data' });
+    }
+
+    if (!stocks || stocks.length === 0) {
+      return res.status(500).json({ error: 'No stocks found from WallStreetBets' });
+    }
+
+    const result = {
+      stocks,
+      generatedAt: new Date().toISOString()
+    };
+
+    // Cache the result
+    saveRedditFavoritesToCache(result);
+
+    res.json({ ...result, cached: false });
+  } catch (error) {
+    console.error('Reddit favorites API error:', error);
+
+    if (error.code === 'insufficient_quota' || error.status === 429) {
+      res.status(503).json({
+        error: 'AI service temporarily unavailable due to usage limits. Please try again in a few minutes.',
+        errorCode: 'QUOTA_EXCEEDED'
+      });
+    } else {
+      res.status(500).json({ error: 'Failed to generate Reddit favorites data' });
+    }
+  }
+});
+
+// ============================================
 // Market Update API
 // ============================================
 
