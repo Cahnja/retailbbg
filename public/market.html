@@ -62,7 +62,7 @@
 
     /* Main Content */
     .main-content {
-      max-width: 1000px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: 32px;
       padding-top: 72px;
@@ -86,118 +86,10 @@
       font-weight: 400;
     }
 
-    /* Bitcoin Banner */
-    .bitcoin-banner {
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 20px 28px;
-      margin-bottom: 20px;
-      border: 1px solid #e8eaed;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .bitcoin-banner::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(135deg, #f7931a 0%, #e8850e 100%);
-    }
-
-    .bitcoin-icon {
-      width: 40px;
-      height: 40px;
-      background: #f7931a;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      color: #fff;
-      font-size: 22px;
-      flex-shrink: 0;
-    }
-
-    .bitcoin-info {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-
-    .bitcoin-label {
-      font-size: 13px;
-      font-weight: 600;
-      color: #5f6368;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .bitcoin-price {
-      font-size: 28px;
-      font-weight: 700;
-      color: #202124;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .bitcoin-change {
-      font-size: 18px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .bitcoin-change.positive {
-      color: #137333;
-    }
-
-    .bitcoin-change.negative {
-      color: #c5221f;
-    }
-
-    .bitcoin-change-detail {
-      font-size: 14px;
-      font-weight: 500;
-      color: #5f6368;
-    }
-
-    .bitcoin-change-detail.positive {
-      color: #137333;
-    }
-
-    .bitcoin-change-detail.negative {
-      color: #c5221f;
-    }
-
-    @media (max-width: 768px) {
-      .bitcoin-banner {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-        padding: 20px;
-      }
-
-      .bitcoin-info {
-        gap: 12px;
-      }
-
-      .bitcoin-price {
-        font-size: 24px;
-      }
-    }
-
     /* Index Cards Grid - V1 Style */
     .indices-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 20px;
       margin-bottom: 32px;
     }
@@ -891,7 +783,7 @@
     /* Responsive */
     @media (max-width: 900px) {
       .indices-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
       }
 
       .timeline-feed::before {
@@ -911,6 +803,10 @@
       .main-content {
         padding: 24px 16px;
         padding-top: 64px;
+      }
+
+      .indices-grid {
+        grid-template-columns: 1fr;
       }
 
       .index-change {
@@ -970,19 +866,6 @@
     </div>
 
     <div id="content-container" style="display: none;">
-      <!-- Bitcoin Price Banner -->
-      <div class="bitcoin-banner" id="bitcoin-banner" style="display: none;">
-        <div class="bitcoin-icon">&#8383;</div>
-        <div>
-          <div class="bitcoin-label">Bitcoin</div>
-          <div class="bitcoin-info">
-            <div class="bitcoin-price" id="bitcoin-price">--</div>
-            <div class="bitcoin-change" id="bitcoin-change">--</div>
-            <div class="bitcoin-change-detail" id="bitcoin-change-detail"></div>
-          </div>
-        </div>
-      </div>
-
       <!-- Index Cards Grid - V1 Style -->
       <div class="indices-grid" id="indices-container">
         <!-- Index cards will be inserted here -->
@@ -1050,10 +933,6 @@
     const errorMessage = document.getElementById('error-message');
     const contentContainer = document.getElementById('content-container');
     const indicesContainer = document.getElementById('indices-container');
-    const bitcoinBanner = document.getElementById('bitcoin-banner');
-    const bitcoinPrice = document.getElementById('bitcoin-price');
-    const bitcoinChange = document.getElementById('bitcoin-change');
-    const bitcoinChangeDetail = document.getElementById('bitcoin-change-detail');
     const driversList = document.getElementById('drivers-list');
     const lastUpdated = document.getElementById('last-updated');
     const cacheBadge = document.getElementById('cache-badge');
@@ -1144,8 +1023,8 @@
       return 'Market';
     }
 
-    function renderIndices(indices) {
-      indicesContainer.innerHTML = indices.map(index => {
+    function renderIndices(indices, bitcoin) {
+      let cards = indices.map(index => {
         const isPositive = index.changePercent >= 0;
         const changeClass = isPositive ? 'positive' : 'negative';
         const arrow = isPositive ? '&#9650;' : '&#9660;';
@@ -1160,31 +1039,27 @@
             <div class="index-price">${formatNumber(index.price)}</div>
           </div>
         `;
-      }).join('');
-    }
+      });
 
-    function renderBitcoin(btc) {
-      if (!btc || btc.price === 0) {
-        bitcoinBanner.style.display = 'none';
-        return;
+      // Add Bitcoin as a 4th index card
+      if (bitcoin && bitcoin.price > 0) {
+        const isPositive = bitcoin.changePercent >= 0;
+        const changeClass = isPositive ? 'positive' : 'negative';
+        const arrow = isPositive ? '&#9650;' : '&#9660;';
+
+        cards.push(`
+          <div class="index-card" id="bitcoin-card">
+            <div class="index-name">Bitcoin</div>
+            <div class="index-change ${changeClass}">
+              <span class="change-arrow">${arrow}</span>
+              ${formatPercent(bitcoin.changePercent)}
+            </div>
+            <div class="index-price">$${formatNumber(bitcoin.price)}</div>
+          </div>
+        `);
       }
-      const isPositive = btc.changePercent >= 0;
-      const changeClass = isPositive ? 'positive' : 'negative';
-      const arrow = isPositive ? '&#9650;' : '&#9660;';
-      const sign = isPositive ? '+' : '';
 
-      bitcoinPrice.textContent = '$' + btc.price.toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
-      bitcoinChange.className = 'bitcoin-change ' + changeClass;
-      bitcoinChange.innerHTML = '<span class="change-arrow">' + arrow + '</span> ' + sign + btc.changePercent.toFixed(2) + '%';
-      bitcoinChangeDetail.className = 'bitcoin-change-detail ' + changeClass;
-      bitcoinChangeDetail.textContent = sign + '$' + Math.abs(btc.change).toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
-      bitcoinBanner.style.display = 'flex';
+      indicesContainer.innerHTML = cards.join('');
     }
 
     function highlightText(text) {
@@ -1546,8 +1421,7 @@
 
         const data = await response.json();
 
-        renderBitcoin(data.bitcoin);
-        renderIndices(data.indices);
+        renderIndices(data.indices, data.bitcoin);
         renderDrivers(data.drivers);
         lastUpdated.textContent = 'Last updated: ' + formatTime(data.asOf);
 
@@ -1600,10 +1474,7 @@
         const data = await response.json();
 
         // Update only the price displays and timestamp (not drivers)
-        renderIndices(data.indices);
-        if (data.bitcoin && typeof renderBitcoin === 'function') {
-          renderBitcoin(data.bitcoin);
-        }
+        renderIndices(data.indices, data.bitcoin);
         lastUpdated.textContent = 'Last updated: ' + formatTime(data.asOf);
 
         if (data.cached) {
