@@ -6873,12 +6873,18 @@ app.get('/api/stock-chart', async (req, res) => {
         break;
     }
 
+    // For intraday ranges, extend period2 to tomorrow to capture all of today's data
+    const period2 = new Date(now);
+    if (range === '1d' || range === '5d') {
+      period2.setDate(period2.getDate() + 1);
+    }
+
     // Fetch quote and chart in parallel
     const [quote, chartResult] = await Promise.all([
       yahooFinance.quote(ticker),
       yahooFinance.chart(ticker, {
         period1: period1.toISOString().split('T')[0],
-        period2: now.toISOString().split('T')[0],
+        period2: period2.toISOString().split('T')[0],
         interval
       })
     ]);
