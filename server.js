@@ -5244,16 +5244,13 @@ Find:
 
 Provide specific facts and quotes from recent news.`;
 
-    const broadSearchPrompt = `Search for "${ticker} stock" and "${companyName} news" to find what's driving this stock ${dayReference}.
+    const broadSearchPrompt = `Search for "${ticker} stock news today" on financial news sites (Yahoo Finance, Investing.com, MarketWatch, Seeking Alpha, CNBC).
 
-Look beyond the obvious — the catalyst might be INDIRECT:
-- A competitor or tech company (AI, fintech, etc.) launching a product that disrupts ${companyName}'s business
-- An industry-wide threat, regulation, or technology shift
-- A major customer, partner, or peer company making news that impacts ${companyName}
+What are the top headlines about ${ticker} (${companyName}) right now? The stock moved ${direction} ${absChange}% so there must be a significant catalyst.
 
-Also search for any direct company news: earnings surprises, lawsuits, executive changes, or deal announcements.
+The cause might be INDIRECT — a competitor, tech company, or industry event that threatens ${companyName}'s business. Search broadly for any major news that mentions ${ticker} or could impact it.
 
-Report ALL recent news about ${ticker} with specific facts, names, dates, and details.`;
+List every headline and key fact you find.`;
 
     if (isStream) sendSSE(res, { type: 'status', message: 'Searching for latest news...' });
 
