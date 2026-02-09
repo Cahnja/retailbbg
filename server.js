@@ -4591,7 +4591,8 @@ ${newsContext}
 Write 4 paragraphs of analysis. Include specific facts, numbers, percentages, and any important context. Each paragraph should flow naturally into the next.
 
 CRITICAL STYLE RULES:
-- Be fact-based. Include as many specific numbers/percentages as you can find.
+- Do NOT repeat the stock price change or percentage move — the user already sees this. Jump straight into the WHY.
+- Be fact-based. Include specific numbers (earnings, revenue, guidance, price targets) but NOT the stock's own price movement.
 - Short, punchy sentences. No filler.
 - Every sentence must be ADDITIVE - if it doesn't add new information, cut it.
 - NO generic investment advice like "investors should weigh risk-reward" or "long-term investors may view this as..."
@@ -4781,7 +4782,8 @@ ${newsContext}
 Write 4 paragraphs of analysis. Include the specific catalyst driving the move, relevant numbers (EPS, revenue, guidance, price targets), and any important context. Each paragraph should flow naturally into the next.
 
 CRITICAL STYLE RULES:
-- Be fact-based. Include as many specific numbers/percentages as you can find.
+- Do NOT repeat the stock price change or percentage move — the user already sees this. Jump straight into the WHY.
+- Be fact-based. Include specific numbers (earnings, revenue, guidance, price targets) but NOT the stock's own price movement.
 - Short, punchy sentences. No filler.
 - Every sentence must be ADDITIVE - if it doesn't add new information, cut it.
 - NO generic investment advice like "investors should weigh risk-reward" or "long-term investors may view this as..."
