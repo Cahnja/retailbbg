@@ -5117,7 +5117,7 @@ function saveStockExplanationToCache(ticker, data) {
 
 // GET /api/stock-explanation-details
 app.get('/api/stock-explanation-details', async (req, res) => {
-  const { ticker, companyName, changePercent, stream, bullet } = req.query;
+  const { ticker, companyName, changePercent, stream } = req.query;
   const isStream = stream === 'true';
 
   if (!ticker || !companyName || !changePercent) {
@@ -5175,17 +5175,15 @@ app.get('/api/stock-explanation-details', async (req, res) => {
       dayReference = "today";
     }
 
-    // Build search context from bullet (Top Movers explanation) or fallback
-    const bulletText = bullet || `${companyName} (${ticker}) moved ${direction} ${absChange}%`;
+    // Web search to find why the stock moved (let GPT-4o figure it out)
+    const searchPrompt = `Why did ${companyName} (${ticker}) stock move ${direction} ${absChange}% ${dayReference}?
 
-    // Web search for more context (same approach as market drivers)
-    const searchPrompt = `Search for more information about this market news from ${dayReference}:
-
-"${bulletText}"
+Search for the specific catalyst: earnings results, analyst upgrades/downgrades, deal announcements, FDA decisions, management changes, guidance updates, or other news that caused this move.
 
 Find:
-- Specific numbers, percentages, and data points
-- Company names and stock movements involved
+- The specific catalyst with exact details (analyst names, price targets, earnings numbers, deal values)
+- Relevant numbers, percentages, and data points
+- Context about the company and sector
 
 Provide specific facts and quotes from recent news.`;
 
@@ -5201,17 +5199,15 @@ Provide specific facts and quotes from recent news.`;
 
     const newsContext = searchResponse.output_text;
 
-    // Generate 4-paragraph analysis (same prompt as market drivers)
-    const analysisPrompt = `You are a senior markets analyst. A user clicked on this market driver from ${dayReference}:
-
-"${bulletText}"
+    // Generate 4-paragraph analysis
+    const analysisPrompt = `You are a senior markets analyst. A user wants to understand why ${companyName} (${ticker}) stock moved ${direction} ${absChange}% ${dayReference}.
 
 Note: This market data is from ${timeContext}.
 
 RESEARCH:
 ${newsContext}
 
-Write 4 short paragraphs. Be extremely concise and direct — every sentence must deliver new information.
+Write 4 short paragraphs explaining why the stock moved. Be extremely concise and direct — every sentence must deliver new information.
 
 STYLE RULES:
 - Do NOT repeat the stock price change or percentage move — jump straight into the WHY.
