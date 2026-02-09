@@ -2324,6 +2324,11 @@
         currentChartData = data.chart;
         currentQuoteData = data.quote;
 
+        // If 1D has no chart data (e.g. weekend/holiday), fall back to 5D
+        if (range === '1d' && (!data.chart || data.chart.length === 0)) {
+          return loadChartData(ticker, '5d');
+        }
+
         // Update header with live quote data
         updatePanelHeader(data.quote);
 
