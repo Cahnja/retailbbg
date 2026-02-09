@@ -5233,46 +5233,29 @@ app.get('/api/stock-explanation-details', async (req, res) => {
       dayReference = "today";
     }
 
-    // Two parallel web searches: direct catalyst + broader news/competitive threats
-    const directSearchPrompt = `Why did ${companyName} (${ticker}) stock move ${direction} ${absChange}% ${dayReference}?
+    // Web search to find why the stock moved (let GPT-4o figure it out)
+    const searchPrompt = `Why did ${companyName} (${ticker}) stock move ${direction} ${absChange}% ${dayReference}?
 
 Search for the specific catalyst: earnings results, analyst upgrades/downgrades, deal announcements, FDA decisions, management changes, guidance updates, or other news that caused this move.
 
 Find:
 - The specific catalyst with exact details (analyst names, price targets, earnings numbers, deal values)
 - Relevant numbers, percentages, and data points
+- Context about the company and sector
 
 Provide specific facts and quotes from recent news.`;
-
-    const broadSearchPrompt = `What major news happened recently involving ${companyName} (${ticker}) or its industry that could affect its stock price?
-
-Search broadly for:
-- Competitive threats: new products, services, or companies disrupting ${companyName}'s business
-- Industry news: regulatory changes, technology disruptions, or market shifts affecting the sector
-- Company-specific news: lawsuits, executive departures, contract wins/losses, strategic changes
-- Any other significant recent developments involving ${companyName} or its direct competitors
-
-Provide specific facts, names, and details from recent news.`;
 
     if (isStream) sendSSE(res, { type: 'status', message: 'Searching for latest news...' });
 
     console.log(`[Stock Details] Web searching for ${ticker}... (time context: ${timeContext})`);
-    const [directSearchResponse, broadSearchResponse] = await Promise.all([
-      client.responses.create({
-        model: 'gpt-4o',
-        tools: [{ type: 'web_search' }],
-        input: directSearchPrompt
-      }, { timeout: 45000 }),
-      client.responses.create({
-        model: 'gpt-4o',
-        tools: [{ type: 'web_search' }],
-        input: broadSearchPrompt
-      }, { timeout: 45000 })
-    ]);
-    if (directSearchResponse.usage) logTokenUsage('stock-details-search-direct', directSearchResponse.usage);
-    if (broadSearchResponse.usage) logTokenUsage('stock-details-search-broad', broadSearchResponse.usage);
+    const searchResponse = await client.responses.create({
+      model: 'gpt-4o',
+      tools: [{ type: 'web_search' }],
+      input: searchPrompt
+    }, { timeout: 45000 });
+    if (searchResponse.usage) logTokenUsage('stock-details-search', searchResponse.usage);
 
-    const newsContext = `DIRECT CATALYST SEARCH:\n${directSearchResponse.output_text}\n\nBROADER NEWS & COMPETITIVE LANDSCAPE:\n${broadSearchResponse.output_text}`;
+    const newsContext = searchResponse.output_text;
 
     // Generate 4-paragraph analysis
     const analysisPrompt = `You are a senior markets analyst. A user wants to understand why ${companyName} (${ticker}) stock moved ${direction} ${absChange}% ${dayReference}.
@@ -5283,8 +5266,6 @@ RESEARCH:
 ${newsContext}
 
 Write 4 short paragraphs explaining why the stock moved. Be extremely concise and direct — every sentence must deliver new information.
-
-IMPORTANT: The catalyst may be INDIRECT — a competitor launching a disruptive product, an industry shift, or regulatory news that threatens the company's business model. Consider both direct company news AND broader industry/competitive developments from the research.
 
 STYLE RULES:
 - Do NOT repeat the stock price change or percentage move — jump straight into the WHY.
