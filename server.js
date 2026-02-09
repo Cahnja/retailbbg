@@ -4850,13 +4850,7 @@ app.get('/api/stock-explanation-details', async (req, res) => {
 
 Note: This price move is from ${timeContext}.
 
-Search for:
-- Earnings results, guidance, and analyst reactions
-- Company announcements (acquisitions, products, partnerships)
-- Analyst upgrades/downgrades with price targets
-- Industry or macro factors affecting the stock
-
-Provide specific facts, numbers, percentages, and quotes from recent news.`;
+Search for the specific catalyst behind this move. Provide specific facts, numbers, and quotes from recent news.`;
 
     if (isStream) sendSSE(res, { type: 'status', message: 'Searching for latest news...' });
 
@@ -4878,11 +4872,12 @@ Note: This price data is from ${timeContext}.
 RESEARCH:
 ${newsContext}
 
-Write 4 paragraphs of analysis. Include the specific catalyst driving the move, relevant numbers (EPS, revenue, guidance, price targets), and any important context. Each paragraph should flow naturally into the next.
+Write 4 paragraphs of analysis. Include the specific catalyst driving the move and any important context. Each paragraph should flow naturally into the next.
 
 CRITICAL STYLE RULES:
 - Do NOT repeat the stock price change or percentage move — the user already sees this. Jump straight into the WHY.
-- Be fact-based. Include specific numbers (earnings, revenue, guidance, price targets) but NOT the stock's own price movement.
+- ONLY include facts that appear in the RESEARCH above. Never invent or assume earnings results, revenue figures, or other numbers not present in the research.
+- Be fact-based. Include specific numbers from the research but NOT the stock's own price movement.
 - Short, punchy sentences. No filler.
 - Every sentence must be ADDITIVE - if it doesn't add new information, cut it.
 - NO generic investment advice like "investors should weigh risk-reward" or "long-term investors may view this as..."
