@@ -4622,7 +4622,7 @@ Note: This market data is from ${timeContext}.
 RESEARCH:
 ${newsContext}
 
-Write 3 short paragraphs. Be extremely concise and direct — every sentence must deliver new information.
+Write 4 short paragraphs. Be extremely concise and direct — every sentence must deliver new information.
 
 STYLE RULES:
 - Do NOT repeat the stock price change or percentage move — jump straight into the WHY.
@@ -4631,14 +4631,14 @@ STYLE RULES:
 - No generic advice, hedging, or obvious statements.
 - Short, punchy sentences. Cut any sentence that doesn't add a new fact.
 - Wrap the single most important sentence in each paragraph with **bold** markdown.
-- Just three tight paragraphs, no headers.`;
+- Just four tight paragraphs, no headers.`;
 
     if (isStream) {
       sendSSE(res, { type: 'status', message: 'Generating analysis...' });
 
       const streamResponse = await client.chat.completions.create({
         model: 'gpt-4o',
-        max_tokens: 500,
+        max_tokens: 800,
         stream: true,
         messages: [{ role: 'user', content: analysisPrompt }]
       });
@@ -4675,7 +4675,7 @@ STYLE RULES:
     } else {
       const response = await client.chat.completions.create({
         model: 'gpt-4o',
-        max_tokens: 500,
+        max_tokens: 800,
         messages: [{ role: 'user', content: analysisPrompt }]
       });
       logTokenUsage('driver-details', response.usage);
@@ -4871,7 +4871,7 @@ Note: This price data is from ${timeContext}.
 RESEARCH:
 ${newsContext}
 
-Write 3 short paragraphs. Be extremely concise and direct — every sentence must deliver new information.
+Write 4 short paragraphs. Be extremely concise and direct — every sentence must deliver new information.
 
 STYLE RULES:
 - Do NOT repeat the stock price change or percentage move — jump straight into the WHY.
@@ -4880,14 +4880,14 @@ STYLE RULES:
 - No generic advice, hedging, or obvious statements.
 - Short, punchy sentences. Cut any sentence that doesn't add a new fact.
 - Wrap the single most important sentence in each paragraph with **bold** markdown.
-- Just three tight paragraphs, no headers.`;
+- Just four tight paragraphs, no headers.`;
 
     if (isStream) {
       sendSSE(res, { type: 'status', message: 'Generating analysis...' });
 
       const streamResponse = await client.chat.completions.create({
         model: 'gpt-4o',
-        max_tokens: 500,
+        max_tokens: 800,
         stream: true,
         messages: [{ role: 'user', content: analysisPrompt }]
       });
@@ -4918,7 +4918,7 @@ STYLE RULES:
     } else {
       const response = await client.chat.completions.create({
         model: 'gpt-4o',
-        max_tokens: 500,
+        max_tokens: 800,
         messages: [{ role: 'user', content: analysisPrompt }]
       });
       logTokenUsage('stock-details', response.usage);
