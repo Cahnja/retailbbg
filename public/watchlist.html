@@ -191,18 +191,6 @@
       color: #202124;
     }
 
-    /* Read-only badge for Popular watchlist */
-    .readonly-badge {
-      display: inline-block;
-      font-size: 11px;
-      color: #5f6368;
-      background: #f1f3f4;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-weight: 500;
-      margin-left: 8px;
-    }
-
     /* Add Stock Section */
     .add-stock-section {
       background: #ffffff;
@@ -1049,7 +1037,7 @@
       </button>
     </div>
 
-    <!-- Add Stock Section (hidden when Popular is selected) -->
+    <!-- Add Stock Section -->
     <div class="add-stock-section" id="add-stock-section" style="display: none;">
       <form class="add-stock-form" id="add-stock-form">
         <input type="text" class="ticker-input" id="ticker-input" placeholder="Enter ticker (e.g., AAPL)" maxlength="10">
@@ -1202,14 +1190,15 @@
     // 5. Replace the CLIENT_ID below with your actual Google Client ID
     const GOOGLE_CLIENT_ID = '526500240893-io4bf4eveom20ld8jv1k5qs7m6a4tn5j.apps.googleusercontent.com';
 
-    // Popular watchlist (read-only preset)
-    const POPULAR_WATCHLIST = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'BTC-USD'];
+    // Popular watchlist (default preset, editable via localStorage)
+    const DEFAULT_POPULAR_WATCHLIST = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'BTC-USD'];
+    let popularWatchlist = JSON.parse(localStorage.getItem('popularWatchlist') || 'null') || [...DEFAULT_POPULAR_WATCHLIST];
 
     // State
     let currentUser = null;
     let authToken = localStorage.getItem('authToken');
     let portfolioWatchlist = JSON.parse(localStorage.getItem('localWatchlist') || '[]');
-    let watchlist = [...POPULAR_WATCHLIST]; // currently displayed list
+    let watchlist = [...popularWatchlist]; // currently displayed list
     let stockPerformance = {};
     let refreshInterval = null;
     let googleInitialized = false;
@@ -1267,7 +1256,7 @@
       startAutoRefresh();
     }
 
-    // Returns true if the currently selected watchlist is the Popular (read-only) one
+    // Returns true if the currently selected watchlist is the Popular one
     function isPopularSelected() {
       return currentWatchlistId === '__popular__';
     }
@@ -1280,10 +1269,10 @@
       const actionsBtn = document.getElementById('watchlist-actions-btn');
 
       if (isPopularSelected()) {
-        // Popular: read-only, no add/remove
-        addStockSection.style.display = 'none';
-        watchlistTitleLabel.innerHTML = 'Popular Stocks <span class="readonly-badge">Read-only</span>';
-        watchlist = [...POPULAR_WATCHLIST];
+        // Popular: editable, saved to localStorage
+        addStockSection.style.display = 'block';
+        watchlistTitleLabel.textContent = 'Popular Stocks';
+        watchlist = [...popularWatchlist];
         // Show New button only if logged in; never show actions for Popular
         newWatchlistBtn.style.display = currentUser ? 'flex' : 'none';
         actionsBtn.style.display = 'none';
@@ -1305,9 +1294,9 @@
       } else {
         // Fallback: show Popular
         currentWatchlistId = '__popular__';
-        addStockSection.style.display = 'none';
-        watchlistTitleLabel.innerHTML = 'Popular Stocks <span class="readonly-badge">Read-only</span>';
-        watchlist = [...POPULAR_WATCHLIST];
+        addStockSection.style.display = 'block';
+        watchlistTitleLabel.textContent = 'Popular Stocks';
+        watchlist = [...popularWatchlist];
         newWatchlistBtn.style.display = currentUser ? 'flex' : 'none';
         actionsBtn.style.display = 'none';
       }
@@ -1471,16 +1460,19 @@
     // Add Stock Form
     addStockForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      // Only allow adding on editable watchlists (not Popular)
-      if (isPopularSelected()) return;
 
       const ticker = tickerInput.value.trim().toUpperCase();
       if (!ticker) return;
 
-      // Check if already in the current portfolio watchlist
-      const currentList = (currentUser && watchlistsData && watchlistsData.watchlists[currentWatchlistId])
-        ? (watchlistsData.watchlists[currentWatchlistId]?.tickers || [])
-        : portfolioWatchlist;
+      // Check if already in the current watchlist
+      let currentList;
+      if (isPopularSelected()) {
+        currentList = popularWatchlist;
+      } else if (currentUser && watchlistsData && watchlistsData.watchlists[currentWatchlistId]) {
+        currentList = watchlistsData.watchlists[currentWatchlistId]?.tickers || [];
+      } else {
+        currentList = portfolioWatchlist;
+      }
 
       if (currentList.includes(ticker)) {
         showToast('This stock is already in your watchlist');
@@ -1500,7 +1492,12 @@
           throw new Error(`"${ticker}" is not a valid ticker symbol`);
         }
 
-        if (currentUser && authToken && watchlistsData?.watchlists[currentWatchlistId]) {
+        if (isPopularSelected()) {
+          // Add to Popular watchlist (saved in localStorage)
+          popularWatchlist.push(ticker);
+          localStorage.setItem('popularWatchlist', JSON.stringify(popularWatchlist));
+          watchlist = [...popularWatchlist];
+        } else if (currentUser && authToken && watchlistsData?.watchlists[currentWatchlistId]) {
           // Add to specific watchlist on server
           const response = await fetch(`/api/watchlists/${currentWatchlistId}/add`, {
             method: 'POST',
@@ -1542,13 +1539,17 @@
       addBtn.textContent = 'Add';
     });
 
-    // Remove Stock (only works on editable watchlists, not Popular)
+    // Remove Stock
     async function removeStock(ticker) {
-      if (isPopularSelected()) return;
       if (!confirm(`Remove ${ticker} from your watchlist?`)) return;
 
       try {
-        if (currentUser && authToken && watchlistsData?.watchlists[currentWatchlistId]) {
+        if (isPopularSelected()) {
+          // Remove from Popular watchlist (saved in localStorage)
+          popularWatchlist = popularWatchlist.filter(t => t !== ticker);
+          localStorage.setItem('popularWatchlist', JSON.stringify(popularWatchlist));
+          watchlist = [...popularWatchlist];
+        } else if (currentUser && authToken && watchlistsData?.watchlists[currentWatchlistId]) {
           const response = await fetch(`/api/watchlists/${currentWatchlistId}/remove/${ticker}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${authToken}` }
@@ -1924,27 +1925,18 @@
 
     // Render watchlist
     function renderWatchlist() {
-      const isReadOnly = isPopularSelected();
-
       if (watchlist.length === 0) {
-        const emptyMsg = isReadOnly
-          ? 'No popular stocks to display'
-          : 'Your portfolio is empty. Add stocks above to start tracking them.';
         watchlistContainer.innerHTML = `
           <div class="empty-state">
-            <h3>${isReadOnly ? 'No stocks' : 'Your portfolio is empty'}</h3>
-            <p>${emptyMsg}</p>
+            <h3>Your watchlist is empty</h3>
+            <p>Add stocks above to start tracking them.</p>
           </div>
         `;
         return;
       }
 
       const timeframes = ['1D', '5D', '1M', 'YTD', '1Y'];
-
-      // Use a different grid when read-only (no remove button column)
-      const gridCols = isReadOnly
-        ? '80px 1fr 90px 68px 68px 68px 68px 68px'
-        : '80px 1fr 90px 68px 68px 68px 68px 68px 40px';
+      const gridCols = '80px 1fr 90px 68px 68px 68px 68px 68px 40px';
 
       let html = `
         <div class="stock-table-header" style="grid-template-columns: ${gridCols};">
@@ -1952,7 +1944,7 @@
           <span class="col-header">Name</span>
           <span class="col-header right">Price</span>
           ${timeframes.map(tf => `<span class="col-header right">${tf}</span>`).join('')}
-          ${isReadOnly ? '' : '<span class="col-header"></span>'}
+          <span class="col-header"></span>
         </div>
       `;
 
@@ -1970,7 +1962,7 @@
           changeColumns += `<span class="stock-change ${className}">${text}</span>`;
         }
 
-        const removeBtn = isReadOnly ? '' : `
+        const removeBtn = `
             <button class="remove-btn" onclick="event.stopPropagation(); removeStock('${ticker}')" title="Remove">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M6 18L18 6M6 6l12 12"/>
