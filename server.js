@@ -3721,16 +3721,18 @@ ${headlines}
 
 Write ONE sentence (15-25 words) identifying the SPECIFIC catalyst for today's move.
 
-REQUIREMENTS:
-- You MUST include specific details: analyst names, price targets, earnings numbers (EPS, revenue), deal values, FDA decisions, executive names
-- Do NOT write a generic sector-level statement like "tech stocks rallied" or "positive market sentiment"
+CRITICAL: ONLY use facts that appear in the headlines above. Do NOT invent or guess any details.
+- If the headlines mention an analyst name, price target, or earnings number, include it
+- If the headlines do NOT mention specific details, do NOT fabricate them — just describe the catalyst at the level of detail the headlines support
 - Do NOT start with the company name or ticker — start with the catalyst itself
 - Do NOT mention the stock price movement (no "surged", "fell", "rose X%", "dropped", "gained", etc.)
-- If multiple catalysts exist, pick the MOST SPECIFIC one with the most concrete details
+- Do NOT write a generic sector-level statement like "tech stocks rallied" or "positive market sentiment"
+- If multiple catalysts exist, pick the MOST SPECIFIC one
 - NO hedging, no "likely", no "may have"
 
 GOOD: "DA Davidson upgraded to Buy with $180 price target, citing OpenAI partnership and cloud infrastructure growth."
 GOOD: "Q4 EPS of $2.41 beat estimates by $0.15 with revenue up 14% to $4.4B on strong optical fiber demand."
+GOOD: "Analyst upgrade citing strong cloud growth and expanding margins." (when headlines don't include specific numbers)
 BAD: "Technology stocks rallied as Wall Street reacted positively to easing industry fears."
 BAD: "Positive analyst sentiment and market momentum drove buying interest."
 
@@ -3746,7 +3748,7 @@ Write ONE specific catalyst sentence:`;
       catalyst = response.choices[0].message.content.trim();
     } else {
       // Fallback: use GPT-4o with just the stock info (no news)
-      const prompt = `${name} (${ticker}) stock is ${direction} ${changeAbs}% today. Write ONE sentence (15-25 words) describing the most likely specific catalyst. Include any concrete details you know (analyst names, earnings numbers, deal terms). Do NOT start with the company name or mention the stock price movement. Do NOT write generic statements. Just the sentence:`;
+      const prompt = `${name} (${ticker}) stock is ${direction} ${changeAbs}% today. Write ONE sentence (15-25 words) describing a plausible catalyst. CRITICAL: Do NOT fabricate specific details like analyst names, price targets, or earnings numbers unless you are certain they are accurate. Keep it factual and general rather than making up specifics. Do NOT start with the company name or mention the stock price movement. Just the sentence:`;
 
       const response = await client.chat.completions.create({
         model: 'gpt-4o',
