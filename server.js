@@ -172,7 +172,7 @@ async function generateCompanyDescription(ticker, companyName) {
     logTokenUsage('company-descriptions', response.usage, 'gpt-4o-mini');
 
     let description = response.choices[0].message.content.trim();
-    description = description.replace(/^["']|["']$/g, '').trim();
+    description = description.replace(/^["']|["']$/g, '').replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim();
 
     // Cache permanently
     saveCompanyDescription(ticker, description);
@@ -3751,8 +3751,8 @@ Write ONE catalyst sentence:`;
       catalyst = 'Recent market developments and trading activity driving the move.';
     }
 
-    // Combine catalyst + company description
-    const analysis = `${catalyst} ${companyDescription}`;
+    // Combine catalyst + company description (strip any stray newlines)
+    const analysis = `${catalyst} ${companyDescription}`.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim();
 
     const result = {
       ticker,
