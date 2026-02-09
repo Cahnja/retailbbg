@@ -1045,6 +1045,13 @@
       border: 1px solid #e8eaed;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
       margin-bottom: 24px;
+      cursor: pointer;
+      transition: box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .fear-greed-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.10);
+      border-color: #dadce0;
     }
 
     .fg-header {
@@ -1256,7 +1263,7 @@
       </div>
 
       <!-- Fear & Greed Index Card -->
-      <div class="fear-greed-card" id="fear-greed-card" style="display: none;">
+      <div class="fear-greed-card" id="fear-greed-card" style="display: none;" onclick="openFearGreedChart()">
         <div class="fg-header">
           <span class="fg-title">Fear & Greed Index</span>
           <div class="fg-main">
@@ -1865,6 +1872,8 @@
       }
     }
 
+    let fearGreedHistory = [];
+
     async function loadFearGreedData() {
       try {
         const response = await fetch('/api/fear-greed');
@@ -1877,6 +1886,11 @@
         const labelEl = document.getElementById('fg-label');
         const indicator = document.getElementById('fg-indicator');
         const comparisons = document.getElementById('fg-comparisons');
+
+        // Store historical data for chart
+        if (data.history && data.history.length > 0) {
+          fearGreedHistory = data.history;
+        }
 
         const color = getFearGreedColor(data.current.label);
 
@@ -1892,9 +1906,17 @@
           const yColor = getFearGreedColor(data.yesterday.label);
           pills += `<span class="fg-comparison-pill"><span class="fg-pill-dot" style="background:${yColor}"></span>Yesterday: <strong>${data.yesterday.label} - ${data.yesterday.value}</strong></span>`;
         }
+        if (data.lastWeek) {
+          const wColor = getFearGreedColor(data.lastWeek.label);
+          pills += `<span class="fg-comparison-pill"><span class="fg-pill-dot" style="background:${wColor}"></span>1 Week Ago: <strong>${data.lastWeek.label} - ${data.lastWeek.value}</strong></span>`;
+        }
         if (data.lastMonth) {
           const mColor = getFearGreedColor(data.lastMonth.label);
-          pills += `<span class="fg-comparison-pill"><span class="fg-pill-dot" style="background:${mColor}"></span>Last Month: <strong>${data.lastMonth.label} - ${data.lastMonth.value}</strong></span>`;
+          pills += `<span class="fg-comparison-pill"><span class="fg-pill-dot" style="background:${mColor}"></span>1 Month Ago: <strong>${data.lastMonth.label} - ${data.lastMonth.value}</strong></span>`;
+        }
+        if (data.lastYear) {
+          const yrColor = getFearGreedColor(data.lastYear.label);
+          pills += `<span class="fg-comparison-pill"><span class="fg-pill-dot" style="background:${yrColor}"></span>1 Year Ago: <strong>${data.lastYear.label} - ${data.lastYear.value}</strong></span>`;
         }
         comparisons.innerHTML = pills;
 
@@ -2367,6 +2389,230 @@
         e.stopImmediatePropagation(); // Prevent driver panel Escape handler from also firing
       }
     });
+
+    // ========================================
+    // Fear & Greed Historical Chart
+    // ========================================
+
+    function getFearGreedScoreColor(score) {
+      if (score <= 25) return '#ea3943';       // Extreme Fear - red
+      if (score <= 45) return '#f5a623';       // Fear - orange
+      if (score <= 55) return '#9aa0a6';       // Neutral - gray
+      if (score <= 75) return '#16c784';       // Greed - green
+      return '#00b894';                         // Extreme Greed - bright green
+    }
+
+    function getFearGreedScoreLabel(score) {
+      if (score <= 25) return 'Extreme Fear';
+      if (score <= 45) return 'Fear';
+      if (score <= 55) return 'Neutral';
+      if (score <= 75) return 'Greed';
+      return 'Extreme Greed';
+    }
+
+    function openFearGreedChart() {
+      if (!fearGreedHistory || fearGreedHistory.length < 2) return;
+
+      const points = fearGreedHistory;
+      const currentScore = points[points.length - 1].score;
+      const currentColor = getFearGreedScoreColor(currentScore);
+      const currentLabel = getFearGreedScoreLabel(currentScore);
+
+      chartPanelContent.innerHTML = `
+        <div class="chart-stock-header">
+          <h1 class="chart-company-name">Fear & Greed Index</h1>
+          <div class="chart-exchange-ticker">CNN Business</div>
+        </div>
+        <div class="chart-price-section">
+          <div class="chart-current-price" style="color:${currentColor}">${currentScore}</div>
+          <div class="chart-price-change" style="color:${currentColor}">
+            <span>${currentLabel}</span>
+          </div>
+          <div class="chart-timestamp">${getChartTime()}</div>
+        </div>
+        <div class="chart-container" id="fg-chart-container">
+          <div class="chart-loading"><div class="spinner"></div>Loading chart...</div>
+        </div>
+      `;
+
+      chartPanelOverlay.classList.add('active');
+      chartSidePanel.classList.add('active');
+      document.body.style.overflow = 'hidden';
+
+      // Render the chart after the DOM is ready
+      setTimeout(() => renderFearGreedSVGChart(points), 0);
+    }
+
+    function renderFearGreedSVGChart(points) {
+      const container = document.getElementById('fg-chart-container');
+      if (!container || !points || points.length < 2) {
+        if (container) container.innerHTML = '<div class="chart-loading" style="color:#5f6368;">No historical data available</div>';
+        return;
+      }
+
+      const width = 510;
+      const height = 260;
+      const padLeft = 0;
+      const padRight = 60;
+      const padTop = 10;
+      const padBottom = 28;
+      const chartW = width - padLeft - padRight;
+      const chartH = height - padTop - padBottom;
+
+      // Fixed Y-axis: 0 to 100
+      const minScore = 0;
+      const maxScore = 100;
+
+      // Scale functions
+      const xScale = (i) => padLeft + (i / (points.length - 1)) * chartW;
+      const yScale = (score) => padTop + ((maxScore - score) / (maxScore - minScore)) * chartH;
+
+      // Zone bands (background color bands for the zones)
+      const zones = [
+        { min: 0, max: 25, color: 'rgba(234,57,67,0.07)', label: 'Extreme Fear' },
+        { min: 25, max: 45, color: 'rgba(245,166,35,0.07)', label: 'Fear' },
+        { min: 45, max: 55, color: 'rgba(154,160,167,0.07)', label: 'Neutral' },
+        { min: 55, max: 75, color: 'rgba(22,199,132,0.07)', label: 'Greed' },
+        { min: 75, max: 100, color: 'rgba(0,184,148,0.07)', label: 'Extreme Greed' }
+      ];
+
+      let zoneBands = '';
+      let zoneLabels = '';
+      zones.forEach(zone => {
+        const y1 = yScale(zone.max);
+        const y2 = yScale(zone.min);
+        zoneBands += `<rect x="${padLeft}" y="${y1}" width="${chartW}" height="${y2 - y1}" fill="${zone.color}"/>`;
+        // Zone label on the right side
+        const labelY = (y1 + y2) / 2 + 3;
+        const labelColor = zone.label === 'Extreme Fear' ? '#ea3943' :
+                           zone.label === 'Fear' ? '#f5a623' :
+                           zone.label === 'Neutral' ? '#9aa0a6' :
+                           zone.label === 'Greed' ? '#16c784' : '#00b894';
+        zoneLabels += `<text x="${width - padRight + 6}" y="${labelY}" font-size="8" fill="${labelColor}" font-family="Arial, sans-serif" font-weight="500">${zone.label}</text>`;
+      });
+
+      // Horizontal grid lines at zone boundaries
+      let gridLines = '';
+      [0, 25, 45, 55, 75, 100].forEach(val => {
+        const y = yScale(val);
+        gridLines += `<line x1="${padLeft}" y1="${y}" x2="${width - padRight}" y2="${y}" stroke="#e8eaed" stroke-width="0.5"/>`;
+      });
+
+      // Build line segments with color based on score zone
+      let lineSegments = '';
+      for (let i = 0; i < points.length - 1; i++) {
+        const x1 = xScale(i);
+        const y1 = yScale(points[i].score);
+        const x2 = xScale(i + 1);
+        const y2 = yScale(points[i + 1].score);
+        const avgScore = (points[i].score + points[i + 1].score) / 2;
+        const color = getFearGreedScoreColor(avgScore);
+        lineSegments += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="2" stroke-linecap="round"/>`;
+      }
+
+      // Build fill path with gradient
+      let fillPath = `M ${xScale(0)} ${yScale(points[0].score)}`;
+      for (let i = 1; i < points.length; i++) {
+        fillPath += ` L ${xScale(i)} ${yScale(points[i].score)}`;
+      }
+      fillPath += ` L ${xScale(points.length - 1)} ${padTop + chartH}`;
+      fillPath += ` L ${xScale(0)} ${padTop + chartH} Z`;
+
+      // X-axis labels (dates)
+      let xLabels = '';
+      const numXLabels = 5;
+      for (let i = 0; i <= numXLabels; i++) {
+        const idx = Math.round((i / numXLabels) * (points.length - 1));
+        const x = xScale(idx);
+        const d = new Date(points[idx].timestamp);
+        const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        xLabels += `<text x="${x}" y="${height - 4}" font-size="10" fill="#5f6368" text-anchor="middle" font-family="Arial, sans-serif">${label}</text>`;
+      }
+
+      const svgId = 'fg-chart-svg';
+      const tooltipId = 'fg-chart-tooltip';
+
+      container.innerHTML = `
+        <svg id="${svgId}" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet">
+          ${zoneBands}
+          ${gridLines}
+          <defs>
+            <linearGradient id="fgFillGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#9aa0a6" stop-opacity="0.15"/>
+              <stop offset="100%" stop-color="#9aa0a6" stop-opacity="0.02"/>
+            </linearGradient>
+          </defs>
+          <path d="${fillPath}" fill="url(#fgFillGrad)"/>
+          ${lineSegments}
+          ${zoneLabels}
+          ${xLabels}
+          <line id="fg-chart-crosshair" x1="0" y1="${padTop}" x2="0" y2="${padTop + chartH}" stroke="#dadce0" stroke-width="1" visibility="hidden"/>
+          <circle id="fg-chart-dot" cx="0" cy="0" r="4" fill="#202124" stroke="white" stroke-width="2" visibility="hidden"/>
+          <rect id="fg-chart-hover-area" x="${padLeft}" y="${padTop}" width="${chartW}" height="${chartH}" fill="transparent" cursor="crosshair"/>
+        </svg>
+        <div class="chart-tooltip" id="${tooltipId}"></div>
+      `;
+
+      // Add hover interactivity
+      const svg = document.getElementById(svgId);
+      const hoverArea = document.getElementById('fg-chart-hover-area');
+      const crosshair = document.getElementById('fg-chart-crosshair');
+      const dot = document.getElementById('fg-chart-dot');
+      const tooltip = document.getElementById(tooltipId);
+
+      function handleFgHover(e) {
+        const rect = svg.getBoundingClientRect();
+        const svgX = ((e.clientX - rect.left) / rect.width) * width;
+        const relX = svgX - padLeft;
+        const idx = Math.round((relX / chartW) * (points.length - 1));
+        if (idx < 0 || idx >= points.length) return;
+
+        const px = xScale(idx);
+        const py = yScale(points[idx].score);
+        const scoreColor = getFearGreedScoreColor(points[idx].score);
+
+        crosshair.setAttribute('x1', px);
+        crosshair.setAttribute('x2', px);
+        crosshair.setAttribute('visibility', 'visible');
+        dot.setAttribute('cx', px);
+        dot.setAttribute('cy', py);
+        dot.setAttribute('fill', scoreColor);
+        dot.setAttribute('visibility', 'visible');
+
+        const d = new Date(points[idx].timestamp);
+        const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const scoreLabel = getFearGreedScoreLabel(points[idx].score);
+
+        tooltip.innerHTML = `<span style="color:${scoreColor};font-weight:600">${points[idx].score}</span> <span style="color:${scoreColor}">${scoreLabel}</span> &middot; ${dateStr}`;
+        tooltip.classList.add('visible');
+
+        // Position tooltip
+        const containerRect = container.getBoundingClientRect();
+        const tooltipX = (px / width) * containerRect.width;
+        const tooltipY = (py / height) * containerRect.height;
+        tooltip.style.left = Math.max(4, Math.min(tooltipX - tooltip.offsetWidth / 2, containerRect.width - tooltip.offsetWidth - 4)) + 'px';
+        tooltip.style.top = (tooltipY - 36) + 'px';
+      }
+
+      hoverArea.addEventListener('mousemove', handleFgHover);
+      hoverArea.addEventListener('mouseleave', () => {
+        crosshair.setAttribute('visibility', 'hidden');
+        dot.setAttribute('visibility', 'hidden');
+        tooltip.classList.remove('visible');
+      });
+
+      // Touch support for mobile
+      hoverArea.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        handleFgHover({ clientX: touch.clientX, clientY: touch.clientY });
+      }, { passive: false });
+      hoverArea.addEventListener('touchend', () => {
+        crosshair.setAttribute('visibility', 'hidden');
+        dot.setAttribute('visibility', 'hidden');
+        tooltip.classList.remove('visible');
+      });
+    }
   </script>
 </body>
 </html>
