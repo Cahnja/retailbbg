@@ -1,4 +1,13 @@
 require('dotenv').config();
+
+// Prevent unhandled errors from crashing the process
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err.message || err);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Rejection:', reason?.message || reason);
+});
+
 const express = require('express');
 const OpenAI = require('openai');
 const fs = require('fs');
@@ -806,7 +815,17 @@ app.get('/portfolio', (req, res) => {
 
 app.use(express.static('public', { etag: false, maxAge: 0 }));
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+let client;
+try {
+  client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+} catch (e) {
+  console.error('Failed to initialize OpenAI client:', e.message);
+  console.error('AI features will be unavailable. Set OPENAI_API_KEY in .env and restart.');
+  // Create a stub client that throws clear errors when used
+  client = new Proxy({}, {
+    get: () => () => { throw new Error('OpenAI client not initialized - missing API key'); }
+  });
+}
 
 // Memo template with section instructions
 // Convert markdown report to styled HTML
@@ -4911,7 +4930,7 @@ Provide specific facts and quotes from recent news.`;
       model: 'gpt-4o',
       tools: [{ type: 'web_search' }],
       input: searchPrompt
-    });
+    }, { timeout: 45000 });
     if (searchResponse.usage) logTokenUsage('driver-details-search', searchResponse.usage);
 
     const newsContext = searchResponse.output_text;
@@ -4945,14 +4964,15 @@ STYLE RULES:
         max_tokens: 800,
         stream: true,
         messages: [{ role: 'user', content: analysisPrompt }]
-      });
+      }, { timeout: 45000 });
 
       let fullText = '';
+      let clientDisconnected = false;
       for await (const chunk of streamResponse) {
         const content = chunk.choices[0]?.delta?.content;
         if (content) {
           fullText += content;
-          sendSSE(res, { type: 'chunk', text: content });
+          try { sendSSE(res, { type: 'chunk', text: content }); } catch (e) { clientDisconnected = true; break; }
         }
       }
 
@@ -4963,19 +4983,25 @@ STYLE RULES:
         generatedAt: new Date().toISOString()
       };
 
-      // Cache the result
-      saveMarketDriverDetailsToCache(bullet, result);
+      // Cache the result even if client disconnected
+      if (analysis) {
+        saveMarketDriverDetailsToCache(bullet, result);
 
-      // Also cache as stock explanation if single-stock driver
-      if (uniqueTickers.length === 1) {
-        const ticker = uniqueTickers[0];
-        const stockResult = { ticker, analysis, generatedAt: new Date().toISOString() };
-        saveStockExplanationToCache(ticker, stockResult);
-        console.log(`[Driver Details] Also saved as stock explanation for ${ticker}`);
+        // Also cache as stock explanation if single-stock driver
+        if (uniqueTickers.length === 1) {
+          const ticker = uniqueTickers[0];
+          const stockResult = { ticker, analysis, generatedAt: new Date().toISOString() };
+          saveStockExplanationToCache(ticker, stockResult);
+          console.log(`[Driver Details] Also saved as stock explanation for ${ticker}`);
+        }
       }
 
-      sendSSE(res, { type: 'done', analysis, cached: false });
-      res.end();
+      if (!clientDisconnected) {
+        try {
+          sendSSE(res, { type: 'done', analysis, cached: false });
+          res.end();
+        } catch (e) { /* client disconnected */ }
+      }
     } else {
       const response = await client.chat.completions.create({
         model: 'gpt-4o',
@@ -5006,7 +5032,7 @@ STYLE RULES:
       res.json({ ...result, cached: false });
     }
   } catch (error) {
-    console.error('Market driver details API error:', error);
+    console.error('Market driver details API error:', error.message || error);
 
     if (isStream) {
       try {
@@ -5014,7 +5040,8 @@ STYLE RULES:
         const isQuota = error.code === 'insufficient_quota' || error.status === 429;
         sendSSE(res, { type: 'error', message: isQuota ? 'API quota exceeded' : 'Failed to generate analysis', isQuotaError: isQuota });
       } catch (e) { /* client disconnected */ }
-      return res.end();
+      try { res.end(); } catch (e) { /* ignore */ }
+      return;
     }
 
     // Check for specific error types
@@ -5169,7 +5196,7 @@ Provide specific facts and quotes from recent news.`;
       model: 'gpt-4o',
       tools: [{ type: 'web_search' }],
       input: searchPrompt
-    });
+    }, { timeout: 45000 });
     if (searchResponse.usage) logTokenUsage('stock-details-search', searchResponse.usage);
 
     const newsContext = searchResponse.output_text;
@@ -5203,14 +5230,15 @@ STYLE RULES:
         max_tokens: 800,
         stream: true,
         messages: [{ role: 'user', content: analysisPrompt }]
-      });
+      }, { timeout: 45000 });
 
       let fullText = '';
+      let clientDisconnected = false;
       for await (const chunk of streamResponse) {
         const content = chunk.choices[0]?.delta?.content;
         if (content) {
           fullText += content;
-          sendSSE(res, { type: 'chunk', text: content });
+          try { sendSSE(res, { type: 'chunk', text: content }); } catch (e) { clientDisconnected = true; break; }
         }
       }
 
@@ -5223,11 +5251,15 @@ STYLE RULES:
         generatedAt: new Date().toISOString()
       };
 
-      // Cache the result
-      saveStockExplanationToCache(ticker, result);
+      // Cache the result even if client disconnected
+      if (analysis) saveStockExplanationToCache(ticker, result);
 
-      sendSSE(res, { type: 'done', analysis, cached: false });
-      res.end();
+      if (!clientDisconnected) {
+        try {
+          sendSSE(res, { type: 'done', analysis, cached: false });
+          res.end();
+        } catch (e) { /* client disconnected */ }
+      }
     } else {
       const response = await client.chat.completions.create({
         model: 'gpt-4o',
@@ -5252,7 +5284,7 @@ STYLE RULES:
       res.json({ ...result, cached: false });
     }
   } catch (error) {
-    console.error('Stock explanation API error:', error);
+    console.error('Stock explanation API error:', error.message || error);
 
     if (isStream) {
       try {
@@ -5260,7 +5292,8 @@ STYLE RULES:
         const isQuota = error.code === 'insufficient_quota' || error.status === 429;
         sendSSE(res, { type: 'error', message: isQuota ? 'API quota exceeded' : 'Failed to generate analysis', isQuotaError: isQuota });
       } catch (e) { /* client disconnected */ }
-      return res.end();
+      try { res.end(); } catch (e) { /* ignore */ }
+      return;
     }
 
     // Check for specific error types
