@@ -998,8 +998,9 @@
       // Split explanation into sentences, but not on abbreviations like Inc., Corp., Ltd., Co.
       // Strategy: temporarily protect abbreviations, split, then restore
       const protectedExplanation = explanation
-        .replace(/\b(Inc|Corp|Ltd|Co|Dr|Mr|Ms|St|Jr|Sr|Vs|N\.V|S\.A|S\.p\.A|P\.L\.C|L\.P|S\.E)\.\s/g, '$1{{DOT}} ')
-        .replace(/\b([A-Z])\.\s(?=[A-Z]\.)/g, '$1{{DOT}} ');
+        .replace(/\b(Inc|Corp|Ltd|Co|Dr|Mr|Mrs|Ms|St|Jr|Sr|Vs|No|Dept|Est|Vol|Approx|Gen|Gov|Prof|Rev|Sgt|Capt|Cmdr|Lt|Maj|Col|Brig|Adm|Pvt|Cpl|Spc|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Oct|Nov|Dec|N\.V|S\.A|S\.p\.A|P\.L\.C|L\.P|S\.E)\.\s/gi, '$1{{DOT}} ')
+        .replace(/\b([A-Z])\.\s/g, '$1{{DOT}} ')
+        .replace(/(\d)\.(\d)/g, '$1{{DOT}}$2');
       const sentences = protectedExplanation.split(/\.\s+/).filter(s => s.trim())
         .map(s => s.replace(/\{\{DOT\}\}/g, '.'));
 
