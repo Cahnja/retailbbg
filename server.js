@@ -4563,8 +4563,6 @@ app.get('/api/market-driver-details', async (req, res) => {
 Find:
 - Specific numbers, percentages, and data points
 - Company names and stock movements involved
-- Analyst reactions or commentary
-- Related market impacts
 
 Provide specific facts and quotes from recent news.`;
 
