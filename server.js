@@ -4865,13 +4865,19 @@ app.get('/api/stock-explanation-details', async (req, res) => {
 
 Note: This price move is from ${timeContext}.
 
-Search for the specific catalyst behind this move. Provide specific facts, numbers, and quotes from recent news.`;
+Search for:
+- Earnings results, guidance, and analyst reactions
+- Company announcements (acquisitions, products, partnerships)
+- Analyst upgrades/downgrades with price targets
+- Industry or macro factors affecting the stock
+
+Provide specific facts, numbers, percentages, and quotes from recent news.`;
 
     if (isStream) sendSSE(res, { type: 'status', message: 'Searching for latest news...' });
 
     console.log(`[Stock Details] Web searching for ${ticker}... (time context: ${timeContext})`);
     const searchResponse = await client.responses.create({
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini',
       tools: [{ type: 'web_search' }],
       input: searchPrompt
     });
@@ -4880,23 +4886,23 @@ Search for the specific catalyst behind this move. Provide specific facts, numbe
     const newsContext = searchResponse.output_text;
 
     // Generate 4-paragraph analysis based on search results
-    const analysisPrompt = `You are a senior equity analyst. Based on the research below, explain why ${companyName} (${ticker}) moved ${direction} ${absChange}% ${dayReference}.
+    const analysisPrompt = `You are a senior equity analyst. Based on the research below, write a 4-paragraph analysis of why ${companyName} (${ticker}) moved ${direction} ${absChange}% ${dayReference}.
 
 Note: This price data is from ${timeContext}.
 
 RESEARCH:
 ${newsContext}
 
-Write 4 short paragraphs. Be extremely concise and direct — every sentence must deliver new information.
+Write 4 paragraphs of analysis. Include the specific catalyst driving the move, relevant numbers (EPS, revenue, guidance, price targets), and any important context. Each paragraph should flow naturally into the next.
 
-STYLE RULES:
-- Do NOT repeat the stock price change or percentage move — jump straight into the WHY.
-- ONLY include facts from the RESEARCH above. Never invent or assume earnings results, revenue figures, or other numbers not in the research.
-- No throat-clearing ("The stock surged today due to several catalysts that excited the market"). Start with the actual catalyst.
-- No generic advice, hedging, or obvious statements.
-- Short, punchy sentences. Cut any sentence that doesn't add a new fact.
-- Wrap the single most important sentence in each paragraph with **bold** markdown.
-- Just four tight paragraphs, no headers.`;
+CRITICAL STYLE RULES:
+- Be fact-based. Include as many specific numbers/percentages as you can find.
+- Short, punchy sentences. No filler.
+- Every sentence must be ADDITIVE - if it doesn't add new information, cut it.
+- NO generic investment advice like "investors should weigh risk-reward" or "long-term investors may view this as..."
+- NO hedging language or obvious statements.
+- Wrap the most important sentence in each paragraph with **bold** markdown.
+- Just four flowing paragraphs, no headers.`;
 
     if (isStream) {
       sendSSE(res, { type: 'status', message: 'Generating analysis...' });
