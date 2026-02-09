@@ -208,6 +208,31 @@ async function getOrGenerateCompanyDescription(ticker, companyName) {
 // ============================================
 // FINNHUB NEWS API
 // ============================================
+// Generic headline patterns to filter out (market roundups tagged with every stock)
+const GENERIC_HEADLINE_PATTERNS = [
+  /top\s+(midday|middle|morning|afternoon)\s+(gainers|losers|decliners|movers)/i,
+  /top\s+gainers\s+and\s+losers/i,
+  /stocks?\s+making\s+the\s+biggest\s+moves/i,
+  /s&p\s*500.*stocks.*session/i,
+  /uncover\s+the\s+latest\s+developments\s+among/i,
+  /these\s+s&p\s*500\s+stocks\s+(are|have)/i,
+  /equity\s+markets?\s+(mostly\s+)?(rise|fall|drop|advance|decline)/i,
+  /s&p\s*500.*nasdaq.*composite.*rise/i,
+  /what's\s+moving\s+markets/i,
+  /monday's\s+session:\s+top/i,
+  /tuesday's\s+session:\s+top/i,
+  /wednesday's\s+session:\s+top/i,
+  /thursday's\s+session:\s+top/i,
+  /friday's\s+session:\s+top/i,
+  /today's\s+session.*top/i,
+  /gapping\s+in\s+today's\s+session/i,
+  /unusual\s+volume\s+in\s+today's\s+session/i,
+];
+
+function isGenericHeadline(headline) {
+  return GENERIC_HEADLINE_PATTERNS.some(pattern => pattern.test(headline));
+}
+
 async function getFinnhubNews(ticker) {
   if (!FINNHUB_API_KEY) {
     console.log('[Finnhub] No API key configured');
@@ -233,11 +258,18 @@ async function getFinnhubNews(ticker) {
 
     const news = await response.json();
 
-    // Return top 5 headlines
     if (news && news.length > 0) {
-      const headlines = news.slice(0, 5).map(item => item.headline).join('\n');
-      console.log(`[Finnhub] Found ${Math.min(news.length, 5)} headlines for ${ticker}`);
-      return headlines;
+      // Filter out generic market roundup headlines
+      const filtered = news.filter(item => !isGenericHeadline(item.headline));
+
+      // Send all filtered headlines (up to 15 to avoid prompt bloat)
+      const relevant = filtered.slice(0, 15);
+
+      if (relevant.length > 0) {
+        const headlines = relevant.map(item => item.headline).join('\n');
+        console.log(`[Finnhub] Found ${relevant.length} relevant headlines for ${ticker} (filtered ${news.length - filtered.length} generic)`);
+        return headlines;
+      }
     }
 
     console.log(`[Finnhub] No news found for ${ticker}`);
