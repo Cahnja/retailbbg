@@ -355,11 +355,6 @@
       font-size: 14px;
       font-weight: 600;
       color: #00205b;
-      cursor: pointer;
-    }
-
-    .stock-ticker:hover {
-      text-decoration: underline;
     }
 
     .stock-name {
@@ -940,14 +935,21 @@
       font-size: 14px;
     }
 
-    /* Clickable stock row */
-    .stock-row.clickable {
+    /* See Details link */
+    .see-details-link {
+      font-size: 12px;
+      font-weight: 500;
+      color: #9aa0a6;
       cursor: pointer;
-      transition: background-color 0.15s;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: color 0.2s;
+      text-align: right;
     }
 
-    .stock-row.clickable:hover {
-      background-color: #f0f4f8;
+    .see-details-link:hover {
+      color: #00205b;
+      text-decoration: underline;
     }
 
     @media (max-width: 520px) {
@@ -1936,7 +1938,7 @@
       }
 
       const timeframes = ['1D', '5D', '1M', 'YTD', '1Y'];
-      const gridCols = '80px 1fr 90px 68px 68px 68px 68px 68px 40px';
+      const gridCols = '80px 1fr 90px 68px 68px 68px 68px 68px 80px 40px';
 
       let html = `
         <div class="stock-table-header" style="grid-template-columns: ${gridCols};">
@@ -1944,6 +1946,7 @@
           <span class="col-header">Name</span>
           <span class="col-header right">Price</span>
           ${timeframes.map(tf => `<span class="col-header right">${tf}</span>`).join('')}
+          <span class="col-header"></span>
           <span class="col-header"></span>
         </div>
       `;
@@ -1970,11 +1973,12 @@
             </button>`;
 
         html += `
-          <div class="stock-row clickable" style="grid-template-columns: ${gridCols};" onclick="openStockPanel('${ticker}', '${escapedCompanyName}', ${changePercent})">
+          <div class="stock-row" style="grid-template-columns: ${gridCols};">
             <span class="stock-ticker">${ticker}</span>
             <span class="stock-name">${escapeHtml(companyName)}</span>
             <span class="stock-price">${priceDisplay}</span>
             ${changeColumns}
+            <a class="see-details-link" onclick="openStockPanel('${ticker}', '${escapedCompanyName}', ${changePercent})">See Details</a>
             ${removeBtn}
           </div>
         `;
