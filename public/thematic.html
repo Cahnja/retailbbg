@@ -336,6 +336,29 @@
       background: #137333;
     }
 
+    /* Section Headers */
+    .section-header {
+      font-size: 20px;
+      font-weight: 500;
+      color: #202124;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e8eaed;
+    }
+
+    .section-block {
+      margin-bottom: 40px;
+    }
+
+    /* Reddit card accent */
+    .theme-card.reddit-card {
+      border-left: 3px solid #ff4500;
+    }
+
+    .theme-card.reddit-card .theme-name {
+      color: #ff4500;
+    }
+
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .main-content {
@@ -375,45 +398,60 @@
         <p class="page-subtitle">Select an investment theme to discover top equity opportunities</p>
       </div>
 
-      <div class="themes-grid" id="themes-grid">
-        <div class="theme-card" data-theme="ai">
-          <div class="theme-name">AI / Artificial Intelligence</div>
-          <div class="theme-description">Companies leading in AI development, infrastructure, and deployment</div>
-        </div>
+      <!-- Section 1: Thematic Investments -->
+      <div class="section-block">
+        <div class="section-header">Thematic Investments</div>
+        <div class="themes-grid" id="themes-grid">
+          <div class="theme-card" data-theme="ai">
+            <div class="theme-name">AI / Artificial Intelligence</div>
+            <div class="theme-description">Companies leading in AI development, infrastructure, and deployment</div>
+          </div>
 
-        <div class="theme-card" data-theme="quantum">
-          <div class="theme-name">Quantum Computing</div>
-          <div class="theme-description">Quantum hardware, software, and adjacent technology plays</div>
-        </div>
+          <div class="theme-card" data-theme="quantum">
+            <div class="theme-name">Quantum Computing</div>
+            <div class="theme-description">Quantum hardware, software, and adjacent technology plays</div>
+          </div>
 
-        <div class="theme-card" data-theme="gold">
-          <div class="theme-name">Gold / Precious Metals</div>
-          <div class="theme-description">Gold miners, ETFs, and related equities</div>
-        </div>
+          <div class="theme-card" data-theme="gold">
+            <div class="theme-name">Gold / Precious Metals</div>
+            <div class="theme-description">Gold miners, ETFs, and related equities</div>
+          </div>
 
-        <div class="theme-card" data-theme="clean_energy">
-          <div class="theme-name">Clean Energy / Renewables</div>
-          <div class="theme-description">Solar, wind, EV, and battery storage companies</div>
-        </div>
+          <div class="theme-card" data-theme="clean_energy">
+            <div class="theme-name">Clean Energy / Renewables</div>
+            <div class="theme-description">Solar, wind, EV, and battery storage companies</div>
+          </div>
 
-        <div class="theme-card" data-theme="cybersecurity">
-          <div class="theme-name">Cybersecurity</div>
-          <div class="theme-description">Security software and services companies</div>
-        </div>
+          <div class="theme-card" data-theme="cybersecurity">
+            <div class="theme-name">Cybersecurity</div>
+            <div class="theme-description">Security software and services companies</div>
+          </div>
 
-        <div class="theme-card" data-theme="semiconductors">
-          <div class="theme-name">Semiconductors</div>
-          <div class="theme-description">Chip makers and equipment manufacturers</div>
-        </div>
+          <div class="theme-card" data-theme="semiconductors">
+            <div class="theme-name">Semiconductors</div>
+            <div class="theme-description">Chip makers and equipment manufacturers</div>
+          </div>
 
-        <div class="theme-card" data-theme="space">
-          <div class="theme-name">Space / Aerospace</div>
-          <div class="theme-description">Space exploration, satellites, and defense</div>
-        </div>
+          <div class="theme-card" data-theme="space">
+            <div class="theme-name">Space / Aerospace</div>
+            <div class="theme-description">Space exploration, satellites, and defense</div>
+          </div>
 
-        <div class="theme-card" data-theme="biotech">
-          <div class="theme-name">Biotech / Genomics</div>
-          <div class="theme-description">Biotechnology and gene therapy companies</div>
+          <div class="theme-card" data-theme="biotech">
+            <div class="theme-name">Biotech / Genomics</div>
+            <div class="theme-description">Biotechnology and gene therapy companies</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Idea Generation -->
+      <div class="section-block">
+        <div class="section-header">Idea Generation</div>
+        <div class="themes-grid">
+          <div class="theme-card reddit-card" id="reddit-favorites-card">
+            <div class="theme-name">Reddit Favorites</div>
+            <div class="theme-description">Top 5 most-discussed stocks on r/WallStreetBets right now</div>
+          </div>
         </div>
       </div>
     </div>
@@ -500,8 +538,8 @@
       return null;
     }
 
-    // Add click handlers to theme cards
-    document.querySelectorAll('.theme-card').forEach(card => {
+    // Add click handlers to theme cards (only those with data-theme attribute)
+    document.querySelectorAll('.theme-card[data-theme]').forEach(card => {
       card.addEventListener('click', () => {
         const theme = card.dataset.theme;
         navigateToTheme(theme);
@@ -509,6 +547,12 @@
     });
 
     backBtn.addEventListener('click', navigateToThemeList);
+
+    // Reddit Favorites card click handler
+    document.getElementById('reddit-favorites-card').addEventListener('click', () => {
+      history.pushState({ view: 'reddit' }, '', '/thematic/reddit-favorites');
+      loadRedditFavorites();
+    });
 
     // Navigate to a theme (updates URL and loads theme)
     function navigateToTheme(theme) {
@@ -525,11 +569,15 @@
 
     // Handle browser back/forward buttons
     window.addEventListener('popstate', (event) => {
-      const theme = event.state?.theme || getThemeFromUrl();
-      if (theme && themeNames[theme]) {
-        loadTheme(theme);
+      if (event.state?.view === 'reddit') {
+        loadRedditFavorites();
       } else {
-        showThemeSelection();
+        const theme = event.state?.theme || getThemeFromUrl();
+        if (theme && themeNames[theme]) {
+          loadTheme(theme);
+        } else {
+          showThemeSelection();
+        }
       }
     });
 
@@ -604,6 +652,76 @@
       return div.innerHTML;
     }
 
+    // Load Reddit Favorites data
+    async function loadRedditFavorites() {
+      resultsTitle.textContent = 'Reddit Favorites';
+      resultsSubtitle.innerHTML = 'Top stocks trending on r/WallStreetBets';
+
+      showResults();
+      showLoading();
+
+      try {
+        const response = await fetch('/api/reddit-favorites');
+
+        if (!response.ok) {
+          let errorMsg = 'Failed to fetch Reddit favorites';
+          try {
+            const errorData = await response.json();
+            errorMsg = errorData.error || errorMsg;
+          } catch {
+            errorMsg = `Server error (${response.status})`;
+          }
+          throw new Error(errorMsg);
+        }
+
+        const data = await response.json();
+
+        if (data.cached) {
+          resultsSubtitle.innerHTML = 'Top stocks trending on r/WallStreetBets <span class="cache-badge"><span class="cache-dot"></span>Cached</span>';
+        }
+
+        showRedditStocks(data.stocks);
+      } catch (error) {
+        console.error('Error fetching Reddit favorites:', error);
+        showError(error.message);
+      }
+    }
+
+    function showRedditStocks(stocks) {
+      loadingState.style.display = 'none';
+      errorState.style.display = 'none';
+
+      if (!stocks || stocks.length === 0) {
+        stocksContainer.innerHTML = '<div style="padding: 40px; text-align: center; color: #5f6368;">No trending stocks found.</div>';
+        return;
+      }
+
+      let html = '';
+      for (const stock of stocks) {
+        html += `
+          <div class="stock-row">
+            <div class="stock-identity">
+              <div class="stock-ticker">${escapeHtml(stock.ticker)}</div>
+              <div class="stock-name">${escapeHtml(stock.companyName)}</div>
+            </div>
+            <div class="stock-content">
+              <div class="stock-overview">${escapeHtml(stock.description)}</div>
+            </div>
+            <div class="stock-actions">
+              <a href="/?ticker=${encodeURIComponent(stock.ticker)}" class="learn-more-link">
+                Generate Report
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+        `;
+      }
+
+      stocksContainer.innerHTML = html;
+    }
+
     // Load theme data (without changing URL - used internally)
     async function loadTheme(theme) {
       resultsTitle.textContent = themeNames[theme] || theme;
@@ -641,6 +759,13 @@
 
     // Check URL on page load to handle direct navigation (e.g., /thematic/ai)
     (function initFromUrl() {
+      const path = window.location.pathname;
+      if (path === '/thematic/reddit-favorites') {
+        history.replaceState({ view: 'reddit' }, '', path);
+        loadRedditFavorites();
+        return;
+      }
+
       const theme = getThemeFromUrl();
       if (theme && themeNames[theme]) {
         // Replace current history state with theme info
