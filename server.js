@@ -4106,7 +4106,22 @@ app.get('/api/reddit-favorites', async (req, res) => {
     const dateStr = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
     console.log('Searching for WallStreetBets popular stocks...');
-    const searchPrompt = `Search for "wallstreetbets most popular stocks ${dateStr}", "reddit WSB trending tickers ${dateStr}", and "r/wallstreetbets what stocks are people buying". Find the top 5 most discussed and mentioned stock tickers on r/wallstreetbets right now. Look for DD posts, YOLO posts, and general discussion to identify which stocks the WSB community is most excited about.`;
+    const searchPrompt = `Search for the most mentioned and discussed stock tickers on Reddit's r/wallstreetbets this week (as of ${dateStr}).
+
+Search these specific queries:
+1. "most mentioned tickers wallstreetbets this week"
+2. "wallstreetbets trending tickers ${dateStr}"
+3. site:quiverquant.com wallstreetbets
+4. "WSB ticker mention" tracker OR aggregator ${dateStr}
+
+Look specifically for WSB sentiment tracking sites and aggregators like:
+- QuiverQuant (quiverquant.com/wallstreetbets)
+- Swaggy Stocks
+- TopStonks
+- Ape Wisdom (apewisdom.io)
+- Any other WSB mention trackers
+
+Find the TOP 5 tickers by actual mention count or discussion volume on r/wallstreetbets right now. These should be the stocks that WSB users are genuinely posting about most frequently in DD posts, YOLO posts, daily discussion threads, and gain/loss porn.`;
 
     const searchResponse = await client.responses.create({
       model: 'gpt-4o',
@@ -4123,48 +4138,72 @@ app.get('/api/reddit-favorites', async (req, res) => {
 Research:
 ${searchResults}
 
-For each stock, provide:
-1. The ticker symbol
-2. The full company name
-3. A one-sentence description of why WallStreetBets is talking about it (mention specific catalysts, DD thesis, or meme momentum)
-
 Return ONLY a JSON array with exactly 5 objects in this format:
 [
-  {"ticker": "SYMBOL", "companyName": "Full Company Name", "description": "One sentence about why WSB is discussing this stock."},
+  {"ticker": "SYMBOL", "companyName": "Full Company Name"},
   ...
 ]
 
 Important:
-- Use real, currently traded US stock tickers only
-- Focus on stocks that are genuinely being discussed on WSB, not just popular stocks in general
-- The description should capture the WSB community's specific sentiment or thesis
+- Use real, currently traded US stock tickers only (no ETFs, no crypto)
+- These must be stocks that are ACTUALLY trending on WSB based on the research data above
+- Do NOT just return well-known mega-cap stocks — return what WSB is genuinely discussing
+- If the research mentions specific mention counts or rankings, respect those rankings
 - Return ONLY the JSON array, no other text`;
 
     const summaryResponse = await client.chat.completions.create({
       model: 'gpt-4o',
-      max_tokens: 800,
+      max_tokens: 400,
       messages: [{ role: 'user', content: summaryPrompt }]
     });
     logTokenUsage('reddit-favorites', summaryResponse.usage);
 
-    let stocks = [];
+    let parsedStocks = [];
     try {
       const content = summaryResponse.choices[0].message.content.trim();
       const jsonMatch = content.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
-        stocks = JSON.parse(jsonMatch[0]);
+        parsedStocks = JSON.parse(jsonMatch[0]);
       }
     } catch (err) {
       console.error('Failed to parse Reddit favorites:', err.message);
       return res.status(500).json({ error: 'Failed to parse Reddit favorites data' });
     }
 
-    if (!stocks || stocks.length === 0) {
+    if (!parsedStocks || parsedStocks.length === 0) {
       return res.status(500).json({ error: 'No stocks found from WallStreetBets' });
     }
 
+    // Generate thematic-style investment thesis for each stock (same approach as /api/thematic/:theme)
+    console.log('Generating investment theses for Reddit favorites...');
+    const batchSize = 3;
+    const stocksWithThesis = [];
+
+    for (let i = 0; i < parsedStocks.length; i += batchSize) {
+      const batch = parsedStocks.slice(i, i + batchSize);
+      console.log(`Generating Reddit thesis batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(parsedStocks.length / batchSize)}...`);
+
+      const batchResults = await Promise.all(batch.map(async (stock) => {
+        const thesisData = await getStockThesis(stock.ticker, stock.companyName);
+        return {
+          ticker: stock.ticker,
+          companyName: stock.companyName,
+          description: thesisData.thesis,
+          hasFullReport: thesisData.hasFullReport || false
+        };
+      }));
+
+      stocksWithThesis.push(...batchResults);
+
+      // Add delay between batches (except for the last batch)
+      if (i + batchSize < parsedStocks.length) {
+        console.log('Waiting 5 seconds before next batch to avoid rate limits...');
+        await delay(5000);
+      }
+    }
+
     const result = {
-      stocks,
+      stocks: stocksWithThesis,
       generatedAt: new Date().toISOString()
     };
 
