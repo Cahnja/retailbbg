@@ -5233,17 +5233,12 @@ app.get('/api/stock-explanation-details', async (req, res) => {
       dayReference = "today";
     }
 
-    // Web search to find why the stock moved (let GPT-4o figure it out)
-    const searchPrompt = `Why did ${companyName} (${ticker}) stock move ${direction} ${absChange}% ${dayReference}?
+    // Web search to find why the stock moved
+    const searchPrompt = `Search financial news sites for all recent headlines about ${companyName} (${ticker}). The stock is ${direction} ${absChange}% ${dayReference}.
 
-Search for the specific catalyst: earnings results, analyst upgrades/downgrades, deal announcements, FDA decisions, management changes, guidance updates, or other news that caused this move.
+Search for "${ticker} stock", "${companyName} news", and "${ticker} ${dayReference}".
 
-Find:
-- The specific catalyst with exact details (analyst names, price targets, earnings numbers, deal values)
-- Relevant numbers, percentages, and data points
-- Context about the company and sector
-
-Provide specific facts and quotes from recent news.`;
+List every relevant headline and key fact you find.`;
 
     if (isStream) sendSSE(res, { type: 'status', message: 'Searching for latest news...' });
 
