@@ -280,6 +280,29 @@ async function getFinnhubNews(ticker) {
   }
 }
 
+async function getYahooNews(ticker) {
+  try {
+    const result = await yahooFinance.search(ticker, { newsCount: 10, quotesCount: 0 });
+
+    if (result && result.news && result.news.length > 0) {
+      const filtered = result.news
+        .map(item => item.title)
+        .filter(title => title && !isGenericHeadline(title));
+
+      if (filtered.length > 0) {
+        console.log(`[Yahoo] Found ${filtered.length} relevant headlines for ${ticker} (filtered ${result.news.length - filtered.length} generic)`);
+        return filtered;
+      }
+    }
+
+    console.log(`[Yahoo] No news found for ${ticker}`);
+    return null;
+  } catch (err) {
+    console.error(`[Yahoo] Error fetching news for ${ticker}:`, err.message);
+    return null;
+  }
+}
+
 // CEO data lookup (from Claude's training knowledge)
 const CEO_DATA_PATH = path.join(__dirname, 'ceo-data.json');
 
@@ -3731,7 +3754,7 @@ async function getStockThesis(ticker, companyName) {
   return await generateBriefThesis(ticker, companyName);
 }
 
-// Generate stock explanation using GPT-4o with Finnhub headlines
+// Generate stock explanation using GPT-4o with Finnhub + Yahoo Finance headlines
 async function generateStockExplanation(ticker, companyName, changePercent) {
   try {
     const direction = changePercent > 0 ? 'up' : 'down';
@@ -3741,8 +3764,22 @@ async function generateStockExplanation(ticker, companyName, changePercent) {
     // Get or generate company description (permanently cached)
     const companyDescription = await getOrGenerateCompanyDescription(ticker, name);
 
-    // Get news headlines from Finnhub (fast, free)
-    const headlines = await getFinnhubNews(ticker);
+    // Get news headlines from Finnhub + Yahoo Finance in parallel
+    const [finnhubHeadlines, yahooHeadlines] = await Promise.all([
+      getFinnhubNews(ticker),
+      getYahooNews(ticker)
+    ]);
+
+    // Combine and deduplicate headlines from both sources
+    const allHeadlines = new Set();
+    if (finnhubHeadlines) {
+      finnhubHeadlines.split('\n').forEach(h => { if (h.trim()) allHeadlines.add(h.trim()); });
+    }
+    if (yahooHeadlines) {
+      yahooHeadlines.forEach(h => { if (h.trim()) allHeadlines.add(h.trim()); });
+    }
+
+    const headlines = allHeadlines.size > 0 ? [...allHeadlines].join('\n') : null;
 
     let catalyst;
 
