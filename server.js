@@ -3059,7 +3059,8 @@ async function fetchStockData(tickers) {
           ticker,
           companyName: quote.shortName || quote.longName || COMPANY_NAMES[ticker] || ticker,
           price: quote.regularMarketPrice,
-          changePercent
+          changePercent,
+          regularMarketTime: quote.regularMarketTime || null
         };
       }
     } catch (error) {
@@ -3531,14 +3532,14 @@ const INDEX_CONFIG = {
   russell: { name: 'Russell 2000', stocks: RUSSELL_2000_STOCKS }
 };
 
-function getMarketMoversCachePath(index = 'sp500') {
-  const today = new Date().toISOString().split('T')[0];
-  return path.join(MARKET_MOVERS_CACHE_DIR, `movers_${index}_${today}.json`);
+function getMarketMoversCachePath(index = 'sp500', dateStr = null) {
+  const date = dateStr || new Date().toISOString().split('T')[0];
+  return path.join(MARKET_MOVERS_CACHE_DIR, `movers_${index}_${date}.json`);
 }
 
-function getMarketMoversPricesCachePath(index = 'sp500') {
-  const today = new Date().toISOString().split('T')[0];
-  return path.join(MARKET_MOVERS_CACHE_DIR, `prices_${index}_${today}.json`);
+function getMarketMoversPricesCachePath(index = 'sp500', dateStr = null) {
+  const date = dateStr || new Date().toISOString().split('T')[0];
+  return path.join(MARKET_MOVERS_CACHE_DIR, `prices_${index}_${date}.json`);
 }
 
 function getCachedMarketMovers(index = 'sp500') {
@@ -3588,8 +3589,8 @@ function getCachedMarketMovers(index = 'sp500') {
   }
 }
 
-function saveMarketMoversToCache(data, index = 'sp500') {
-  const cachePath = getMarketMoversCachePath(index);
+function saveMarketMoversToCache(data, index = 'sp500', dateStr = null) {
+  const cachePath = getMarketMoversCachePath(index, dateStr);
   const cacheData = {
     data,
     timestamp: Date.now()
@@ -5924,6 +5925,22 @@ async function refreshMarketMoversPrices(index) {
     const stockData = await fetchStockData(indexStocks);
     console.log(`[Market Movers Prices] Fetched data for ${stockData.length} ${indexName} stocks`);
 
+    // Extract the actual trading date from Yahoo Finance's regularMarketTime
+    // This ensures weekend/holiday refreshes use the last trading day's date
+    let tradingDateStr = null;
+    const firstWithTime = stockData.find(s => s.regularMarketTime);
+    if (firstWithTime && firstWithTime.regularMarketTime) {
+      const marketTime = firstWithTime.regularMarketTime instanceof Date
+        ? firstWithTime.regularMarketTime
+        : new Date(firstWithTime.regularMarketTime * 1000);
+      // Convert to ET date string (YYYY-MM-DD)
+      tradingDateStr = marketTime.toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+      console.log(`[Market Movers Prices] Trading date from Yahoo Finance: ${tradingDateStr}`);
+    } else {
+      tradingDateStr = new Date().toISOString().split('T')[0];
+      console.log(`[Market Movers Prices] No regularMarketTime found, falling back to today: ${tradingDateStr}`);
+    }
+
     // Sort by change percent
     const sortedByGain = [...stockData].sort((a, b) => b.changePercent - a.changePercent);
     const sortedByLoss = [...stockData].sort((a, b) => a.changePercent - b.changePercent);
@@ -5951,13 +5968,14 @@ async function refreshMarketMoversPrices(index) {
       index,
       indexName,
       totalStocksAnalyzed: stockData.length,
+      tradingDate: tradingDateStr,
       fetchedAt: new Date().toISOString()
     };
 
-    // Save prices-only cache
-    const pricesCachePath = getMarketMoversPricesCachePath(index);
+    // Save prices-only cache using the actual trading date
+    const pricesCachePath = getMarketMoversPricesCachePath(index, tradingDateStr);
     fs.writeFileSync(pricesCachePath, JSON.stringify({ data: priceData, timestamp: Date.now() }, null, 2));
-    console.log(`[Market Movers Prices] Saved prices cache for ${index.toUpperCase()}`);
+    console.log(`[Market Movers Prices] Saved prices cache for ${index.toUpperCase()} (trading date: ${tradingDateStr})`);
 
     return priceData;
 
@@ -5968,18 +5986,20 @@ async function refreshMarketMoversPrices(index) {
 }
 
 // Step 2: Generate AI explanations + thesis for top movers (expensive, slow ~8-10 min)
-async function refreshMarketMoversExplanations(index) {
+async function refreshMarketMoversExplanations(index, tradingDate = null) {
   try {
-    // Read the current prices cache
-    const pricesCachePath = getMarketMoversPricesCachePath(index);
+    // Read the current prices cache (use trading date if provided)
+    const pricesCachePath = getMarketMoversPricesCachePath(index, tradingDate);
     if (!fs.existsSync(pricesCachePath)) {
-      console.error(`[Market Movers Explanations] No prices cache found for ${index.toUpperCase()}`);
+      console.error(`[Market Movers Explanations] No prices cache found for ${index.toUpperCase()} (date: ${tradingDate || 'today'})`);
       return false;
     }
 
     const pricesCache = JSON.parse(fs.readFileSync(pricesCachePath, 'utf8'));
     const priceData = pricesCache.data;
     const { gainers: gainersBasic, losers: losersBasic, indexName } = priceData;
+    // Use trading date from price data if not explicitly passed
+    const effectiveTradingDate = tradingDate || priceData.tradingDate;
 
     // Generate all 20 explanations and thesis with rate limiting
     console.log(`[Market Movers Explanations] Generating AI explanations for ${index.toUpperCase()}...`);
@@ -6026,15 +6046,30 @@ async function refreshMarketMoversExplanations(index) {
       hasFullReport: thesisResults[i + 10].hasFullReport
     }));
 
-    const asOf = new Date().toLocaleString('en-US', {
-      timeZone: 'America/New_York',
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    }) + ' ET';
+    // Use the trading session date for asOf (not current wall clock time)
+    // If we have a trading date from Yahoo Finance, format it properly
+    let asOf;
+    if (effectiveTradingDate) {
+      // Parse the trading date and show it as the session date with market close time
+      const [year, month, day] = effectiveTradingDate.split('-').map(Number);
+      const tradingDateObj = new Date(year, month - 1, day);
+      const dateFormatted = tradingDateObj.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+      asOf = `${dateFormatted}, 4:00 PM ET`;
+    } else {
+      asOf = new Date().toLocaleString('en-US', {
+        timeZone: 'America/New_York',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      }) + ' ET';
+    }
 
     const result = {
       gainers,
@@ -6043,12 +6078,13 @@ async function refreshMarketMoversExplanations(index) {
       index,
       indexName,
       totalStocksAnalyzed: priceData.totalStocksAnalyzed,
+      tradingDate: effectiveTradingDate,
       generatedAt: new Date().toISOString()
     };
 
-    // Cache the full result with explanations
-    saveMarketMoversToCache(result, index);
-    console.log(`[Market Movers Explanations] Successfully cached ${index.toUpperCase()} market movers with explanations`);
+    // Cache the full result with explanations (use trading date for filename)
+    saveMarketMoversToCache(result, index, effectiveTradingDate);
+    console.log(`[Market Movers Explanations] Successfully cached ${index.toUpperCase()} market movers with explanations (trading date: ${effectiveTradingDate || 'today'})`);
     return true;
 
   } catch (error) {
@@ -6062,7 +6098,7 @@ async function refreshMarketMoversExplanations(index) {
 async function refreshMarketMoversForIndex(index) {
   const priceData = await refreshMarketMoversPrices(index);
   if (!priceData) return false;
-  return await refreshMarketMoversExplanations(index);
+  return await refreshMarketMoversExplanations(index, priceData.tradingDate);
 }
 
 // Track last refresh to avoid duplicate refreshes within the same window
