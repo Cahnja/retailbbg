@@ -3767,7 +3767,7 @@ Write ONE catalyst sentence:`;
       generatedAt: new Date().toISOString()
     };
 
-    return { explanation: analysis };
+    return { explanation: analysis, catalyst };
   } catch (error) {
     console.error(`Error generating explanation for ${ticker}:`, error);
     const direction = changePercent > 0 ? 'higher' : 'lower';
@@ -3775,6 +3775,7 @@ Write ONE catalyst sentence:`;
     const name = companyName || COMPANY_NAMES[ticker] || ticker;
     return {
       explanation: `Real-time analysis temporarily unavailable. ${name} is a publicly traded company. Check financial news for the latest developments.`,
+      catalyst: '',
       cached: false,
       error: true
     };
@@ -5839,6 +5840,7 @@ async function refreshMarketMoversExplanations(index) {
     const gainers = gainersBasic.map((stock, i) => ({
       ...stock,
       explanation: explanationResults[i].explanation,
+      catalyst: explanationResults[i].catalyst,
       thesis: thesisResults[i].thesis,
       hasFullReport: thesisResults[i].hasFullReport
     }));
@@ -5846,6 +5848,7 @@ async function refreshMarketMoversExplanations(index) {
     const losers = losersBasic.map((stock, i) => ({
       ...stock,
       explanation: explanationResults[i + 10].explanation,
+      catalyst: explanationResults[i + 10].catalyst,
       thesis: thesisResults[i + 10].thesis,
       hasFullReport: thesisResults[i + 10].hasFullReport
     }));

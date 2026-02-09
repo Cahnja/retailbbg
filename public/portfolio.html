@@ -1111,7 +1111,8 @@
             companyName: stock.companyName,
             changePercent: stock.changePercent
           });
-          if (stock.explanation) params.set('bullet', stock.explanation);
+          const bullet = stock.catalyst || stock.explanation;
+          if (bullet) params.set('bullet', bullet);
           fetch(`/api/stock-explanation-details?${params}`).catch(() => {});
         });
       } catch (error) {
@@ -1220,18 +1221,18 @@
       sidePanel.classList.add('active');
       document.body.style.overflow = 'hidden';
 
-      // Find the explanation bullet from current data
-      let explanation = '';
+      // Find the catalyst bullet from current data (fall back to explanation for cached data)
+      let bullet = '';
       if (currentData) {
         const allStocks = [...(currentData.gainers || []), ...(currentData.losers || [])];
         const stock = allStocks.find(s => s.ticker === ticker);
-        if (stock && stock.explanation) {
-          explanation = stock.explanation;
+        if (stock) {
+          bullet = stock.catalyst || stock.explanation || '';
         }
       }
 
       // Fetch the detailed analysis
-      fetchStockExplanation(ticker, companyName, changePercent, explanation);
+      fetchStockExplanation(ticker, companyName, changePercent, bullet);
     }
 
     function closePanel() {
