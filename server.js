@@ -4601,7 +4601,7 @@ CRITICAL STYLE RULES:
 - Just four flowing paragraphs, no headers.`;
 
     const response = await client.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o',
       max_tokens: 800,
       messages: [{ role: 'user', content: analysisPrompt }]
     });
@@ -4792,7 +4792,7 @@ CRITICAL STYLE RULES:
 - Just four flowing paragraphs, no headers.`;
 
     const response = await client.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o',
       max_tokens: 800,
       messages: [{ role: 'user', content: analysisPrompt }]
     });
