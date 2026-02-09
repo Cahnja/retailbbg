@@ -123,49 +123,7 @@
       border-color: #00205b;
     }
 
-    /* Watchlist Tabs (Popular / My Portfolio) */
-    .watchlist-tabs {
-      display: flex;
-      gap: 0;
-      margin-bottom: 20px;
-      border-bottom: 2px solid #e8eaed;
-    }
-
-    .watchlist-tab {
-      padding: 10px 24px;
-      font-size: 14px;
-      font-weight: 500;
-      color: #5f6368;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s;
-      position: relative;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -2px;
-    }
-
-    .watchlist-tab:hover {
-      color: #202124;
-      background: #f8f9fa;
-    }
-
-    .watchlist-tab.active {
-      color: #00205b;
-      font-weight: 600;
-      border-bottom-color: #00205b;
-    }
-
-    .watchlist-tab .tab-count {
-      font-size: 11px;
-      color: #9aa0a6;
-      margin-left: 6px;
-      font-weight: 400;
-    }
-
-    .watchlist-tab.active .tab-count {
-      color: #5f6368;
-    }
+    /* Watchlist Tabs - removed, Popular is now in the watchlist selector */
 
     /* Watchlist Selector (for logged-in users with multiple server watchlists) */
     .watchlist-selector {
@@ -1075,33 +1033,23 @@
       </div>
     </div>
 
-    <!-- Watchlist Tabs: Popular / My Portfolio -->
-    <div class="watchlist-tabs" id="watchlist-tabs">
-      <button class="watchlist-tab active" data-tab="popular" onclick="switchMainTab('popular')">
-        Popular <span class="tab-count" id="popular-count">(8)</span>
-      </button>
-      <button class="watchlist-tab" data-tab="portfolio" onclick="switchMainTab('portfolio')">
-        My Portfolio <span class="tab-count" id="portfolio-count">(0)</span>
-      </button>
-    </div>
-
-    <!-- Watchlist Selector (shown when logged in, on portfolio tab) -->
-    <div class="watchlist-selector" id="watchlist-selector" style="display: none;">
+    <!-- Watchlist Selector (always visible) -->
+    <div class="watchlist-selector" id="watchlist-selector" style="display: flex;">
       <select id="watchlist-select" class="watchlist-dropdown">
-        <!-- Options populated dynamically -->
+        <!-- Options populated dynamically; always includes Popular -->
       </select>
-      <button class="new-watchlist-btn" onclick="showCreateWatchlistModal()">
+      <button class="new-watchlist-btn" id="new-watchlist-btn" onclick="showCreateWatchlistModal()" style="display: none;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M12 5v14M5 12h14"/>
         </svg>
         New
       </button>
-      <button class="watchlist-actions-btn" onclick="showWatchlistActionsMenu()" id="watchlist-actions-btn" title="More actions">
+      <button class="watchlist-actions-btn" onclick="showWatchlistActionsMenu()" id="watchlist-actions-btn" title="More actions" style="display: none;">
         &#x22EF;
       </button>
     </div>
 
-    <!-- Add Stock Section (only shown on My Portfolio tab) -->
+    <!-- Add Stock Section (hidden when Popular is selected) -->
     <div class="add-stock-section" id="add-stock-section" style="display: none;">
       <form class="add-stock-form" id="add-stock-form">
         <input type="text" class="ticker-input" id="ticker-input" placeholder="Enter ticker (e.g., AAPL)" maxlength="10">
@@ -1260,7 +1208,6 @@
     // State
     let currentUser = null;
     let authToken = localStorage.getItem('authToken');
-    let activeTab = 'popular'; // 'popular' or 'portfolio'
     let portfolioWatchlist = JSON.parse(localStorage.getItem('localWatchlist') || '[]');
     let watchlist = [...POPULAR_WATCHLIST]; // currently displayed list
     let stockPerformance = {};
@@ -1269,7 +1216,7 @@
 
     // Multiple watchlists state
     let watchlistsData = null;  // Full watchlist data from server
-    let currentWatchlistId = null;  // Currently selected watchlist ID
+    let currentWatchlistId = '__popular__';  // Currently selected watchlist ID (starts on Popular)
 
     // DOM Elements
     const authSection = document.getElementById('auth-section');
@@ -1312,68 +1259,58 @@
       }
 
       updateAuthUI();
-      updateTabCounts();
-      applyActiveTab();
+      applyActiveWatchlist();
+      renderWatchlistSelector();
       renderWatchlist();
 
       // Start auto-refresh
       startAutoRefresh();
     }
 
-    // Switch between Popular and My Portfolio tabs
-    function switchMainTab(tab) {
-      activeTab = tab;
-
-      // Update tab button styles
-      document.querySelectorAll('.watchlist-tab').forEach(t => {
-        t.classList.toggle('active', t.dataset.tab === tab);
-      });
-
-      applyActiveTab();
-      renderWatchlist();
-      fetchPrices();
+    // Returns true if the currently selected watchlist is the Popular (read-only) one
+    function isPopularSelected() {
+      return currentWatchlistId === '__popular__';
     }
 
-    // Apply the active tab state to the UI
-    function applyActiveTab() {
+    // Apply the selected watchlist to the UI
+    function applyActiveWatchlist() {
       const addStockSection = document.getElementById('add-stock-section');
       const watchlistTitleLabel = document.getElementById('watchlist-title-label');
-      const watchlistSelector = document.getElementById('watchlist-selector');
+      const newWatchlistBtn = document.getElementById('new-watchlist-btn');
+      const actionsBtn = document.getElementById('watchlist-actions-btn');
 
-      if (activeTab === 'popular') {
-        // Popular tab: read-only, no add/remove, no watchlist selector
+      if (isPopularSelected()) {
+        // Popular: read-only, no add/remove
         addStockSection.style.display = 'none';
         watchlistTitleLabel.innerHTML = 'Popular Stocks <span class="readonly-badge">Read-only</span>';
-        watchlistSelector.style.display = 'none';
         watchlist = [...POPULAR_WATCHLIST];
-      } else {
-        // My Portfolio tab: editable
+        // Show New button only if logged in; never show actions for Popular
+        newWatchlistBtn.style.display = currentUser ? 'flex' : 'none';
+        actionsBtn.style.display = 'none';
+      } else if (currentUser && watchlistsData && watchlistsData.watchlists[currentWatchlistId]) {
+        // Server watchlist: editable
         addStockSection.style.display = 'block';
-        watchlistTitleLabel.textContent = 'My Portfolio';
-
-        if (currentUser && watchlistsData) {
-          // Logged-in: show server watchlist selector
-          watchlistSelector.style.display = 'flex';
-          watchlist = watchlistsData.watchlists[currentWatchlistId]?.tickers || [];
-        } else {
-          // Not logged in: use local portfolio
-          watchlistSelector.style.display = 'none';
-          watchlist = portfolioWatchlist;
-        }
-      }
-    }
-
-    // Update the count badges on tabs
-    function updateTabCounts() {
-      document.getElementById('popular-count').textContent = `(${POPULAR_WATCHLIST.length})`;
-
-      let portfolioCount = 0;
-      if (currentUser && watchlistsData && currentWatchlistId) {
-        portfolioCount = (watchlistsData.watchlists[currentWatchlistId]?.tickers || []).length;
+        const wlName = watchlistsData.watchlists[currentWatchlistId].name;
+        watchlistTitleLabel.textContent = wlName;
+        watchlist = watchlistsData.watchlists[currentWatchlistId].tickers || [];
+        newWatchlistBtn.style.display = 'flex';
+        actionsBtn.style.display = 'inline-block';
+      } else if (!currentUser && currentWatchlistId === '__local__') {
+        // Local (not logged in) portfolio
+        addStockSection.style.display = 'block';
+        watchlistTitleLabel.textContent = 'My Watchlist';
+        watchlist = portfolioWatchlist;
+        newWatchlistBtn.style.display = 'none';
+        actionsBtn.style.display = 'none';
       } else {
-        portfolioCount = portfolioWatchlist.length;
+        // Fallback: show Popular
+        currentWatchlistId = '__popular__';
+        addStockSection.style.display = 'none';
+        watchlistTitleLabel.innerHTML = 'Popular Stocks <span class="readonly-badge">Read-only</span>';
+        watchlist = [...POPULAR_WATCHLIST];
+        newWatchlistBtn.style.display = currentUser ? 'flex' : 'none';
+        actionsBtn.style.display = 'none';
       }
-      document.getElementById('portfolio-count').textContent = `(${portfolioCount})`;
     }
 
     function updateAuthUI() {
@@ -1388,7 +1325,7 @@
           <button class="auth-btn" onclick="showAuthModal('login')">Login</button>
           <button class="auth-btn secondary" onclick="showAuthModal('signup')">Sign Up</button>
         `;
-        if (portfolioWatchlist.length > 0 && activeTab === 'portfolio') {
+        if (portfolioWatchlist.length > 0 && !isPopularSelected()) {
           loginPrompt.style.display = 'inline';
         }
       }
@@ -1468,8 +1405,8 @@
 
         hideAuthModal();
         updateAuthUI();
-        updateTabCounts();
-        applyActiveTab();
+        applyActiveWatchlist();
+        renderWatchlistSelector();
         renderWatchlist();
       } catch (err) {
         loginError.textContent = err.message;
@@ -1520,8 +1457,8 @@
 
         hideAuthModal();
         updateAuthUI();
-        updateTabCounts();
-        applyActiveTab();
+        applyActiveWatchlist();
+        renderWatchlistSelector();
         renderWatchlist();
       } catch (err) {
         signupError.textContent = err.message;
@@ -1534,14 +1471,14 @@
     // Add Stock Form
     addStockForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      // Only allow adding on portfolio tab
-      if (activeTab !== 'portfolio') return;
+      // Only allow adding on editable watchlists (not Popular)
+      if (isPopularSelected()) return;
 
       const ticker = tickerInput.value.trim().toUpperCase();
       if (!ticker) return;
 
       // Check if already in the current portfolio watchlist
-      const currentList = (currentUser && watchlistsData && currentWatchlistId)
+      const currentList = (currentUser && watchlistsData && watchlistsData.watchlists[currentWatchlistId])
         ? (watchlistsData.watchlists[currentWatchlistId]?.tickers || [])
         : portfolioWatchlist;
 
@@ -1563,7 +1500,7 @@
           throw new Error(`"${ticker}" is not a valid ticker symbol`);
         }
 
-        if (currentUser && authToken && currentWatchlistId) {
+        if (currentUser && authToken && watchlistsData?.watchlists[currentWatchlistId]) {
           // Add to specific watchlist on server
           const response = await fetch(`/api/watchlists/${currentWatchlistId}/add`, {
             method: 'POST',
@@ -1594,7 +1531,7 @@
         }
 
         tickerInput.value = '';
-        updateTabCounts();
+        renderWatchlistSelector();
         renderWatchlist();
         await fetchPrices();
       } catch (err) {
@@ -1605,13 +1542,13 @@
       addBtn.textContent = 'Add';
     });
 
-    // Remove Stock (only works on portfolio tab)
+    // Remove Stock (only works on editable watchlists, not Popular)
     async function removeStock(ticker) {
-      if (activeTab !== 'portfolio') return;
+      if (isPopularSelected()) return;
       if (!confirm(`Remove ${ticker} from your watchlist?`)) return;
 
       try {
-        if (currentUser && authToken && currentWatchlistId) {
+        if (currentUser && authToken && watchlistsData?.watchlists[currentWatchlistId]) {
           const response = await fetch(`/api/watchlists/${currentWatchlistId}/remove/${ticker}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${authToken}` }
@@ -1628,7 +1565,6 @@
               watchlistsData.watchlists[currentWatchlistId].tickers.filter(t => t !== ticker);
           }
           watchlist = watchlistsData.watchlists[currentWatchlistId]?.tickers || [];
-          renderWatchlistSelector();
         } else {
           portfolioWatchlist = portfolioWatchlist.filter(t => t !== ticker);
           localStorage.setItem('localWatchlist', JSON.stringify(portfolioWatchlist));
@@ -1638,7 +1574,7 @@
           }
         }
 
-        updateTabCounts();
+        renderWatchlistSelector();
         renderWatchlist();
       } catch (err) {
         showToast(err.message);
@@ -1654,19 +1590,13 @@
       // Reset watchlist state
       portfolioWatchlist = [];
       watchlistsData = null;
-      currentWatchlistId = null;
+      currentWatchlistId = '__popular__';
       localStorage.removeItem('localWatchlist');
       stockPerformance = {};
 
-      // Switch back to Popular tab
-      activeTab = 'popular';
-      document.querySelectorAll('.watchlist-tab').forEach(t => {
-        t.classList.toggle('active', t.dataset.tab === 'popular');
-      });
-
-      applyActiveTab();
+      applyActiveWatchlist();
+      renderWatchlistSelector();
       updateAuthUI();
-      updateTabCounts();
       renderWatchlist();
       fetchPrices();
     }
@@ -1688,15 +1618,16 @@
             watchlistsData.watchlists[wl.id] = wl;
           });
 
-          currentWatchlistId = data.defaultWatchlist;
+          // Keep current selection if it is Popular; otherwise use server default
+          if (currentWatchlistId !== '__popular__') {
+            currentWatchlistId = data.defaultWatchlist;
+          }
 
           // Clear local storage since we're using server data
           localStorage.removeItem('localWatchlist');
           portfolioWatchlist = [];
 
-          // Apply current tab state
-          applyActiveTab();
-          updateTabCounts();
+          applyActiveWatchlist();
           renderWatchlistSelector();
           await fetchPrices();
         }
@@ -1711,8 +1642,7 @@
             const data = await legacyResponse.json();
             portfolioWatchlist = data.watchlist || [];
             localStorage.removeItem('localWatchlist');
-            applyActiveTab();
-            updateTabCounts();
+            applyActiveWatchlist();
             await fetchPrices();
           }
         } catch (e) {
@@ -1721,17 +1651,24 @@
       }
     }
 
-    // Render watchlist selector dropdown
+    // Render watchlist selector dropdown (always includes Popular first)
     function renderWatchlistSelector() {
-      if (!watchlistsData) return;
-
       const select = document.getElementById('watchlist-select');
-      select.innerHTML = Object.values(watchlistsData.watchlists)
-        .map(wl => `
-          <option value="${wl.id}" ${wl.id === currentWatchlistId ? 'selected' : ''}>
-            ${escapeHtml(wl.name)}
-          </option>
-        `).join('');
+
+      // Always start with Popular
+      let options = `<option value="__popular__" ${currentWatchlistId === '__popular__' ? 'selected' : ''}>Popular (Mag 7 + BTC)</option>`;
+
+      if (currentUser && watchlistsData) {
+        // Logged-in: add server watchlists
+        Object.values(watchlistsData.watchlists).forEach(wl => {
+          options += `<option value="${wl.id}" ${wl.id === currentWatchlistId ? 'selected' : ''}>${escapeHtml(wl.name)} (${wl.tickers.length})</option>`;
+        });
+      } else if (!currentUser) {
+        // Not logged in: always show My Watchlist option so user can add stocks
+        options += `<option value="__local__" ${currentWatchlistId === '__local__' ? 'selected' : ''}>My Watchlist (${portfolioWatchlist.length})</option>`;
+      }
+
+      select.innerHTML = options;
     }
 
     // Toast notification function
@@ -1761,14 +1698,10 @@
       return div.innerHTML;
     }
 
-    // Switch watchlist (server watchlist dropdown for logged-in users)
+    // Switch watchlist (works for Popular, local, and server watchlists)
     async function switchWatchlist(watchlistId) {
-      if (!watchlistsData?.watchlists[watchlistId]) return;
-
       currentWatchlistId = watchlistId;
-      watchlist = watchlistsData.watchlists[watchlistId].tickers;
-
-      updateTabCounts();
+      applyActiveWatchlist();
       renderWatchlist();
       await fetchPrices();
     }
@@ -1780,6 +1713,10 @@
 
     // Create watchlist modal functions
     function showCreateWatchlistModal() {
+      if (!currentUser) {
+        showAuthModal('login');
+        return;
+      }
       document.getElementById('create-watchlist-modal').classList.add('active');
       document.getElementById('new-watchlist-name').focus();
     }
@@ -1811,8 +1748,8 @@
           currentWatchlistId = data.watchlist.id;
           watchlist = [];
 
+          applyActiveWatchlist();
           renderWatchlistSelector();
-          updateTabCounts();
           renderWatchlist();
           hideCreateWatchlistModal();
         } else {
@@ -1827,7 +1764,7 @@
     // Rename watchlist modal functions
     function showRenameWatchlistModal() {
       hideWatchlistActionsMenu();
-      if (!currentWatchlistId || !watchlistsData) return;
+      if (isPopularSelected() || !currentWatchlistId || !watchlistsData) return;
 
       const currentName = watchlistsData.watchlists[currentWatchlistId]?.name || '';
       document.getElementById('rename-watchlist-name').value = currentName;
@@ -1857,6 +1794,7 @@
 
         if (response.ok) {
           watchlistsData.watchlists[currentWatchlistId].name = name;
+          applyActiveWatchlist();
           renderWatchlistSelector();
           hideRenameWatchlistModal();
         } else {
@@ -1871,14 +1809,10 @@
     // Delete current watchlist
     async function deleteCurrentWatchlist() {
       hideWatchlistActionsMenu();
-      if (!currentWatchlistId || !watchlistsData) return;
+      // Cannot delete Popular or non-server watchlists
+      if (isPopularSelected() || !currentWatchlistId || !watchlistsData) return;
 
       const watchlistName = watchlistsData.watchlists[currentWatchlistId]?.name || 'this watchlist';
-
-      if (Object.keys(watchlistsData.watchlists).length === 1) {
-        showToast('Cannot delete the last watchlist');
-        return;
-      }
 
       if (!confirm(`Delete "${watchlistName}"? This cannot be undone.`)) return;
 
@@ -1891,11 +1825,17 @@
         if (response.ok) {
           const data = await response.json();
           delete watchlistsData.watchlists[currentWatchlistId];
-          currentWatchlistId = data.defaultWatchlist;
-          watchlist = watchlistsData.watchlists[currentWatchlistId]?.tickers || [];
 
+          // If there are still server watchlists, switch to the default one;
+          // otherwise fall back to Popular
+          if (Object.keys(watchlistsData.watchlists).length > 0) {
+            currentWatchlistId = data.defaultWatchlist;
+          } else {
+            currentWatchlistId = '__popular__';
+          }
+
+          applyActiveWatchlist();
           renderWatchlistSelector();
-          updateTabCounts();
           renderWatchlist();
           await fetchPrices();
         } else {
@@ -1984,7 +1924,7 @@
 
     // Render watchlist
     function renderWatchlist() {
-      const isReadOnly = (activeTab === 'popular');
+      const isReadOnly = isPopularSelected();
 
       if (watchlist.length === 0) {
         const emptyMsg = isReadOnly
@@ -2164,8 +2104,8 @@
 
         hideAuthModal();
         updateAuthUI();
-        updateTabCounts();
-        applyActiveTab();
+        applyActiveWatchlist();
+        renderWatchlistSelector();
         renderWatchlist();
 
         console.log('Google sign-in successful:', currentUser.email);
