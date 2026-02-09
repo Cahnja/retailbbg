@@ -5289,6 +5289,9 @@ List every relevant key fact you find.`;
 
     const newsContext = searchResponse.output_text;
 
+    // Debug: save web search result to file
+    try { fs.writeFileSync(path.join(__dirname, 'cache', `web-search-${ticker}.txt`), newsContext); } catch(e) {}
+
     // Generate 4-paragraph analysis
     const analysisPrompt = `You are a senior markets analyst. A user wants to understand why ${companyName} (${ticker}) stock moved ${direction} ${absChange}% ${dayReference}.
 
