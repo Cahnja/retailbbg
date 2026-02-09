@@ -4855,7 +4855,7 @@ Search for the specific catalyst behind this move. Provide specific facts, numbe
 
     console.log(`[Stock Details] Web searching for ${ticker}... (time context: ${timeContext})`);
     const searchResponse = await client.responses.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o',
       tools: [{ type: 'web_search' }],
       input: searchPrompt
     });
