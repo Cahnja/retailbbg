@@ -474,7 +474,7 @@
       position: fixed;
       top: 0;
       right: 0;
-      width: 480px;
+      width: 560px;
       max-width: 100%;
       height: 100vh;
       background: #ffffff;
@@ -1312,6 +1312,10 @@
     const panelTime = document.getElementById('panel-time');
     const panelContent = document.getElementById('panel-content');
 
+    // Chart state
+    let currentPanelTicker = null;
+    let currentPanelRange = '1d';
+
     function getCurrentTime() {
       const now = new Date();
       return now.toLocaleString('en-US', {
@@ -1322,29 +1326,9 @@
       });
     }
 
-    function showLoadingState() {
-      panelContent.innerHTML = `
-        <div class="panel-loading">
-          <div class="skeleton-section">
-            <div class="skeleton skeleton-label"></div>
-            <div class="skeleton skeleton-line" style="width: 100%;"></div>
-            <div class="skeleton skeleton-line" style="width: 95%;"></div>
-            <div class="skeleton skeleton-line" style="width: 88%;"></div>
-          </div>
-          <div class="skeleton-section">
-            <div class="skeleton skeleton-label"></div>
-            <div class="skeleton skeleton-line" style="width: 100%;"></div>
-            <div class="skeleton skeleton-line" style="width: 92%;"></div>
-            <div class="skeleton skeleton-line" style="width: 85%;"></div>
-            <div class="skeleton skeleton-line" style="width: 90%;"></div>
-          </div>
-          <div class="skeleton-section">
-            <div class="skeleton skeleton-label"></div>
-            <div class="skeleton skeleton-line" style="width: 100%;"></div>
-            <div class="skeleton skeleton-line" style="width: 80%;"></div>
-          </div>
-        </div>
-      `;
+    function chartFormatPrice(price) {
+      if (price == null) return '--';
+      return price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
     function renderAnalysis(analysisText) {
@@ -1370,6 +1354,9 @@
       const change = parseFloat(changePercent);
       const isPositive = change >= 0;
 
+      currentPanelTicker = ticker;
+      currentPanelRange = '1d';
+
       // Look up the stock from currentData to get the catalyst
       let catalyst = '';
       if (currentData) {
@@ -1385,22 +1372,59 @@
       panelChange.className = 'meta-item ' + (isPositive ? 'positive' : 'negative');
       panelTime.textContent = getCurrentTime();
 
-      // Show loading state
-      showLoadingState();
+      // Set up panel content with chart, analysis, and headlines containers
+      panelContent.innerHTML = `
+        <div class="chart-timeframe-tabs" id="chart-tabs">
+          ${['1D','5D','1M','3M','6M','YTD','1Y'].map(t =>
+            `<button class="chart-tab${t === '1D' ? ' active' : ''}" data-range="${t.toLowerCase()}">${t}</button>`
+          ).join('')}
+        </div>
+        <div class="chart-container" id="chart-container">
+          <div class="chart-loading"><div class="spinner"></div>Loading chart...</div>
+        </div>
+        <div id="analysis-container">
+          <div class="panel-section">
+            <h2 class="section-title">Analysis</h2>
+            <div class="panel-status">
+              <div class="spinner"></div>
+              <span>Generating analysis...</span>
+            </div>
+          </div>
+        </div>
+        <div id="headlines-container" class="headlines-section">
+          <h2 class="section-title">Headlines</h2>
+          <div class="headlines-loading"><div class="spinner"></div>Loading headlines...</div>
+        </div>
+      `;
 
       // Show the panel
       panelOverlay.classList.add('active');
       sidePanel.classList.add('active');
       document.body.style.overflow = 'hidden';
 
-      // Fetch the detailed analysis
+      // Attach tab click handlers
+      document.querySelectorAll('#chart-tabs .chart-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const range = tab.dataset.range;
+          if (range === currentPanelRange) return;
+          currentPanelRange = range;
+          document.querySelectorAll('#chart-tabs .chart-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          loadChartData(currentPanelTicker, range);
+        });
+      });
+
+      // Fetch chart, analysis, and headlines in parallel (all independent)
+      loadChartData(ticker, '1d');
       fetchStockExplanation(ticker, companyName, changePercent, catalyst);
+      fetchHeadlines(ticker, companyName);
     }
 
     function closePanel() {
       panelOverlay.classList.remove('active');
       sidePanel.classList.remove('active');
       document.body.style.overflow = '';
+      currentPanelTicker = null;
     }
 
     // Close panel when clicking overlay
@@ -1415,15 +1439,211 @@
       }
     });
 
-    async function fetchStockExplanation(ticker, companyName, changePercent, catalyst) {
-      try {
-        panelContent.innerHTML = `
-          <div class="panel-status">
-            <div class="spinner"></div>
-            <span>Generating analysis...</span>
-          </div>
-        `;
+    // ---- Chart functions ----
 
+    async function loadChartData(ticker, range) {
+      const chartContainer = document.getElementById('chart-container');
+      if (!chartContainer) return;
+      chartContainer.innerHTML = `<div class="chart-loading"><div class="spinner"></div>Loading chart...</div>`;
+
+      try {
+        // Map 3m to 6m range on backend (no native 3m), we'll trim client-side
+        const apiRange = range === '3m' ? '6m' : range;
+        const response = await fetch(`/api/stock-chart?ticker=${encodeURIComponent(ticker)}&range=${apiRange}`);
+        if (!response.ok) throw new Error('Failed to load chart');
+
+        const data = await response.json();
+        let chartPoints = data.chart;
+
+        // For 3m, trim 6m data to last ~3 months
+        if (range === '3m' && chartPoints && chartPoints.length > 0) {
+          const threeMonthsAgo = Date.now() - (90 * 24 * 60 * 60 * 1000);
+          chartPoints = chartPoints.filter(p => p.timestamp >= threeMonthsAgo);
+        }
+
+        // If 1D has no chart data (e.g. weekend/holiday), fall back to 5D
+        if (range === '1d' && (!chartPoints || chartPoints.length === 0)) {
+          return loadChartData(ticker, '5d');
+        }
+
+        renderSVGChart(chartPoints, data.quote, range);
+      } catch (err) {
+        console.error('Chart load error:', err);
+        chartContainer.innerHTML = `<div class="chart-loading" style="color:#c5221f;">Failed to load chart data</div>`;
+      }
+    }
+
+    function renderSVGChart(points, quote, range) {
+      const container = document.getElementById('chart-container');
+      if (!points || points.length < 2) {
+        container.innerHTML = `<div class="chart-loading" style="color:#5f6368;">No chart data available</div>`;
+        return;
+      }
+
+      const width = 430;
+      const height = 180;
+      const padLeft = 0;
+      const padRight = 60;
+      const padTop = 8;
+      const padBottom = 24;
+      const chartW = width - padLeft - padRight;
+      const chartH = height - padTop - padBottom;
+
+      const prices = points.map(p => p.price);
+      let minPrice = Math.min(...prices);
+      let maxPrice = Math.max(...prices);
+
+      // Include previous close in range for 1D view
+      const prevClose = quote.previousClose;
+      if (range === '1d' && prevClose != null) {
+        minPrice = Math.min(minPrice, prevClose);
+        maxPrice = Math.max(maxPrice, prevClose);
+      }
+
+      // Add small padding to price range
+      const priceRange = maxPrice - minPrice || 1;
+      minPrice -= priceRange * 0.05;
+      maxPrice += priceRange * 0.05;
+      const finalRange = maxPrice - minPrice;
+
+      const firstPrice = range === '1d' && prevClose != null ? prevClose : points[0].price;
+      const lastPrice = points[points.length - 1].price;
+      const isUp = lastPrice >= firstPrice;
+      const lineColor = isUp ? '#137333' : '#c5221f';
+      const fillColor = isUp ? 'rgba(19,115,51,0.08)' : 'rgba(197,34,31,0.08)';
+
+      // Scale functions
+      const xScale = (i) => padLeft + (i / (points.length - 1)) * chartW;
+      const yScale = (price) => padTop + ((maxPrice - price) / finalRange) * chartH;
+
+      // Build line path
+      let linePath = `M ${xScale(0)} ${yScale(points[0].price)}`;
+      for (let i = 1; i < points.length; i++) {
+        linePath += ` L ${xScale(i)} ${yScale(points[i].price)}`;
+      }
+
+      // Build fill path (area under line)
+      let fillPath = linePath;
+      fillPath += ` L ${xScale(points.length - 1)} ${padTop + chartH}`;
+      fillPath += ` L ${xScale(0)} ${padTop + chartH} Z`;
+
+      // Y-axis labels (4 ticks for compact view)
+      let yLabels = '';
+      let gridLines = '';
+      const numTicks = 4;
+      for (let i = 0; i <= numTicks; i++) {
+        const price = maxPrice - (i / numTicks) * finalRange;
+        const y = padTop + (i / numTicks) * chartH;
+        yLabels += `<text x="${width - padRight + 6}" y="${y + 4}" font-size="9" fill="#5f6368" font-family="Arial, sans-serif">${chartFormatPrice(price)}</text>`;
+        gridLines += `<line x1="${padLeft}" y1="${y}" x2="${width - padRight}" y2="${y}" stroke="#f0f0f0" stroke-width="1"/>`;
+      }
+
+      // X-axis labels
+      let xLabels = '';
+      const numXLabels = 4;
+      for (let i = 0; i <= numXLabels; i++) {
+        const idx = Math.round((i / numXLabels) * (points.length - 1));
+        const x = xScale(idx);
+        const ts = points[idx].timestamp;
+        const d = new Date(ts);
+        let label;
+        if (range === '1d') {
+          label = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        } else if (range === '5d') {
+          label = d.toLocaleDateString('en-US', { weekday: 'short' });
+        } else if (range === '1m' || range === '3m' || range === '6m' || range === 'ytd') {
+          label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        } else {
+          label = d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+        }
+        xLabels += `<text x="${x}" y="${height - 4}" font-size="9" fill="#5f6368" text-anchor="middle" font-family="Arial, sans-serif">${label}</text>`;
+      }
+
+      // Previous close line (only for 1D)
+      let prevCloseLine = '';
+      if (range === '1d' && prevClose != null) {
+        const pcY = yScale(prevClose);
+        prevCloseLine = `
+          <line x1="${padLeft}" y1="${pcY}" x2="${width - padRight}" y2="${pcY}" stroke="#9aa0a6" stroke-width="1" stroke-dasharray="4,3"/>
+        `;
+      }
+
+      const svgId = 'panel-chart-svg';
+      const tooltipId = 'panel-chart-tooltip';
+
+      container.innerHTML = `
+        <svg id="${svgId}" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet">
+          ${gridLines}
+          ${prevCloseLine}
+          <path d="${fillPath}" fill="${fillColor}"/>
+          <path d="${linePath}" fill="none" stroke="${lineColor}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+          ${yLabels}
+          ${xLabels}
+          <line id="panel-chart-crosshair" x1="0" y1="${padTop}" x2="0" y2="${padTop + chartH}" stroke="#dadce0" stroke-width="1" visibility="hidden"/>
+          <circle id="panel-chart-dot" cx="0" cy="0" r="3.5" fill="${lineColor}" stroke="white" stroke-width="1.5" visibility="hidden"/>
+          <rect id="panel-chart-hover" x="${padLeft}" y="${padTop}" width="${chartW}" height="${chartH}" fill="transparent" cursor="crosshair"/>
+        </svg>
+        <div class="chart-tooltip" id="${tooltipId}"></div>
+      `;
+
+      // Add hover interactivity
+      const svg = document.getElementById(svgId);
+      const hoverArea = document.getElementById('panel-chart-hover');
+      const crosshair = document.getElementById('panel-chart-crosshair');
+      const dot = document.getElementById('panel-chart-dot');
+      const tooltip = document.getElementById(tooltipId);
+
+      function handleHover(e) {
+        const rect = svg.getBoundingClientRect();
+        const svgX = ((e.clientX - rect.left) / rect.width) * width;
+        const relX = svgX - padLeft;
+        const idx = Math.round((relX / chartW) * (points.length - 1));
+        if (idx < 0 || idx >= points.length) return;
+
+        const px = xScale(idx);
+        const py = yScale(points[idx].price);
+
+        crosshair.setAttribute('x1', px);
+        crosshair.setAttribute('x2', px);
+        crosshair.setAttribute('visibility', 'visible');
+        dot.setAttribute('cx', px);
+        dot.setAttribute('cy', py);
+        dot.setAttribute('visibility', 'visible');
+
+        const d = new Date(points[idx].timestamp);
+        let timeStr;
+        if (range === '1d' || range === '5d') {
+          timeStr = d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+        } else {
+          timeStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        tooltip.textContent = `$${chartFormatPrice(points[idx].price)}  ${timeStr}`;
+        tooltip.classList.add('visible');
+
+        // Position tooltip
+        const containerRect = container.getBoundingClientRect();
+        const tooltipX = (px / width) * containerRect.width;
+        const tooltipY = (py / height) * containerRect.height;
+        tooltip.style.left = Math.min(tooltipX - tooltip.offsetWidth / 2, containerRect.width - tooltip.offsetWidth - 4) + 'px';
+        tooltip.style.top = (tooltipY - 32) + 'px';
+      }
+
+      hoverArea.addEventListener('mousemove', handleHover);
+      hoverArea.addEventListener('mouseleave', () => {
+        crosshair.setAttribute('visibility', 'hidden');
+        dot.setAttribute('visibility', 'hidden');
+        tooltip.classList.remove('visible');
+      });
+    }
+
+    // ---- Analysis fetch ----
+
+    async function fetchStockExplanation(ticker, companyName, changePercent, catalyst) {
+      const analysisContainer = document.getElementById('analysis-container');
+      if (!analysisContainer) return;
+
+      try {
         const params = new URLSearchParams({ ticker, companyName, changePercent });
         if (catalyst) params.set('catalyst', catalyst);
         const response = await fetch(`/api/stock-explanation-details?${params}`);
@@ -1433,17 +1653,78 @@
           throw new Error(data.isQuotaError ? 'quota' : (data.error || 'Failed to load analysis'));
         }
 
-        panelContent.innerHTML = renderAnalysis(data.analysis);
+        analysisContainer.innerHTML = renderAnalysis(data.analysis);
       } catch (error) {
         console.error('Error fetching stock explanation:', error);
         let errorMsg = 'Unable to load detailed analysis. Please try again.';
         if (error.message === 'quota') {
           errorMsg = 'AI service quota exceeded. This feature will be available again soon. Please try again later.';
         }
-        panelContent.innerHTML = `
+        analysisContainer.innerHTML = `
           <div class="panel-error">
             <p>${errorMsg}</p>
           </div>
+        `;
+      }
+    }
+
+    // ---- Headlines fetch ----
+
+    async function fetchHeadlines(ticker, companyName) {
+      const headlinesContainer = document.getElementById('headlines-container');
+      if (!headlinesContainer) return;
+
+      try {
+        const params = new URLSearchParams({ ticker, companyName });
+        const response = await fetch(`/api/stock-headlines?${params}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to load headlines');
+        }
+
+        if (!data.headlines || data.headlines.length === 0) {
+          headlinesContainer.innerHTML = `
+            <h2 class="section-title">Headlines</h2>
+            <div style="color: #5f6368; font-family: Arial, sans-serif; font-size: 13px; padding: 8px 0;">No recent headlines found.</div>
+          `;
+          return;
+        }
+
+        let html = '<h2 class="section-title">Headlines</h2><ul class="headlines-list">';
+        data.headlines.forEach(item => {
+          const titleHtml = item.url
+            ? `<a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a>`
+            : escapeHtml(item.title);
+
+          let timeAgo = '';
+          if (item.timestamp) {
+            const diff = Date.now() - item.timestamp;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            if (hours < 1) {
+              timeAgo = 'Just now';
+            } else if (hours < 24) {
+              timeAgo = hours + 'h ago';
+            } else {
+              const days = Math.floor(hours / 24);
+              timeAgo = days + 'd ago';
+            }
+          }
+
+          html += `
+            <li class="headline-item">
+              <span class="headline-bullet">&bull;</span>${titleHtml}
+              ${item.source || timeAgo ? `<div class="headline-source">${[item.source, timeAgo].filter(Boolean).join(' &middot; ')}</div>` : ''}
+            </li>
+          `;
+        });
+        html += '</ul>';
+        headlinesContainer.innerHTML = html;
+      } catch (error) {
+        console.error('Error fetching headlines:', error);
+        headlinesContainer.innerHTML = `
+          <h2 class="section-title">Headlines</h2>
+          <div style="color: #c5221f; font-family: Arial, sans-serif; font-size: 13px; padding: 8px 0;">Failed to load headlines.</div>
         `;
       }
     }
