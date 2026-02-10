@@ -755,34 +755,44 @@
       to { transform: rotate(360deg); }
     }
 
-    /* Panel Price Display */
+    /* Panel Price Display - Google Finance style */
     .panel-price-display {
       display: flex;
-      align-items: baseline;
-      gap: 12px;
-      margin-bottom: 4px;
+      flex-direction: column;
+      margin-bottom: 16px;
     }
 
     .panel-price-value {
       font-family: Arial, sans-serif;
-      font-size: 28px;
+      font-size: 36px;
       font-weight: 700;
-      color: #1a1a1a;
+      color: #202124;
       letter-spacing: -0.5px;
+      line-height: 1.2;
     }
 
     .panel-price-change {
       font-family: Arial, sans-serif;
       font-size: 16px;
-      font-weight: 600;
+      font-weight: 500;
+      margin-top: 4px;
+      line-height: 1.4;
     }
 
     .panel-price-change.positive {
-      color: #0d8043;
+      color: #137333;
     }
 
     .panel-price-change.negative {
-      color: #c5221f;
+      color: #a50e0e;
+    }
+
+    .panel-price-date {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      color: #70757a;
+      margin-top: 2px;
+      line-height: 1.4;
     }
 
     /* Chart Timeframe Tabs */
@@ -1346,13 +1356,23 @@
       panelChange.className = 'meta-item ' + (isPositive ? 'positive' : 'negative');
       panelTime.textContent = getCurrentTime();
 
-      // Build price display HTML
-      const priceHtml = stockPrice != null ? `
-        <div class="panel-price-display">
-          <span class="panel-price-value">$${stockPrice.toFixed(2)}</span>
-          <span class="panel-price-change ${isPositive ? 'positive' : 'negative'}">${isPositive ? '+' : ''}${change.toFixed(2)}%${stockChangeDollar != null ? ' (' + (isPositive ? '+' : '') + '$' + Math.abs(stockChangeDollar).toFixed(2) + ')' : ''}</span>
-        </div>
-      ` : '';
+      // Build price display HTML (Google Finance style: price, change, date stacked)
+      let priceHtml = '';
+      if (stockPrice != null) {
+        const sign = isPositive ? '+' : '-';
+        const dollarPart = stockChangeDollar != null ? `${sign}$${Math.abs(stockChangeDollar).toFixed(2)} ` : '';
+        const pctPart = `(${isPositive ? '+' : ''}${change.toFixed(2)}%)`;
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ', ' +
+          now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZoneName: 'short' });
+        priceHtml = `
+          <div class="panel-price-display">
+            <span class="panel-price-value">$${stockPrice.toFixed(2)}</span>
+            <span class="panel-price-change ${isPositive ? 'positive' : 'negative'}">${dollarPart}${pctPart} today</span>
+            <span class="panel-price-date">${dateStr}</span>
+          </div>
+        `;
+      }
 
       // Set up panel content with chart and analysis containers
       panelContent.innerHTML = `
