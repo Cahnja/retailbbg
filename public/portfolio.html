@@ -1325,12 +1325,18 @@
       currentPanelTicker = ticker;
       currentPanelRange = '1d';
 
-      // Look up the stock from currentData to get the catalyst
+      // Look up the stock from currentData to get the catalyst and price
       let catalyst = '';
+      let stockPrice = null;
+      let stockChangeDollar = null;
       if (currentData) {
         const allStocks = [...(currentData.gainers || []), ...(currentData.losers || [])];
         const match = allStocks.find(s => s.ticker === ticker);
-        if (match && match.catalyst) catalyst = match.catalyst;
+        if (match) {
+          if (match.catalyst) catalyst = match.catalyst;
+          if (match.price != null) stockPrice = match.price;
+          if (match.changeDollar != null) stockChangeDollar = match.changeDollar;
+        }
       }
 
       // Set the header info
@@ -1340,8 +1346,17 @@
       panelChange.className = 'meta-item ' + (isPositive ? 'positive' : 'negative');
       panelTime.textContent = getCurrentTime();
 
+      // Build price display HTML
+      const priceHtml = stockPrice != null ? `
+        <div class="panel-price-display">
+          <span class="panel-price-value">$${stockPrice.toFixed(2)}</span>
+          <span class="panel-price-change ${isPositive ? 'positive' : 'negative'}">${isPositive ? '+' : ''}${change.toFixed(2)}%${stockChangeDollar != null ? ' (' + (isPositive ? '+' : '') + '$' + Math.abs(stockChangeDollar).toFixed(2) + ')' : ''}</span>
+        </div>
+      ` : '';
+
       // Set up panel content with chart and analysis containers
       panelContent.innerHTML = `
+        ${priceHtml}
         <div class="chart-timeframe-tabs" id="chart-tabs">
           ${['1D','5D','1M','3M','6M','YTD','1Y'].map(t =>
             `<button class="chart-tab${t === '1D' ? ' active' : ''}" data-range="${t.toLowerCase()}">${t}</button>`
