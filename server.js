@@ -5294,7 +5294,10 @@ STYLE RULES:
 - No generic advice, hedging, or obvious statements.
 - Short, punchy sentences. Cut any sentence that doesn't add a new fact.
 - Wrap the single most important sentence in each paragraph with **bold** markdown.
-- Just four tight paragraphs, no headers.`;
+- Just four tight paragraphs, no headers.
+- Do NOT mention trading volume, trading activity, or technical price action.
+- Focus only on the NEWS catalyst — what event, announcement, or development caused the move.
+- No references to "heavy trading", "high volume", "sell-off pressure", "trading momentum", or similar trading jargon.`;
 
     const response = await client.chat.completions.create({
       model: 'gpt-4o',
