@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>Market Update - Initiate Coverage</title>
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#1e3a5f">
+  <meta name="theme-color" content="#1a3353">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Initiate Coverage">
@@ -16,42 +16,51 @@
 
     :root {
       /* Brand */
-      --brand-dark: #1e3a5f;
-      --brand-mid: #2c4a6e;
-      --brand-light: #f0ebe3;
+      --brand-dark: #1a3353;
+      --brand-mid: #2a4f7a;
+      --brand-light: #eae4d9;
 
       /* Positive / Negative */
-      --positive: #15803d;
-      --positive-bg: #f0fdf4;
-      --negative: #b91c1c;
-      --negative-bg: #fef2f2;
+      --positive: #0d7377;
+      --positive-bg: #e0f2f1;
+      --negative: #c0392b;
+      --negative-bg: #fbeae8;
 
       /* Neutrals */
-      --text-primary: #1c1917;
-      --text-secondary: #57534e;
-      --text-tertiary: #a8a29e;
-      --text-faint: #c4beb8;
+      --text-primary: #2c2c2c;
+      --text-secondary: #5c5c5c;
+      --text-tertiary: #8a8580;
+      --text-faint: #a8a29e;
 
       --bg-page: #faf8f5;
-      --bg-card: #fffffe;
+      --bg-card: #ffffff;
       --bg-subtle: #f5f2ed;
 
       --border: #e0dcd5;
-      --border-light: #eae6df;
+      --border-light: #ebe7e0;
 
       /* Sizing */
       --radius-card: 10px;
       --radius-sm: 6px;
-      --shadow-card: 0 1px 3px rgba(28, 25, 23, 0.06);
-      --shadow-hover: 0 4px 14px rgba(28, 25, 23, 0.10);
+      --shadow-card: 0 1px 3px rgba(120, 100, 70, 0.08);
+      --shadow-hover: 0 4px 14px rgba(120, 100, 70, 0.14);
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      font-family: 'Georgia', 'Times New Roman', -apple-system, BlinkMacSystemFont, 'Segoe UI', serif;
       background: var(--bg-page);
       color: var(--text-primary);
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
+    }
+
+    /* Override to sans-serif for UI elements */
+    .nav-strip, .nav-tab, .brand-ic, .index-name, .index-change, .index-price,
+    .fg-title, .fg-score, .fg-label, .fg-bar-labels, .fg-comparison-pill, .fg-source,
+    .timestamp, .cache-badge, .timeline-header, .refresh-btn,
+    .driver-meta, .driver-tag, .impact-badge, .earnings-link,
+    .bottom-tab-bar, .page-date, .page-subtitle {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     }
 
     /* ===== Navigation Banner ===== */
@@ -61,8 +70,8 @@
       left: 0;
       right: 0;
       height: 48px;
-      background: var(--bg-card);
-      border-bottom: 1px solid var(--border);
+      background: var(--brand-dark);
+      border-bottom: none;
       display: flex;
       align-items: center;
       padding: 0 24px;
@@ -74,7 +83,7 @@
       align-items: center;
       gap: 8px;
       text-decoration: none;
-      color: var(--text-primary);
+      color: #fff;
       margin-right: 24px;
       flex-shrink: 0;
     }
@@ -82,14 +91,14 @@
     .brand-ic {
       font-size: 16px;
       font-weight: 800;
-      color: var(--brand-dark);
+      color: #f0e6d3;
       letter-spacing: -1px;
     }
 
     .brand-sep {
       width: 1px;
       height: 20px;
-      background: var(--border);
+      background: rgba(255, 255, 255, 0.2);
     }
 
     .nav-tabs {
@@ -103,7 +112,7 @@
       text-decoration: none;
       font-size: 13px;
       font-weight: 500;
-      color: var(--text-tertiary);
+      color: rgba(255, 255, 255, 0.55);
       padding: 0 16px;
       display: flex;
       align-items: center;
@@ -113,12 +122,12 @@
     }
 
     .nav-tab:hover {
-      color: var(--text-secondary);
+      color: rgba(255, 255, 255, 0.8);
     }
 
     .nav-tab.active {
-      color: var(--brand-dark);
-      border-bottom-color: var(--brand-dark);
+      color: #fff;
+      border-bottom-color: #f0e6d3;
       font-weight: 600;
     }
 
@@ -136,11 +145,12 @@
     }
 
     .page-title {
-      font-size: 26px;
+      font-size: 28px;
       font-weight: 700;
       color: var(--brand-dark);
       letter-spacing: -0.3px;
       margin-bottom: 4px;
+      font-family: 'Georgia', 'Times New Roman', serif;
     }
 
     .page-subtitle {
@@ -295,7 +305,7 @@
       position: relative;
       height: 8px;
       border-radius: 4px;
-      background: linear-gradient(to right, var(--negative) 0%, #c88a2c 50%, var(--positive) 100%);
+      background: linear-gradient(to right, var(--negative) 0%, #d4a857 50%, var(--positive) 100%);
     }
 
     .fg-bar-indicator {
@@ -363,6 +373,10 @@
       text-decoration: underline;
     }
 
+    .fg-source a:hover {
+      color: var(--text-tertiary);
+    }
+
     /* ===== Timestamp ===== */
     .timestamp {
       font-size: 12px;
@@ -371,6 +385,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     }
 
     .live-dot {
@@ -438,7 +453,7 @@
     }
 
     .refresh-btn:hover {
-      background: var(--brand-light);
+      background: var(--bg-subtle);
       border-color: var(--brand-dark);
     }
 
@@ -534,9 +549,10 @@
 
     .driver-text {
       font-size: 15px;
-      line-height: 1.6;
+      line-height: 1.7;
       color: var(--text-primary);
       margin-bottom: 10px;
+      font-family: 'Georgia', 'Times New Roman', serif;
     }
 
     .driver-highlight {
@@ -580,7 +596,7 @@
     }
 
     .impact-badge.high { color: var(--negative); }
-    .impact-badge.medium { color: #b45309; }
+    .impact-badge.medium { color: #b8860b; }
     .impact-badge.low { color: var(--positive); }
 
     .timeline-arrow {
@@ -611,10 +627,11 @@
       font-weight: 500;
       transition: all 0.2s;
       margin-left: 6px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     }
 
     .earnings-link a:hover {
-      background: #e4ddd2;
+      background: #ddd5c5;
     }
 
     /* ===== Loading State ===== */
@@ -1318,7 +1335,7 @@
       align-items: center;
       justify-content: center;
       text-decoration: none;
-      color: rgba(255, 255, 255, 0.6);
+      color: rgba(255, 255, 255, 0.5);
       font-size: 9px;
       font-weight: 500;
       gap: 3px;
@@ -1330,7 +1347,7 @@
     }
 
     .bottom-tab-bar .tab-item.active {
-      color: white;
+      color: #f0e6d3;
     }
 
     .bottom-tab-bar .tab-item svg {

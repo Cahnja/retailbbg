@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>Top Movers - Initiate Coverage</title>
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#1e3a5f">
+  <meta name="theme-color" content="#1a3353">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Initiate Coverage">
@@ -14,33 +14,46 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --brand-dark: #1e3a5f;
-      --brand-mid: #2c4a6e;
-      --brand-light: #f0ebe3;
-      --positive: #15803d;
-      --negative: #b91c1c;
-      --text-primary: #1c1917;
-      --text-secondary: #57534e;
-      --text-tertiary: #a8a29e;
-      --text-faint: #c4beb8;
+      --brand-dark: #1a3353;
+      --brand-mid: #2a4f7a;
+      --brand-light: #eae4d9;
+      --positive: #0d7377;
+      --negative: #c0392b;
+      --text-primary: #2c2c2c;
+      --text-secondary: #5c5c5c;
+      --text-tertiary: #8a8580;
+      --text-faint: #a8a29e;
       --bg-page: #faf8f5;
-      --bg-card: #fffffe;
+      --bg-card: #ffffff;
       --bg-subtle: #f5f2ed;
       --border: #e0dcd5;
-      --positive-bg: #f0fdf4;
-      --negative-bg: #fef2f2;
+      --border-light: #ebe7e0;
+      --positive-bg: #e0f2f1;
+      --negative-bg: #fbeae8;
       --radius-card: 10px;
       --radius-sm: 6px;
-      --shadow-card: 0 1px 3px rgba(28, 25, 23, 0.06);
-      --shadow-hover: 0 4px 14px rgba(28, 25, 23, 0.10);
+      --shadow-card: 0 1px 3px rgba(120, 100, 70, 0.08);
+      --shadow-hover: 0 4px 14px rgba(120, 100, 70, 0.14);
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      font-family: 'Georgia', 'Times New Roman', -apple-system, BlinkMacSystemFont, 'Segoe UI', serif;
       background: var(--bg-page);
       color: var(--text-primary);
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
+    }
+
+    /* Override to sans-serif for UI elements */
+    .nav-strip, .nav-tab, .brand-ic, .index-name, .index-change, .index-price,
+    .fg-title, .fg-score, .fg-label, .fg-bar-labels, .fg-comparison-pill, .fg-source,
+    .timestamp, .cache-badge, .timeline-header, .refresh-btn,
+    .driver-meta, .driver-tag, .impact-badge, .earnings-link,
+    .bottom-tab-bar, .page-date, .page-subtitle,
+    .status-bar, .status-text, .index-selector-wrapper, .index-label, .index-selector,
+    .movers-table, .stock-ticker, .stock-name, .stock-price, .stock-change,
+    .column-header, .explanation-text, .click-hint {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     }
 
     /* Navigation Banner */
@@ -50,8 +63,8 @@
       left: 0;
       right: 0;
       height: 48px;
-      background: var(--bg-card);
-      border-bottom: 1px solid var(--border);
+      background: var(--brand-dark);
+      border-bottom: none;
       display: flex;
       align-items: center;
       padding: 0 24px;
@@ -64,7 +77,7 @@
       align-items: center;
       gap: 8px;
       text-decoration: none;
-      color: var(--text-primary);
+      color: #fff;
       margin-right: 24px;
       flex-shrink: 0;
     }
@@ -72,14 +85,14 @@
     .brand-ic {
       font-size: 16px;
       font-weight: 800;
-      color: var(--brand-dark);
+      color: #f0e6d3;
       letter-spacing: -1px;
     }
 
     .brand-sep {
       width: 1px;
       height: 20px;
-      background: var(--border);
+      background: rgba(255, 255, 255, 0.2);
     }
 
     .nav-tabs {
@@ -94,7 +107,7 @@
       text-decoration: none;
       font-size: 13px;
       font-weight: 500;
-      color: var(--text-tertiary);
+      color: rgba(255, 255, 255, 0.55);
       padding: 0 16px;
       display: flex;
       align-items: center;
@@ -104,12 +117,12 @@
     }
 
     .nav-tab:hover {
-      color: var(--text-secondary);
+      color: rgba(255, 255, 255, 0.8);
     }
 
     .nav-tab.active {
-      color: var(--brand-dark);
-      border-bottom-color: var(--brand-dark);
+      color: #fff;
+      border-bottom-color: #f0e6d3;
       font-weight: 600;
     }
 
@@ -720,7 +733,7 @@
     }
 
     .skeleton {
-      background: linear-gradient(90deg, #f0ebe3 25%, #e8e3da 50%, #f0ebe3 75%);
+      background: linear-gradient(90deg, #eae4d9 25%, #e0dcd5 50%, #eae4d9 75%);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
       border-radius: 4px;
@@ -951,7 +964,7 @@
       align-items: center;
       justify-content: center;
       text-decoration: none;
-      color: rgba(255, 255, 255, 0.6);
+      color: rgba(255, 255, 255, 0.5);
       font-size: 9px;
       font-weight: 500;
       gap: 3px;
@@ -963,7 +976,7 @@
     }
 
     .bottom-tab-bar .tab-item.active {
-      color: white;
+      color: #f0e6d3;
     }
 
     .bottom-tab-bar .tab-item svg {
