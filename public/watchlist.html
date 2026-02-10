@@ -645,56 +645,30 @@
       padding: 0 16px;
     }
 
-    /* Sort Controls */
-    .sort-bar {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 10px 24px;
-      border-bottom: 1px solid #e8eaed;
-      flex-wrap: wrap;
-    }
-
-    .sort-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: #5f6368;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-right: 4px;
-    }
-
-    .sort-pill {
+    /* Sortable Column Headers */
+    .col-header.sortable {
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.15s ease;
       display: inline-flex;
       align-items: center;
       gap: 3px;
-      padding: 4px 10px;
-      font-size: 11px;
-      font-weight: 500;
-      color: #5f6368;
-      background: #f1f3f4;
-      border: 1px solid transparent;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      white-space: nowrap;
-      line-height: 1.3;
     }
 
-    .sort-pill:hover {
-      background: #e8eaed;
+    .col-header.sortable:hover {
       color: #202124;
     }
 
-    .sort-pill.active {
-      background: #e8f0fe;
+    .col-header.sortable.right {
+      justify-content: flex-end;
+    }
+
+    .col-header.sortable.active {
       color: #1a73e8;
-      border-color: #c6dafc;
-      font-weight: 600;
     }
 
     .sort-arrow {
-      font-size: 10px;
+      font-size: 9px;
       line-height: 1;
     }
 
@@ -757,15 +731,6 @@
         font-size: 11px;
       }
 
-      .sort-bar {
-        padding: 8px 12px;
-        gap: 4px;
-      }
-
-      .sort-pill {
-        padding: 3px 8px;
-        font-size: 10px;
-      }
     }
 
     /* Side Panel Overlay */
@@ -2149,7 +2114,7 @@
       return sorted;
     }
 
-    // Handle sort pill click
+    // Handle column header sort click
     function handleSortClick(key) {
       if (currentSortKey === key) {
         // Toggle direction
@@ -2162,30 +2127,12 @@
       renderWatchlist();
     }
 
-    // Build sort bar HTML
-    function buildSortBar() {
-      const sortOptions = [
-        { key: 'name', label: 'Name' },
-        { key: 'price', label: 'Price' },
-        { key: '1D', label: '1D %' },
-        { key: '5D', label: '5D %' },
-        { key: '1M', label: '1M %' },
-        { key: 'YTD', label: 'YTD %' },
-        { key: '1Y', label: '1Y %' }
-      ];
-
-      const pills = sortOptions.map(opt => {
-        const isActive = currentSortKey === opt.key;
-        const arrow = isActive ? (currentSortDir === 'desc' ? ' <span class="sort-arrow">\u25BC</span>' : ' <span class="sort-arrow">\u25B2</span>') : '';
-        return `<button class="sort-pill${isActive ? ' active' : ''}" onclick="handleSortClick('${opt.key}')">${opt.label}${arrow}</button>`;
-      }).join('');
-
-      return `
-        <div class="sort-bar">
-          <span class="sort-label">Sort</span>
-          ${pills}
-        </div>
-      `;
+    // Build a sortable column header
+    function buildColHeader(key, label, isRight) {
+      const isActive = currentSortKey === key;
+      const arrow = isActive ? `<span class="sort-arrow">${currentSortDir === 'desc' ? '\u25BC' : '\u25B2'}</span>` : '';
+      const classes = `col-header sortable${isRight ? ' right' : ''}${isActive ? ' active' : ''}`;
+      return `<span class="${classes}" onclick="handleSortClick('${key}')">${label}${arrow}</span>`;
     }
 
     // Render watchlist
@@ -2204,14 +2151,12 @@
       const gridCols = '80px 1fr 90px 68px 68px 68px 68px 68px 40px';
       const sortedTickers = getSortedWatchlist();
 
-      let html = buildSortBar();
-
-      html += `
+      let html = `
         <div class="stock-table-header" style="grid-template-columns: ${gridCols};">
           <span class="col-header">Ticker</span>
-          <span class="col-header">Name</span>
-          <span class="col-header right">Price</span>
-          ${timeframes.map(tf => `<span class="col-header right">${tf}</span>`).join('')}
+          ${buildColHeader('name', 'Name', false)}
+          ${buildColHeader('price', 'Price', true)}
+          ${timeframes.map(tf => buildColHeader(tf, tf, true)).join('')}
           <span class="col-header"></span>
         </div>
       `;
