@@ -257,39 +257,67 @@ function isGenericHeadline(headline) {
   return GENERIC_HEADLINE_PATTERNS.some(pattern => pattern.test(headline));
 }
 
-// Check if a headline is relevant to the specific ticker/company
-// Returns true if headline mentions the ticker or a recognizable part of the company name
+// Check if a headline is relevant to the specific ticker/company (used for Finnhub only)
+// Relaxed filter: only rejects headlines that clearly reference a DIFFERENT company's
+// ticker/earnings without mentioning the target company. Keeps industry/sector headlines.
 function isRelevantHeadline(headline, ticker, companyName) {
   if (!headline || !ticker) return true; // If we can't check, let it through
   const headlineLower = headline.toLowerCase();
   const tickerLower = ticker.toLowerCase();
 
-  // Check if headline contains the ticker as a whole word (avoid matching partial words)
-  // e.g., "WTW" should match but not match inside another word
+  // Check if headline mentions the target ticker — always relevant
   const tickerRegex = new RegExp(`\\b${tickerLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
   if (tickerRegex.test(headline)) return true;
 
-  // Check company name relevance
+  // Check if headline mentions target company name — always relevant
   if (companyName) {
     const nameLower = companyName.toLowerCase();
-
-    // Try the full company name first
     if (headlineLower.includes(nameLower)) return true;
 
-    // Extract meaningful name words (skip generic suffixes like Inc, Corp, Ltd, etc.)
     const skipWords = new Set(['inc', 'inc.', 'corp', 'corp.', 'ltd', 'ltd.', 'llc', 'plc',
       'co', 'co.', 'company', 'companies', 'group', 'holdings', 'holding',
       'the', 'and', '&', 'of', 'international', 'intl', 'global', 'services',
       'n.v.', 'n.v', 's.a.', 's.a', 's.p.a.', 's.p.a', 'se', 'ag', 'nv', 'sa']);
     const nameWords = nameLower.split(/[\s,]+/).filter(w => w.length > 1 && !skipWords.has(w));
-
-    // Check if any significant name word (3+ chars) appears in the headline
     for (const word of nameWords) {
       if (word.length >= 3 && headlineLower.includes(word)) return true;
     }
   }
 
-  return false;
+  // If the headline doesn't mention the target company, only reject it if it's clearly
+  // about a DIFFERENT specific company (e.g., "MKL Q4 Earnings Beat", "SpyGlass Pharma IPO").
+  // Pattern: headline starts with or prominently features another ticker (2-5 uppercase letters)
+  // followed by earnings/results language, or "Ticker:" prefix pattern.
+  const otherTickerEarnings = /\b[A-Z]{1,5}\b\s+(Q[1-4]|quarterly|annual|earnings|results|revenue|profit|EPS|beats?|misses?|reports?)\b/i;
+  const tickerPrefixPattern = /^[A-Z]{1,5}:\s/; // e.g., "MKL: Q4 Earnings Beat"
+  const namedCompanyEarnings = /\b(announces?|reports?|posts?|delivers?|beats?|misses?)\s+(Q[1-4]|quarterly|annual|earnings|results|revenue|IPO|offering)\b/i;
+
+  if (otherTickerEarnings.test(headline) || tickerPrefixPattern.test(headline)) {
+    // This headline is about a specific other company's earnings/results — filter it out
+    return false;
+  }
+
+  // If headline names a specific company + earnings action and doesn't mention target, filter it
+  // e.g., "SpyGlass Pharma Announces IPO" — but NOT "Insurance broker stocks tumble..."
+  if (namedCompanyEarnings.test(headline)) {
+    // Check if this looks like a specific company-focused headline (starts with a proper noun)
+    // vs a sector/industry headline. Sector headlines usually start with common words.
+    const firstWord = headline.split(/\s+/)[0];
+    // If the first word is capitalized and not a common English word, it's likely a company name
+    const commonStarters = new Set(['the', 'a', 'an', 'all', 'most', 'some', 'many', 'few',
+      'top', 'best', 'worst', 'new', 'big', 'major', 'key', 'why', 'how', 'what', 'when',
+      'where', 'which', 'who', 'will', 'can', 'could', 'should', 'may', 'might', 'this',
+      'that', 'these', 'those', 'here', 'there', 'us', 'u.s.', 'global', 'world', 'market',
+      'stock', 'stocks', 'shares', 'wall', 'oil', 'gold', 'tech', 'bank', 'banks', 'insurance',
+      'energy', 'health', 'retail', 'auto', 'chip', 'semiconductor', 'pharma', 'biotech',
+      'crypto', 'bitcoin', 'fed', 'china', 'europe', 'asia', 'dow', 'nasdaq', 's&p']);
+    if (!commonStarters.has(firstWord.toLowerCase())) {
+      return false;
+    }
+  }
+
+  // Default: keep the headline (it's likely about the industry/sector/market trend)
+  return true;
 }
 
 async function getFinnhubNews(ticker, companyName) {
@@ -349,7 +377,7 @@ async function getYahooNews(ticker, companyName) {
     if (result && result.news && result.news.length > 0) {
       const filtered = result.news
         .map(item => item.title)
-        .filter(title => title && !isGenericHeadline(title) && isRelevantHeadline(title, ticker, companyName));
+        .filter(title => title && !isGenericHeadline(title));
 
       if (filtered.length > 0) {
         console.log(`[Yahoo] Found ${filtered.length} relevant headlines for ${ticker} (filtered ${result.news.length - filtered.length} generic/irrelevant)`);
