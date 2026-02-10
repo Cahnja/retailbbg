@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Initiate Coverage</string>
+    <string name="title_activity_main">Initiate Coverage</string>
+    <string name="package_name">com.initiatecoverage.app</string>
+    <string name="custom_url_scheme">com.initiatecoverage.app</string>
+</resources>

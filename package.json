@@ -13,6 +13,13 @@
   "type": "commonjs",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.72.0",
+    "@capacitor/android": "^8.0.2",
+    "@capacitor/cli": "^8.0.2",
+    "@capacitor/core": "^8.0.2",
+    "@capacitor/haptics": "^8.0.0",
+    "@capacitor/ios": "^8.0.2",
+    "@capacitor/splash-screen": "^8.0.0",
+    "@capacitor/status-bar": "^8.0.0",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.3",
     "exa-js": "^2.3.0",

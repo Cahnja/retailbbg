@@ -951,6 +951,10 @@ app.get('/thematic/:theme', (req, res, next) => {
   res.sendFile(path.join(__dirname, 'public', 'thematic.html'));
 });
 
+app.get('/market', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'market.html'));
+});
+
 app.get('/top-movers', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'portfolio.html'));
 });

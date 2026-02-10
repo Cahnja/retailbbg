@@ -1,0 +1,18 @@
+{
+  "appId": "com.initiatecoverage.app",
+  "appName": "Initiate Coverage",
+  "webDir": "public",
+  "server": {
+    "url": "https://initiatecoverage.com",
+    "cleartext": false
+  },
+  "plugins": {
+    "StatusBar": {
+      "style": "Dark"
+    },
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#1e3a5f"
+    }
+  }
+}

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1e3a5f">
+  <title>Offline - Initiate Coverage</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f8f9fa;
+      color: #202124;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .offline-container {
+      text-align: center;
+      max-width: 400px;
+    }
+    .offline-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+      background: #1e3a5f;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .offline-icon svg {
+      width: 40px;
+      height: 40px;
+      color: white;
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #1e3a5f;
+      margin-bottom: 12px;
+    }
+    p {
+      font-size: 16px;
+      color: #5f6368;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .retry-btn {
+      background: #1e3a5f;
+      color: white;
+      border: none;
+      padding: 12px 32px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .retry-btn:hover {
+      background: #2d5a87;
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-container">
+    <div class="offline-icon">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728M5.636 18.364a9 9 0 010-12.728M12 12v.01M8.172 8.172a5 5 0 017.656 0M15.828 15.828a5 5 0 01-7.656 0" />
+      </svg>
+    </div>
+    <h1>You're Offline</h1>
+    <p>Initiate Coverage requires an internet connection to load market data. Please check your connection and try again.</p>
+    <button class="retry-btn" onclick="window.location.reload()">Try Again</button>
+  </div>
+</body>
+</html>
