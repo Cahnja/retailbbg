@@ -19,6 +19,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
 const cron = require('node-cron');
+const Exa = require('exa-js').default;
 
 // JWT secret - in production, use environment variable
 const JWT_SECRET = process.env.JWT_SECRET || 'retailbbg-jwt-secret-key-2024';
@@ -970,6 +971,19 @@ try {
   client = new Proxy({}, {
     get: () => () => { throw new Error('OpenAI client not initialized - missing API key'); }
   });
+}
+
+// Initialize Exa client for web search (alternative to OpenAI web_search)
+let exa;
+if (process.env.EXA_API_KEY && process.env.EXA_API_KEY !== 'your-exa-api-key-here') {
+  try {
+    exa = new Exa(process.env.EXA_API_KEY);
+    console.log('Exa client initialized successfully');
+  } catch (e) {
+    console.error('Failed to initialize Exa client:', e.message);
+  }
+} else {
+  console.log('Exa client not initialized - set EXA_API_KEY in .env to enable Exa search');
 }
 
 // Memo template with section instructions
@@ -5145,7 +5159,8 @@ STYLE RULES:
 - No generic advice, hedging, or obvious statements.
 - Short, punchy sentences. Cut any sentence that doesn't add a new fact.
 - Wrap the single most important sentence in each paragraph with **bold** markdown.
-- Just four tight paragraphs, no headers.`;
+- Just four tight paragraphs, no headers.
+- Do NOT discuss institutional investor movements, fund stake changes, or portfolio reallocations. Focus on business news and catalysts only.`;
 
     if (isStream) {
       sendSSE(res, { type: 'status', message: 'Generating analysis...' });
@@ -5437,7 +5452,8 @@ STYLE RULES:
 - Just four tight paragraphs, no headers.
 - Do NOT mention trading volume, trading activity, or technical price action.
 - Focus only on the NEWS catalyst — what event, announcement, or development caused the move.
-- No references to "heavy trading", "high volume", "sell-off pressure", "trading momentum", or similar trading jargon.`;
+- No references to "heavy trading", "high volume", "sell-off pressure", "trading momentum", or similar trading jargon.
+- Do NOT discuss institutional investor movements, fund stake changes, or portfolio reallocations. Focus on business news and catalysts only.`;
 
     const response = await client.chat.completions.create({
       model: 'gpt-4o',
@@ -5486,6 +5502,202 @@ STYLE RULES:
   } finally {
     // Clean up in-flight tracking
     stockExplanationInFlight.delete(tickerUpper);
+  }
+});
+
+// ============================================
+// STOCK EXPLANATION VIA EXA (side-by-side test)
+// ============================================
+
+// In-flight deduplication for Exa stock explanations
+const stockExplanationExaInFlight = new Map();
+
+// GET /api/stock-explanation-exa
+app.get('/api/stock-explanation-exa', async (req, res) => {
+  const { ticker, companyName, changePercent, catalyst } = req.query;
+
+  if (!ticker || !companyName || !changePercent) {
+    return res.status(400).json({ error: 'Missing required parameters: ticker, companyName, changePercent' });
+  }
+
+  if (!exa) {
+    return res.status(503).json({ error: 'Exa client not initialized. Set EXA_API_KEY in .env and restart.' });
+  }
+
+  const tickerUpper = ticker.toUpperCase();
+
+  // Check cache first (uses same cache as regular endpoint with "-exa" suffix)
+  const exaCacheKey = `${tickerUpper}-exa`;
+  const cached = getCachedStockExplanation(exaCacheKey);
+  if (cached) {
+    return res.json({ ...cached, cached: true, source: 'exa' });
+  }
+
+  // In-flight deduplication
+  if (stockExplanationExaInFlight.has(tickerUpper)) {
+    console.log(`[Stock Details Exa] ${tickerUpper} already in-flight, waiting for existing request...`);
+    try {
+      const result = await stockExplanationExaInFlight.get(tickerUpper);
+      return res.json({ ...result, cached: true, source: 'exa' });
+    } catch (error) {
+      const cachedRetry = getCachedStockExplanation(exaCacheKey);
+      if (cachedRetry) {
+        return res.json({ ...cachedRetry, cached: true, source: 'exa' });
+      }
+      console.error('Stock explanation Exa API error (in-flight wait):', error.message || error);
+      return res.status(500).json({
+        error: 'Failed to generate stock explanation via Exa',
+        message: error.message || 'An unexpected error occurred'
+      });
+    }
+  }
+
+  // Create and store the in-flight promise
+  const generatePromise = (async () => {
+    console.log(`[Stock Details Exa] Generating detailed stock explanation for ${tickerUpper} (${changePercent})`);
+
+    const direction = parseFloat(changePercent) >= 0 ? 'up' : 'down';
+    const absChange = Math.abs(parseFloat(changePercent)).toFixed(1);
+
+    // Check if market is open (9:30am - 4:00pm ET on weekdays)
+    const now = new Date();
+    const etTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    const hour = etTime.getHours();
+    const minute = etTime.getMinutes();
+    const dayOfWeek = etTime.getDay();
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    const isBeforeOpen = hour < 9 || (hour === 9 && minute < 30);
+    const isMondayPreMarket = dayOfWeek === 1 && isBeforeOpen;
+    const isPreMarket = !isWeekend && isBeforeOpen;
+
+    // Calculate the actual last trading date
+    const lastTradingDate = new Date(etTime);
+    let timeContext, dayReference;
+    if (isWeekend || isMondayPreMarket) {
+      const daysBack = dayOfWeek === 0 ? 2 : dayOfWeek === 1 ? 3 : 1;
+      lastTradingDate.setDate(lastTradingDate.getDate() - daysBack);
+      const dateStr = lastTradingDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      timeContext = `${dateStr} (the market hasn't opened since then)`;
+      dayReference = `on ${dateStr}`;
+    } else if (isPreMarket) {
+      lastTradingDate.setDate(lastTradingDate.getDate() - 1);
+      const dateStr = lastTradingDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      timeContext = `${dateStr} (the market hasn't opened yet today)`;
+      dayReference = `on ${dateStr}`;
+    } else {
+      const dateStr = lastTradingDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      timeContext = `today, ${dateStr}`;
+      dayReference = `today (${dateStr})`;
+    }
+
+    // --- Exa search instead of OpenAI web_search ---
+    // Calculate start date for search (yesterday or day before for weekends)
+    const searchStartDate = new Date(lastTradingDate);
+    searchStartDate.setDate(searchStartDate.getDate() - 1);
+    const startPublishedDate = searchStartDate.toISOString().split('T')[0] + 'T00:00:00.000Z';
+
+    console.log(`[Stock Details Exa] Searching Exa for ${tickerUpper}... (startDate: ${startPublishedDate})`);
+
+    const exaResults = await exa.searchAndContents(`${tickerUpper} stock news ${companyName}`, {
+      numResults: 5,
+      startPublishedDate,
+      includeDomains: [
+        'reuters.com', 'cnbc.com', 'bloomberg.com', 'seekingalpha.com',
+        'benzinga.com', 'businesswire.com', 'prnewswire.com',
+        'finance.yahoo.com', 'marketwatch.com', 'barrons.com'
+      ],
+      text: { maxCharacters: 3000 }
+    });
+
+    // Format Exa results into newsContext string
+    let newsContext = '';
+    if (exaResults.results && exaResults.results.length > 0) {
+      newsContext = exaResults.results.map((r, i) => {
+        const publishDate = r.publishedDate ? new Date(r.publishedDate).toLocaleDateString('en-US') : 'Unknown date';
+        return `[${i + 1}] ${r.title || 'No title'}\nURL: ${r.url}\nPublished: ${publishDate}\n${r.text || 'No content available'}\n`;
+      }).join('\n---\n\n');
+    } else {
+      newsContext = `No recent news articles found for ${companyName} (${tickerUpper}) from major financial news sources.`;
+    }
+
+    // Debug: save Exa search result to file
+    try { fs.writeFileSync(path.join(__dirname, 'cache', `exa-search-${tickerUpper}.txt`), newsContext); } catch(e) {}
+
+    console.log(`[Stock Details Exa] Found ${exaResults.results ? exaResults.results.length : 0} articles for ${tickerUpper}`);
+
+    // Generate 4-paragraph analysis using the same GPT-4o prompt
+    const catalystLine = catalyst ? `\nInitial report: "${catalyst}"\n` : '';
+    const analysisPrompt = `You are a senior markets analyst. A user wants to understand why ${companyName} (${tickerUpper}) stock moved ${direction} ${absChange}% ${dayReference}.
+${catalystLine}
+Note: This market data is from ${timeContext}.
+
+RESEARCH:
+${newsContext}
+
+Write 4 detailed paragraphs explaining why the stock moved. Be extremely concise and direct — every sentence must deliver new information.
+
+If no specific catalyst for today's move can be identified from the research, instead provide a general news update covering the most important recent developments for the company over the past several months (earnings, acquisitions, product launches, analyst views, competitive landscape changes).
+
+STYLE RULES:
+- Do NOT repeat the stock price change or percentage move — jump straight into the WHY.
+- ONLY include facts from the RESEARCH above. Never invent numbers.
+- No throat-clearing ("The stock surged today due to several catalysts that excited the market"). Start with the actual catalyst.
+- No generic advice, hedging, or obvious statements.
+- Short, punchy sentences. Cut any sentence that doesn't add a new fact.
+- Wrap the single most important sentence in each paragraph with **bold** markdown.
+- Just four tight paragraphs, no headers.
+- Do NOT mention trading volume, trading activity, or technical price action.
+- Focus only on the NEWS catalyst — what event, announcement, or development caused the move.
+- No references to "heavy trading", "high volume", "sell-off pressure", "trading momentum", or similar trading jargon.
+- Do NOT discuss institutional investor movements, fund stake changes, or portfolio reallocations. Focus on business news and catalysts only.`;
+
+    const response = await client.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [{ role: 'user', content: analysisPrompt }]
+    });
+    logTokenUsage('stock-details-exa', response.usage);
+
+    const analysis = response.choices[0].message.content.trim();
+
+    const result = {
+      ticker: tickerUpper,
+      companyName,
+      changePercent,
+      analysis,
+      source: 'exa',
+      exaArticleCount: exaResults.results ? exaResults.results.length : 0,
+      generatedAt: new Date().toISOString()
+    };
+
+    // Cache the result with "-exa" suffix
+    saveStockExplanationToCache(exaCacheKey, result);
+
+    return result;
+  })();
+
+  // Store the promise for in-flight deduplication
+  stockExplanationExaInFlight.set(tickerUpper, generatePromise);
+
+  try {
+    const result = await generatePromise;
+    res.json({ ...result, cached: false });
+  } catch (error) {
+    console.error('Stock explanation Exa API error:', error.message || error);
+
+    if (error.code === 'insufficient_quota' || error.status === 429) {
+      res.status(503).json({
+        error: 'API quota exceeded',
+        message: 'API quota has been exceeded. Please try again later.',
+        isQuotaError: true
+      });
+    } else {
+      res.status(500).json({
+        error: 'Failed to generate stock explanation via Exa',
+        message: error.message || 'An unexpected error occurred'
+      });
+    }
+  } finally {
+    stockExplanationExaInFlight.delete(tickerUpper);
   }
 });
 

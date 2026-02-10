@@ -21,3 +21,4 @@ STYLE RULES:
 - Do NOT mention trading volume, trading activity, or technical price action.
 - Focus only on the NEWS catalyst — what event, announcement, or development caused the move.
 - No references to "heavy trading", "high volume", "sell-off pressure", "trading momentum", or similar trading jargon.
+- Do NOT discuss institutional investor movements, fund stake changes, or portfolio reallocations. Focus on business news and catalysts only.
