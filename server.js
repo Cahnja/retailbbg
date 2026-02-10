@@ -4991,20 +4991,24 @@ app.get('/api/market-driver-details', async (req, res) => {
     const isMondayPreMarket = dayOfWeek === 1 && isBeforeOpen;
     const isPreMarket = !isWeekend && isBeforeOpen;
 
-    // Determine correct time reference:
-    // - Weekend or Monday pre-market: data is from Friday
-    // - Tue-Fri pre-market: data is from yesterday
-    // - Market hours: data is from today
+    // Calculate the actual last trading date
+    const lastTradingDate = new Date(etTime);
     let timeContext, dayReference;
     if (isWeekend || isMondayPreMarket) {
-      timeContext = "Friday (the market hasn't opened since then)";
-      dayReference = "Friday";
+      const daysBack = dayOfWeek === 0 ? 2 : dayOfWeek === 1 ? 3 : 1; // Sun=2, Mon=3, Sat=1
+      lastTradingDate.setDate(lastTradingDate.getDate() - daysBack);
+      const dateStr = lastTradingDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      timeContext = `${dateStr} (the market hasn't opened since then)`;
+      dayReference = `on ${dateStr}`;
     } else if (isPreMarket) {
-      timeContext = "yesterday (the market hasn't opened yet today)";
-      dayReference = "yesterday";
+      lastTradingDate.setDate(lastTradingDate.getDate() - 1);
+      const dateStr = lastTradingDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      timeContext = `${dateStr} (the market hasn't opened yet today)`;
+      dayReference = `on ${dateStr}`;
     } else {
-      timeContext = "today";
-      dayReference = "today";
+      const dateStr = lastTradingDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      timeContext = `today, ${dateStr}`;
+      dayReference = `today (${dateStr})`;
     }
 
     // Web search for more context on this market driver
@@ -5241,20 +5245,24 @@ app.get('/api/stock-explanation-details', async (req, res) => {
     const isMondayPreMarket = dayOfWeek === 1 && isBeforeOpen;
     const isPreMarket = !isWeekend && isBeforeOpen;
 
-    // Determine correct time reference:
-    // - Weekend or Monday pre-market: data is from Friday
-    // - Tue-Fri pre-market: data is from yesterday
-    // - Market hours: data is from today
+    // Calculate the actual last trading date
+    const lastTradingDate = new Date(etTime);
     let timeContext, dayReference;
     if (isWeekend || isMondayPreMarket) {
-      timeContext = "Friday (the market hasn't opened since then)";
-      dayReference = "Friday";
+      const daysBack = dayOfWeek === 0 ? 2 : dayOfWeek === 1 ? 3 : 1; // Sun=2, Mon=3, Sat=1
+      lastTradingDate.setDate(lastTradingDate.getDate() - daysBack);
+      const dateStr = lastTradingDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      timeContext = `${dateStr} (the market hasn't opened since then)`;
+      dayReference = `on ${dateStr}`;
     } else if (isPreMarket) {
-      timeContext = "yesterday (the market hasn't opened yet today)";
-      dayReference = "yesterday";
+      lastTradingDate.setDate(lastTradingDate.getDate() - 1);
+      const dateStr = lastTradingDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      timeContext = `${dateStr} (the market hasn't opened yet today)`;
+      dayReference = `on ${dateStr}`;
     } else {
-      timeContext = "today";
-      dayReference = "today";
+      const dateStr = lastTradingDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      timeContext = `today, ${dateStr}`;
+      dayReference = `today (${dateStr})`;
     }
 
     // Web search to find why the stock moved
