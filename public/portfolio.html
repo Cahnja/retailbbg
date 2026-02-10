@@ -551,34 +551,6 @@
       margin-top: 4px;
     }
 
-    .panel-meta {
-      display: flex;
-      gap: 16px;
-      margin-top: 16px;
-      font-family: Arial, sans-serif;
-      font-size: 13px;
-      opacity: 0.9;
-    }
-
-    .meta-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .meta-item svg {
-      width: 14px;
-      height: 14px;
-    }
-
-    .meta-item.positive {
-      color: #90EE90;
-    }
-
-    .meta-item.negative {
-      color: #FFB6C1;
-    }
-
     /* Panel Content */
     .panel-content {
       flex: 1;
@@ -1016,20 +988,6 @@
       <div class="panel-label">Stock Analysis</div>
       <h1 class="panel-title" id="panel-title">Loading...</h1>
       <div class="panel-ticker" id="panel-ticker"></div>
-      <div class="panel-meta">
-        <span class="meta-item" id="panel-change">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-          </svg>
-          <span id="panel-change-text">--</span>
-        </span>
-        <span class="meta-item">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span id="panel-time">--</span>
-        </span>
-      </div>
     </div>
 
     <div class="panel-content" id="panel-content">
@@ -1285,24 +1243,12 @@
     const sidePanel = document.getElementById('side-panel');
     const panelTitle = document.getElementById('panel-title');
     const panelTicker = document.getElementById('panel-ticker');
-    const panelChange = document.getElementById('panel-change');
-    const panelChangeText = document.getElementById('panel-change-text');
-    const panelTime = document.getElementById('panel-time');
     const panelContent = document.getElementById('panel-content');
 
     // Chart state
     let currentPanelTicker = null;
     let currentPanelRange = '1d';
 
-    function getCurrentTime() {
-      const now = new Date();
-      return now.toLocaleString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-        timeZoneName: 'short'
-      });
-    }
 
     function chartFormatPrice(price) {
       if (price == null) return '--';
@@ -1352,9 +1298,6 @@
       // Set the header info
       panelTitle.textContent = companyName;
       panelTicker.textContent = ticker;
-      panelChangeText.textContent = (isPositive ? '+' : '') + change.toFixed(2) + '%';
-      panelChange.className = 'meta-item ' + (isPositive ? 'positive' : 'negative');
-      panelTime.textContent = getCurrentTime();
 
       // Build price display HTML (Google Finance style: price, change, date stacked)
       let priceHtml = '';
