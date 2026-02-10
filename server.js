@@ -6420,7 +6420,6 @@ async function refreshMarketMoversExplanations(index, tradingDate = null) {
     // If we have a trading date from Yahoo Finance, format it properly
     let asOf;
     if (effectiveTradingDate) {
-      // Parse the trading date and show it as the session date with market close time
       const [year, month, day] = effectiveTradingDate.split('-').map(Number);
       const tradingDateObj = new Date(year, month - 1, day);
       const dateFormatted = tradingDateObj.toLocaleDateString('en-US', {
@@ -6428,7 +6427,27 @@ async function refreshMarketMoversExplanations(index, tradingDate = null) {
         day: 'numeric',
         year: 'numeric'
       });
-      asOf = `${dateFormatted}, 4:00 PM ET`;
+
+      // Check if the trading date is today and market is still open
+      const nowET = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+      const todayStr = nowET.getFullYear() + '-' +
+        String(nowET.getMonth() + 1).padStart(2, '0') + '-' +
+        String(nowET.getDate()).padStart(2, '0');
+      const nowMinutes = nowET.getHours() * 60 + nowET.getMinutes();
+      const marketClose = 16 * 60; // 4:00 PM = 960 minutes
+
+      if (effectiveTradingDate === todayStr && nowMinutes < marketClose) {
+        // Market is still open today - show the actual fetch time
+        const timeFormatted = nowET.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        });
+        asOf = `${dateFormatted}, ${timeFormatted} ET`;
+      } else {
+        // Past trading date or market has closed - show 4:00 PM
+        asOf = `${dateFormatted}, 4:00 PM ET`;
+      }
     } else {
       asOf = new Date().toLocaleString('en-US', {
         timeZone: 'America/New_York',
