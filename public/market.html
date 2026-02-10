@@ -17,33 +17,33 @@
     :root {
       /* Brand */
       --brand-dark: #1e3a5f;
-      --brand-mid: #2d5a87;
-      --brand-light: #e8f0f7;
+      --brand-mid: #2c4a6e;
+      --brand-light: #f0ebe3;
 
       /* Positive / Negative */
-      --positive: #137333;
-      --positive-bg: #e6f4ea;
-      --negative: #c5221f;
-      --negative-bg: #fce8e6;
+      --positive: #15803d;
+      --positive-bg: #f0fdf4;
+      --negative: #b91c1c;
+      --negative-bg: #fef2f2;
 
       /* Neutrals */
-      --text-primary: #1a1d21;
-      --text-secondary: #5f6368;
-      --text-tertiary: #80868b;
-      --text-faint: #9aa0a6;
+      --text-primary: #1c1917;
+      --text-secondary: #57534e;
+      --text-tertiary: #a8a29e;
+      --text-faint: #c4beb8;
 
-      --bg-page: #f5f6f8;
-      --bg-card: #ffffff;
-      --bg-subtle: #f8f9fa;
+      --bg-page: #faf8f5;
+      --bg-card: #fffffe;
+      --bg-subtle: #f5f2ed;
 
-      --border: #e2e5e9;
-      --border-light: #eef0f3;
+      --border: #e0dcd5;
+      --border-light: #eae6df;
 
       /* Sizing */
       --radius-card: 10px;
       --radius-sm: 6px;
-      --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08);
-      --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.12);
+      --shadow-card: 0 1px 3px rgba(28, 25, 23, 0.06);
+      --shadow-hover: 0 4px 14px rgba(28, 25, 23, 0.10);
     }
 
     body {
@@ -183,7 +183,7 @@
       left: 0;
       right: 0;
       height: 3px;
-      background: linear-gradient(135deg, var(--brand-dark), var(--brand-mid));
+      background: linear-gradient(135deg, var(--brand-dark), #8b7355);
     }
 
     .index-card:hover {
@@ -238,7 +238,7 @@
 
     .fear-greed-card:hover {
       box-shadow: var(--shadow-hover);
-      border-color: #cdd1d6;
+      border-color: #ccc7be;
     }
 
     .fg-header {
@@ -295,7 +295,7 @@
       position: relative;
       height: 8px;
       border-radius: 4px;
-      background: linear-gradient(to right, var(--negative) 0%, #f5a623 50%, var(--positive) 100%);
+      background: linear-gradient(to right, var(--negative) 0%, #c88a2c 50%, var(--positive) 100%);
     }
 
     .fg-bar-indicator {
@@ -438,7 +438,7 @@
     }
 
     .refresh-btn:hover {
-      background: var(--bg-subtle);
+      background: var(--brand-light);
       border-color: var(--brand-dark);
     }
 
@@ -580,7 +580,7 @@
     }
 
     .impact-badge.high { color: var(--negative); }
-    .impact-badge.medium { color: #c77d00; }
+    .impact-badge.medium { color: #b45309; }
     .impact-badge.low { color: var(--positive); }
 
     .timeline-arrow {
@@ -614,7 +614,7 @@
     }
 
     .earnings-link a:hover {
-      background: #d0dfee;
+      background: #e4ddd2;
     }
 
     /* ===== Loading State ===== */
