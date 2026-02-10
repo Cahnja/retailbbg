@@ -755,6 +755,36 @@
       to { transform: rotate(360deg); }
     }
 
+    /* Panel Price Display */
+    .panel-price-display {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+
+    .panel-price-value {
+      font-family: Arial, sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      letter-spacing: -0.5px;
+    }
+
+    .panel-price-change {
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .panel-price-change.positive {
+      color: #0d8043;
+    }
+
+    .panel-price-change.negative {
+      color: #c5221f;
+    }
+
     /* Chart Timeframe Tabs */
     .chart-timeframe-tabs {
       display: flex;
@@ -842,68 +872,6 @@
 
     .chart-tooltip.visible {
       opacity: 1;
-    }
-
-    /* Headlines Section */
-    .headlines-section {
-      margin-top: 24px;
-    }
-
-    .headlines-list {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    .headline-item {
-      padding: 10px 0;
-      border-bottom: 1px solid #f0f0f0;
-      font-family: Arial, sans-serif;
-      font-size: 13px;
-      line-height: 1.5;
-      color: #333;
-    }
-
-    .headline-item:last-child {
-      border-bottom: none;
-    }
-
-    .headline-item a {
-      color: #1a73e8;
-      text-decoration: none;
-    }
-
-    .headline-item a:hover {
-      text-decoration: underline;
-    }
-
-    .headline-source {
-      font-size: 11px;
-      color: #9aa0a6;
-      margin-top: 2px;
-    }
-
-    .headline-bullet {
-      color: #1e3a5f;
-      margin-right: 6px;
-      font-weight: bold;
-    }
-
-    .headlines-loading {
-      display: flex;
-      align-items: center;
-      color: #5f6368;
-      font-family: Arial, sans-serif;
-      font-size: 13px;
-      padding: 12px 0;
-    }
-
-    .headlines-loading .spinner {
-      width: 14px;
-      height: 14px;
-      border: 2px solid #e0e0e0;
-      border-top-color: #666;
-      margin-right: 8px;
     }
 
     /* Responsive */
@@ -1372,7 +1340,7 @@
       panelChange.className = 'meta-item ' + (isPositive ? 'positive' : 'negative');
       panelTime.textContent = getCurrentTime();
 
-      // Set up panel content with chart, analysis, and headlines containers
+      // Set up panel content with chart and analysis containers
       panelContent.innerHTML = `
         <div class="chart-timeframe-tabs" id="chart-tabs">
           ${['1D','5D','1M','3M','6M','YTD','1Y'].map(t =>
@@ -1390,10 +1358,6 @@
               <span>Generating analysis...</span>
             </div>
           </div>
-        </div>
-        <div id="headlines-container" class="headlines-section">
-          <h2 class="section-title">Headlines</h2>
-          <div class="headlines-loading"><div class="spinner"></div>Loading headlines...</div>
         </div>
       `;
 
@@ -1414,10 +1378,9 @@
         });
       });
 
-      // Fetch chart, analysis, and headlines in parallel (all independent)
+      // Fetch chart and analysis in parallel (both independent)
       loadChartData(ticker, '1d');
       fetchStockExplanation(ticker, companyName, changePercent, catalyst);
-      fetchHeadlines(ticker, companyName);
     }
 
     function closePanel() {
@@ -1664,67 +1627,6 @@
           <div class="panel-error">
             <p>${errorMsg}</p>
           </div>
-        `;
-      }
-    }
-
-    // ---- Headlines fetch ----
-
-    async function fetchHeadlines(ticker, companyName) {
-      const headlinesContainer = document.getElementById('headlines-container');
-      if (!headlinesContainer) return;
-
-      try {
-        const params = new URLSearchParams({ ticker, companyName });
-        const response = await fetch(`/api/stock-headlines?${params}`);
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to load headlines');
-        }
-
-        if (!data.headlines || data.headlines.length === 0) {
-          headlinesContainer.innerHTML = `
-            <h2 class="section-title">Headlines</h2>
-            <div style="color: #5f6368; font-family: Arial, sans-serif; font-size: 13px; padding: 8px 0;">No recent headlines found.</div>
-          `;
-          return;
-        }
-
-        let html = '<h2 class="section-title">Headlines</h2><ul class="headlines-list">';
-        data.headlines.forEach(item => {
-          const titleHtml = item.url
-            ? `<a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a>`
-            : escapeHtml(item.title);
-
-          let timeAgo = '';
-          if (item.timestamp) {
-            const diff = Date.now() - item.timestamp;
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            if (hours < 1) {
-              timeAgo = 'Just now';
-            } else if (hours < 24) {
-              timeAgo = hours + 'h ago';
-            } else {
-              const days = Math.floor(hours / 24);
-              timeAgo = days + 'd ago';
-            }
-          }
-
-          html += `
-            <li class="headline-item">
-              <span class="headline-bullet">&bull;</span>${titleHtml}
-              ${item.source || timeAgo ? `<div class="headline-source">${[item.source, timeAgo].filter(Boolean).join(' &middot; ')}</div>` : ''}
-            </li>
-          `;
-        });
-        html += '</ul>';
-        headlinesContainer.innerHTML = html;
-      } catch (error) {
-        console.error('Error fetching headlines:', error);
-        headlinesContainer.innerHTML = `
-          <h2 class="section-title">Headlines</h2>
-          <div style="color: #c5221f; font-family: Arial, sans-serif; font-size: 13px; padding: 8px 0;">Failed to load headlines.</div>
         `;
       }
     }
