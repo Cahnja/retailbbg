@@ -1945,12 +1945,20 @@
         renderDrivers(data.drivers);
         lastUpdated.textContent = 'Last updated: ' + formatTime(data.asOf);
 
-        // Pre-load first 4 drivers in background
+        // Pre-load first 4 driver details in background (staggered to avoid overwhelming API)
         if (data.drivers && data.drivers.length > 0) {
-          data.drivers.slice(0, 4).forEach(driver => {
-            const bulletText = typeof driver === 'object' && driver.text ? driver.text : driver;
-            fetch(`/api/market-driver-details?bullet=${encodeURIComponent(bulletText)}`).catch(() => {});
-          });
+          const preloadDrivers = data.drivers.slice(0, 4);
+          (async () => {
+            for (let i = 0; i < preloadDrivers.length; i++) {
+              const driver = preloadDrivers[i];
+              const bulletText = typeof driver === 'object' && driver.text ? driver.text : driver;
+              fetch(`/api/market-driver-details?bullet=${encodeURIComponent(bulletText)}`).catch(() => {});
+              // Stagger requests by 2s to avoid overwhelming OpenAI API
+              if (i < preloadDrivers.length - 1) {
+                await new Promise(r => setTimeout(r, 2000));
+              }
+            }
+          })();
         }
 
         if (data.cached) {
