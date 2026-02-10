@@ -5306,7 +5306,7 @@ function saveStockExplanationToCache(ticker, data) {
 
 // GET /api/stock-explanation-details
 app.get('/api/stock-explanation-details', async (req, res) => {
-  const { ticker, companyName, changePercent } = req.query;
+  const { ticker, companyName, changePercent, catalyst } = req.query;
 
   if (!ticker || !companyName || !changePercent) {
     return res.status(400).json({ error: 'Missing required parameters: ticker, companyName, changePercent' });
@@ -5356,8 +5356,9 @@ app.get('/api/stock-explanation-details', async (req, res) => {
     }
 
     // Web search to find why the stock moved
+    const catalystLine = catalyst ? `\nInitial report: "${catalyst}"\n` : '';
     const searchPrompt = `Search financial news sites for all recent news about ${companyName} (${ticker}). The stock is ${direction} ${absChange}% ${dayReference}.
-
+${catalystLine}
 Search for "${ticker} stock", "${companyName} news".
 
 List every relevant key fact you find.`;

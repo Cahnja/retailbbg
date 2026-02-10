@@ -1112,6 +1112,7 @@
             companyName: stock.companyName,
             changePercent: stock.changePercent
           });
+          if (stock.catalyst) params.set('catalyst', stock.catalyst);
           fetch(`/api/stock-explanation-details?${params}`).catch(() => {});
         });
       } catch (error) {
@@ -1205,6 +1206,14 @@
       const change = parseFloat(changePercent);
       const isPositive = change >= 0;
 
+      // Look up the stock from currentData to get the catalyst
+      let catalyst = '';
+      if (currentData) {
+        const allStocks = [...(currentData.gainers || []), ...(currentData.losers || [])];
+        const match = allStocks.find(s => s.ticker === ticker);
+        if (match && match.catalyst) catalyst = match.catalyst;
+      }
+
       // Set the header info
       panelTitle.textContent = companyName;
       panelTicker.textContent = ticker;
@@ -1221,7 +1230,7 @@
       document.body.style.overflow = 'hidden';
 
       // Fetch the detailed analysis
-      fetchStockExplanation(ticker, companyName, changePercent);
+      fetchStockExplanation(ticker, companyName, changePercent, catalyst);
     }
 
     function closePanel() {
@@ -1242,7 +1251,7 @@
       }
     });
 
-    async function fetchStockExplanation(ticker, companyName, changePercent) {
+    async function fetchStockExplanation(ticker, companyName, changePercent, catalyst) {
       try {
         panelContent.innerHTML = `
           <div class="panel-status">
@@ -1252,6 +1261,7 @@
         `;
 
         const params = new URLSearchParams({ ticker, companyName, changePercent });
+        if (catalyst) params.set('catalyst', catalyst);
         const response = await fetch(`/api/stock-explanation-details?${params}`);
         const data = await response.json();
 

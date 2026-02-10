@@ -1,0 +1,7 @@
+Search financial news sites for all recent news about {companyName} ({ticker}). The stock is {direction} {absChange}% {dayReference}.
+
+Initial report: "{catalyst}"
+
+Search for "{ticker} stock", "{companyName} news".
+
+List every relevant key fact you find.
