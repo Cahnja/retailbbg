@@ -5,7 +5,9 @@ Note: This market data is from {timeContext}.
 RESEARCH:
 {newsContext}
 
-Write 4 short paragraphs explaining why the stock moved. Be extremely concise and direct — every sentence must deliver new information.
+Write 4 detailed paragraphs explaining why the stock moved. Be extremely concise and direct — every sentence must deliver new information.
+
+If no specific catalyst for today's move can be identified from the research, instead provide a general news update covering the most important recent developments for the company over the past several months (earnings, acquisitions, product launches, analyst views, competitive landscape changes).
 
 STYLE RULES:
 - Do NOT repeat the stock price change or percentage move — jump straight into the WHY.
