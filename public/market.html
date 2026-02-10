@@ -1000,43 +1000,6 @@
       opacity: 1;
     }
 
-    /* Key Stats Grid */
-    .key-stats-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 0;
-      border: 1px solid #e8eaed;
-      border-radius: 8px;
-      overflow: hidden;
-      margin-bottom: 24px;
-    }
-
-    .stat-item {
-      padding: 12px 14px;
-      border-bottom: 1px solid #e8eaed;
-      border-right: 1px solid #e8eaed;
-    }
-
-    .stat-item:nth-child(3n) {
-      border-right: none;
-    }
-
-    .stat-item:nth-last-child(-n+3) {
-      border-bottom: none;
-    }
-
-    .stat-label {
-      font-size: 12px;
-      color: #5f6368;
-      margin-bottom: 2px;
-    }
-
-    .stat-value {
-      font-size: 14px;
-      font-weight: 600;
-      color: #202124;
-    }
-
     /* Fear & Greed Card */
     .fear-greed-card {
       background: #ffffff;
@@ -2089,7 +2052,6 @@
         <div class="chart-container" id="chart-container">
           <div class="chart-loading"><div class="spinner"></div>Loading chart...</div>
         </div>
-        <div id="chart-stats-container"></div>
       `;
 
       chartPanelOverlay.classList.add('active');
@@ -2134,9 +2096,6 @@
 
         // Render chart
         renderIndexSVGChart(data.chart, data.quote, range);
-
-        // Render stats
-        renderIndexKeyStats(data.quote);
       } catch (err) {
         console.error('Chart load error:', err);
         chartContainer.innerHTML = `<div class="chart-loading" style="color:#c5221f;">Failed to load chart data</div>`;
@@ -2331,51 +2290,6 @@
         dot.setAttribute('visibility', 'hidden');
         tooltip.classList.remove('visible');
       });
-    }
-
-    function renderIndexKeyStats(quote) {
-      const container = document.getElementById('chart-stats-container');
-      if (!container) return;
-
-      const stats = [];
-
-      // Common stats for all indices
-      stats.push({ label: 'Open', value: quote.open != null ? formatChartPrice(quote.open) : '--' });
-      stats.push({ label: 'High', value: quote.dayHigh != null ? formatChartPrice(quote.dayHigh) : '--' });
-      stats.push({ label: 'Low', value: quote.dayLow != null ? formatChartPrice(quote.dayLow) : '--' });
-
-      // Market cap (only meaningful for BTC)
-      if (quote.marketCap != null) {
-        stats.push({ label: 'Mkt Cap', value: formatLargeNumber(quote.marketCap) });
-      }
-
-      // Previous close
-      stats.push({ label: 'Prev Close', value: quote.previousClose != null ? formatChartPrice(quote.previousClose) : '--' });
-
-      // 52-week range
-      stats.push({ label: '52-wk High', value: quote.fiftyTwoWeekHigh != null ? formatChartPrice(quote.fiftyTwoWeekHigh) : '--' });
-      stats.push({ label: '52-wk Low', value: quote.fiftyTwoWeekLow != null ? formatChartPrice(quote.fiftyTwoWeekLow) : '--' });
-
-      // P/E ratio (if available)
-      if (quote.peRatio != null) {
-        stats.push({ label: 'P/E Ratio', value: quote.peRatio.toFixed(2) });
-      }
-
-      // Ensure we have rows of 3
-      while (stats.length % 3 !== 0) {
-        stats.push({ label: '', value: '' });
-      }
-
-      container.innerHTML = `
-        <div class="key-stats-grid">
-          ${stats.map(s => `
-            <div class="stat-item">
-              <div class="stat-label">${s.label}</div>
-              <div class="stat-value">${s.value}</div>
-            </div>
-          `).join('')}
-        </div>
-      `;
     }
 
     function closeChartPanel() {
