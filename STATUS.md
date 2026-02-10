@@ -218,7 +218,47 @@ ssh root@138.197.118.128 "cd /root/retailbbg && npm install && pm2 restart retai
 ssh root@138.197.118.128 "pm2 logs retailbbg --lines 50"
 ```
 
-## Recent Changes (Feb 9, 2026)
+## Recent Changes (Feb 10, 2026)
+
+### Stock Chart in Explanation Panel
+- [x] **Interactive SVG Chart**: Added stock price chart to the Top Movers explanation side panel
+- [x] **Timeframe Tabs**: Chart supports 1D, 5D, 1M, 3M, 6M, YTD, 1Y timeframe selectors
+- [x] **Stock Price Display**: Large stock price and colored % change shown above the chart in the explanation panel
+
+### Explanation Panel Content Changes
+- [x] **Headlines Added Then Removed**: Added headlines section to explanation panel, then removed per user preference
+- [x] **Removed Headlines from Stock Explanation Panel**: Headlines section removed from Top Movers side panel per user preference, keeping chart + analysis only
+- [x] **Detailed Paragraphs**: Changed stock explanation prompt from "4 short paragraphs" to "4 detailed paragraphs"
+- [x] **Catalyst Fallback**: Added fallback handling for when no specific catalyst is found for a stock move
+
+### UI Restyling
+- [x] **Google Finance-Style Price Display**: Restyled the price display above the chart to match Google Finance: large price on its own line, colored dollar+percentage change with "today" label, gray date/time on third line
+- [x] **Cleaned Up Blue Header**: Removed percentage badge and time from the blue panel header since that info now lives in the Google Finance-style price display
+
+### Prompt Improvements
+- [x] **No Institutional Investor Movements**: Added prompt rule to exclude institutional investor/fund stake changes and portfolio reallocations from stock explanations
+- [x] **Removed Analyst Reactions from Driver Search**: Cleaned up market driver search prompt to exclude analyst reactions/market impacts
+- [x] **Don't Repeat Price Movement**: Market driver and stock detail analyses no longer repeat the stock price movement
+- [x] **Switched to GPT-4o**: Market driver and stock detail analyses now use GPT-4o (upgraded from previous model)
+
+### Pre-loading & Cache Fixes
+- [x] **Staggered Pre-load Requests**: Added 2-second delays between pre-load requests to avoid overwhelming OpenAI API
+- [x] **Cache Cleared & Pre-loaded**: Cleared all stock explanation caches and pre-loaded top 3 gainers/losers (DDOG, MAS, MAR, XYL, MCO, SPGI)
+
+### Portfolio Panel Update (In Progress)
+- [ ] **Portfolio Panel Format Update**: Updating watchlist.html stock explanation panel to match the Top Movers format
+
+### Exa Integration (In Progress)
+- [x] **Exa Search API**: Implementing Exa search as alternative to OpenAI web_search for stock explanations (cheaper, faster, more controllable)
+- [ ] **Exa Search API Evaluation**: Testing Exa vs OpenAI web_search quality across multiple tickers (DDOG, XYL, MSFT, MCO)
+
+### Fear & Greed Index
+- [x] **Fear & Greed Investigation**: Confirmed the changing number is expected behavior (CNN's live real-time index + 15-min auto-refresh + 1-hour server cache)
+
+### Text Processing
+- [x] **Corporate Suffix Sentence Splitting**: Added N.V., S.A., S.p.A and other corporate suffixes to sentence splitter to prevent incorrect splits
+
+## Previous Changes (Feb 9, 2026)
 
 ### SSE Streaming for Detail Endpoints
 - [x] **Server-Sent Events**: Both `/api/market-driver-details` and `/api/stock-explanation-details` support `?stream=true` query parameter

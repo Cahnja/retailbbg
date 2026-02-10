@@ -2190,13 +2190,9 @@
         });
       });
 
-      // Determine asset type for analysis API
-      const isBitcoin = ticker === 'BTC-USD';
-      const assetType = isBitcoin ? 'bitcoin' : 'market';
-
       // Fetch chart data and analysis in parallel
       loadIndexChartData(ticker, '1d');
-      fetchAssetExplanation(assetType, changePercent);
+      fetchAssetExplanation(ticker, name, changePercent);
     }
 
     async function loadIndexChartData(ticker, range) {
@@ -2435,16 +2431,20 @@
       `;
     }
 
-    async function fetchAssetExplanation(assetType, changePercent) {
+    async function fetchAssetExplanation(ticker, companyName, changePercent) {
       const analysisContainer = document.getElementById('asset-analysis-container');
       if (!analysisContainer) return;
 
-      const label = assetType === 'bitcoin' ? 'Bitcoin Analysis' : 'Market Analysis';
+      const isBitcoin = ticker === 'BTC-USD';
+      const label = isBitcoin ? 'Bitcoin Analysis' : 'Market Analysis';
 
       try {
-        const params = new URLSearchParams({ type: assetType });
-        if (changePercent != null) params.set('changePercent', changePercent);
-        const response = await fetch(`/api/asset-explanation?${params}`);
+        const params = new URLSearchParams({
+          ticker: ticker,
+          companyName: companyName,
+          changePercent: changePercent != null ? changePercent : '0'
+        });
+        const response = await fetch(`/api/stock-explanation-details?${params}`);
         const data = await response.json();
 
         if (!response.ok) {
