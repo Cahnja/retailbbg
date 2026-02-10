@@ -2,8 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Market Update - RetailBBG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Market Update - Initiate Coverage</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Initiate Coverage">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -15,48 +21,73 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Navigation Banner - V8: Compact with pill-style active state */
-    .nav-banner {
+    /* Navigation Banner - V4: Compact Data-Focused */
+    .nav-strip {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      background: #00205b;
-      height: 40px;
+      height: 44px;
+      background: #ffffff;
+      border-bottom: 1px solid #eaecef;
       display: flex;
       align-items: center;
-      justify-content: center;
+      padding: 0 20px;
       z-index: 1000;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      gap: 0;
     }
 
-    .nav-items {
+    .brand {
       display: flex;
-      gap: 6px;
-      padding: 0 8px;
-    }
-
-    .nav-item {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      color: rgba(255, 255, 255, 0.7);
+      align-items: center;
+      gap: 8px;
       text-decoration: none;
-      font-size: 12px;
+      color: #0b0e11;
+      margin-right: 24px;
+      flex-shrink: 0;
+    }
+
+    .brand-ic {
+      font-size: 16px;
+      font-weight: 800;
+      color: #1e3a5f;
+      letter-spacing: -1px;
+    }
+
+    .brand-sep {
+      width: 1px;
+      height: 18px;
+      background: #eaecef;
+    }
+
+    .nav-tabs {
+      display: flex;
+      align-items: stretch;
+      height: 44px;
+      gap: 0;
+      flex-shrink: 0;
+    }
+
+    .nav-tab {
+      text-decoration: none;
+      font-size: 13px;
       font-weight: 500;
-      letter-spacing: 0.3px;
-      padding: 6px 16px;
-      border-radius: 16px;
-      position: relative;
-      transition: all 0.2s ease;
+      color: #848e9c;
+      padding: 0 14px;
+      display: flex;
+      align-items: center;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s ease;
+      white-space: nowrap;
     }
 
-    .nav-item:hover {
-      color: white;
-      background: rgba(255, 255, 255, 0.1);
+    .nav-tab:hover {
+      color: #474d57;
     }
 
-    .nav-item.active {
-      color: #00205b;
-      background: white;
+    .nav-tab.active {
+      color: #1e3a5f;
+      border-bottom-color: #1e3a5f;
       font-weight: 600;
     }
 
@@ -1292,16 +1323,104 @@
         padding: 20px;
       }
     }
+
+    /* ===== Bottom Tab Bar (Mobile) ===== */
+    .bottom-tab-bar {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #00205b;
+      z-index: 1000;
+      padding-bottom: env(safe-area-inset-bottom);
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .bottom-tab-bar .tab-items {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 56px;
+    }
+
+    .bottom-tab-bar .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 10px;
+      font-weight: 500;
+      gap: 3px;
+      padding: 6px 12px;
+      min-width: 64px;
+      -webkit-tap-highlight-color: transparent;
+      transition: color 0.2s;
+    }
+
+    .bottom-tab-bar .tab-item.active {
+      color: white;
+    }
+
+    .bottom-tab-bar .tab-item svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .bottom-tab-bar .tab-label {
+      line-height: 1;
+    }
+
+    @media (max-width: 768px) {
+      .nav-strip {
+        display: none;
+      }
+
+      .bottom-tab-bar {
+        display: block;
+      }
+
+      body {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: calc(56px + env(safe-area-inset-bottom));
+      }
+
+      .main-content {
+        padding-top: calc(24px + env(safe-area-inset-top));
+      }
+
+      .side-panel {
+        width: 100%;
+        height: 100%;
+      }
+
+      .chart-side-panel {
+        width: 100%;
+        height: 100%;
+      }
+
+      .page-title {
+        font-size: 22px;
+      }
+
+      .page-subtitle {
+        font-size: 13px;
+      }
+    }
   </style>
 </head>
 <body>
-  <nav class="nav-banner">
-    <div class="nav-items">
-      <a href="/market.html" class="nav-item active">Market Update</a>
-      <a href="/top-movers" class="nav-item">Top Movers</a>
-      <a href="/portfolio" class="nav-item">Portfolio</a>
-      <a href="/ideageneration" class="nav-item">Idea Generation</a>
-      <a href="/index.html" class="nav-item">Initiation</a>
+  <nav class="nav-strip">
+    <a href="/market" class="brand">
+      <span class="brand-ic">IC</span>
+    </a>
+    <div class="brand-sep"></div>
+    <div class="nav-tabs">
+      <a href="/market" class="nav-tab active">Market Update</a>
+      <a href="/top-movers" class="nav-tab">Top Movers</a>
+      <a href="/portfolio" class="nav-tab">Portfolio</a>
     </div>
   </nav>
 
@@ -2713,6 +2832,30 @@
         tooltip.classList.remove('visible');
       });
     }
+  </script>
+
+  <!-- Bottom Tab Bar (Mobile) -->
+  <nav class="bottom-tab-bar">
+    <div class="tab-items">
+      <a href="/market" class="tab-item active">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+        <span class="tab-label">Market</span>
+      </a>
+      <a href="/top-movers" class="tab-item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+        <span class="tab-label">Top Movers</span>
+      </a>
+      <a href="/portfolio" class="tab-item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+        <span class="tab-label">Portfolio</span>
+      </a>
+    </div>
+  </nav>
+
+  <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
+  }
   </script>
 </body>
 </html>
