@@ -5257,6 +5257,10 @@ STYLE RULES:
 const STOCK_EXPLANATION_CACHE_DIR = path.join(__dirname, 'cache', 'stock-explanations');
 const STOCK_EXPLANATION_CACHE_MAX_AGE_MINUTES = 720;
 
+// In-flight request deduplication for stock explanations
+// Prevents duplicate OpenAI calls when pre-load and user click race for the same ticker
+const stockExplanationInFlight = new Map();
+
 if (!fs.existsSync(STOCK_EXPLANATION_CACHE_DIR)) {
   fs.mkdirSync(STOCK_EXPLANATION_CACHE_DIR, { recursive: true });
 }
@@ -5312,14 +5316,47 @@ app.get('/api/stock-explanation-details', async (req, res) => {
     return res.status(400).json({ error: 'Missing required parameters: ticker, companyName, changePercent' });
   }
 
+  const tickerUpper = ticker.toUpperCase();
+
   // Check cache first
-  const cached = getCachedStockExplanation(ticker);
+  const cached = getCachedStockExplanation(tickerUpper);
   if (cached) {
     return res.json({ ...cached, cached: true });
   }
 
-  try {
-    console.log(`Generating detailed stock explanation for ${ticker} (${changePercent})`);
+  // Check if this ticker is already being generated (in-flight deduplication)
+  // If so, wait for the existing request instead of making duplicate OpenAI calls
+  if (stockExplanationInFlight.has(tickerUpper)) {
+    console.log(`[Stock Details] ${tickerUpper} already in-flight, waiting for existing request...`);
+    try {
+      const result = await stockExplanationInFlight.get(tickerUpper);
+      return res.json({ ...result, cached: true });
+    } catch (error) {
+      // The in-flight request failed; fall through and check cache again
+      // (another concurrent request may have started and cached it)
+      const cachedRetry = getCachedStockExplanation(tickerUpper);
+      if (cachedRetry) {
+        return res.json({ ...cachedRetry, cached: true });
+      }
+      // Re-throw to be caught by the outer handler
+      console.error('Stock explanation API error (in-flight wait):', error.message || error);
+      if (error.code === 'insufficient_quota' || error.status === 429) {
+        return res.status(503).json({
+          error: 'API quota exceeded',
+          message: 'OpenAI API quota has been exceeded. Please try again later or contact support.',
+          isQuotaError: true
+        });
+      }
+      return res.status(500).json({
+        error: 'Failed to generate stock explanation',
+        message: error.message || 'An unexpected error occurred'
+      });
+    }
+  }
+
+  // Create and store the in-flight promise
+  const generatePromise = (async () => {
+    console.log(`Generating detailed stock explanation for ${tickerUpper} (${changePercent})`);
 
     const direction = parseFloat(changePercent) >= 0 ? 'up' : 'down';
     const absChange = Math.abs(parseFloat(changePercent)).toFixed(1);
@@ -5357,13 +5394,13 @@ app.get('/api/stock-explanation-details', async (req, res) => {
 
     // Web search to find why the stock moved
     const catalystLine = catalyst ? `\nInitial report: "${catalyst}"\n` : '';
-    const searchPrompt = `Search financial news sites for all recent news about ${companyName} (${ticker}). The stock is ${direction} ${absChange}% ${dayReference}.
+    const searchPrompt = `Search financial news sites for all recent news about ${companyName} (${tickerUpper}). The stock is ${direction} ${absChange}% ${dayReference}.
 ${catalystLine}
-Search for "${ticker} stock", "${companyName} news".
+Search for "${tickerUpper} stock", "${companyName} news".
 
 List every relevant key fact you find.`;
 
-    console.log(`[Stock Details] Web searching for ${ticker}... (time context: ${timeContext})`);
+    console.log(`[Stock Details] Web searching for ${tickerUpper}... (time context: ${timeContext})`);
     const searchResponse = await client.responses.create({
       model: 'gpt-4o',
       tools: [{ type: 'web_search' }],
@@ -5374,10 +5411,10 @@ List every relevant key fact you find.`;
     const newsContext = searchResponse.output_text;
 
     // Debug: save web search result to file
-    try { fs.writeFileSync(path.join(__dirname, 'cache', `web-search-${ticker}.txt`), newsContext); } catch(e) {}
+    try { fs.writeFileSync(path.join(__dirname, 'cache', `web-search-${tickerUpper}.txt`), newsContext); } catch(e) {}
 
     // Generate 4-paragraph analysis
-    const analysisPrompt = `You are a senior markets analyst. A user wants to understand why ${companyName} (${ticker}) stock moved ${direction} ${absChange}% ${dayReference}.
+    const analysisPrompt = `You are a senior markets analyst. A user wants to understand why ${companyName} (${tickerUpper}) stock moved ${direction} ${absChange}% ${dayReference}.
 
 Note: This market data is from ${timeContext}.
 
@@ -5407,7 +5444,7 @@ STYLE RULES:
     const analysis = response.choices[0].message.content.trim();
 
     const result = {
-      ticker,
+      ticker: tickerUpper,
       companyName,
       changePercent,
       analysis,
@@ -5415,8 +5452,16 @@ STYLE RULES:
     };
 
     // Cache the result
-    saveStockExplanationToCache(ticker, result);
+    saveStockExplanationToCache(tickerUpper, result);
 
+    return result;
+  })();
+
+  // Store the promise so concurrent requests can await it
+  stockExplanationInFlight.set(tickerUpper, generatePromise);
+
+  try {
+    const result = await generatePromise;
     res.json({ ...result, cached: false });
   } catch (error) {
     console.error('Stock explanation API error:', error.message || error);
@@ -5434,6 +5479,9 @@ STYLE RULES:
         message: error.message || 'An unexpected error occurred'
       });
     }
+  } finally {
+    // Clean up in-flight tracking
+    stockExplanationInFlight.delete(tickerUpper);
   }
 });
 
@@ -7213,6 +7261,90 @@ app.get('/api/stock-chart', async (req, res) => {
   } catch (error) {
     console.error('Error fetching stock chart:', error.message);
     res.status(500).json({ error: 'Failed to fetch stock chart data' });
+  }
+});
+
+// GET /api/stock-headlines - Get combined Finnhub + Yahoo headlines for a stock
+app.get('/api/stock-headlines', async (req, res) => {
+  try {
+    const ticker = (req.query.ticker || '').trim().toUpperCase();
+    const companyName = (req.query.companyName || '').trim();
+
+    if (!ticker) {
+      return res.status(400).json({ error: 'Ticker parameter required' });
+    }
+
+    const name = companyName || COMPANY_NAMES[ticker] || ticker;
+
+    const seen = new Set();
+    const headlines = [];
+
+    // Fetch Finnhub raw news (with URLs) and Yahoo raw news in parallel
+    const [finnhubRes, yahooRes] = await Promise.allSettled([
+      (async () => {
+        if (!FINNHUB_API_KEY) return [];
+        const to = new Date();
+        const from = new Date();
+        from.setDate(from.getDate() - 3);
+        const fromStr = from.toISOString().split('T')[0];
+        const toStr = to.toISOString().split('T')[0];
+        const url = `https://finnhub.io/api/v1/company-news?symbol=${ticker}&from=${fromStr}&to=${toStr}&token=${FINNHUB_API_KEY}`;
+        const response = await fetch(url);
+        if (!response.ok) return [];
+        const news = await response.json();
+        return (news || []).filter(item =>
+          !isGenericHeadline(item.headline) &&
+          isRelevantHeadline(item.headline, ticker, name)
+        ).slice(0, 10);
+      })(),
+      (async () => {
+        const result = await yahooFinance.search(ticker, { newsCount: 10, quotesCount: 0 });
+        if (result && result.news && result.news.length > 0) {
+          return result.news.filter(item => item.title && !isGenericHeadline(item.title)).slice(0, 10);
+        }
+        return [];
+      })()
+    ]);
+
+    // Process Finnhub results
+    if (finnhubRes.status === 'fulfilled') {
+      finnhubRes.value.forEach(item => {
+        const key = item.headline.trim().toLowerCase();
+        if (!seen.has(key)) {
+          seen.add(key);
+          headlines.push({
+            title: item.headline.trim(),
+            url: item.url || null,
+            source: item.source || 'Finnhub',
+            timestamp: item.datetime ? item.datetime * 1000 : null
+          });
+        }
+      });
+    }
+
+    // Process Yahoo results
+    if (yahooRes.status === 'fulfilled') {
+      yahooRes.value.forEach(item => {
+        const key = item.title.trim().toLowerCase();
+        if (!seen.has(key)) {
+          seen.add(key);
+          headlines.push({
+            title: item.title.trim(),
+            url: item.link || null,
+            source: 'Yahoo Finance',
+            timestamp: item.providerPublishTime ? new Date(item.providerPublishTime).getTime() : null
+          });
+        }
+      });
+    }
+
+    // Sort by timestamp (most recent first)
+    headlines.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+    res.json({ headlines: headlines.slice(0, 15) });
+  } catch (error) {
+    console.error('Error fetching stock headlines:', error.message);
+    res.status(500).json({ error: 'Failed to fetch headlines' });
   }
 });
 
