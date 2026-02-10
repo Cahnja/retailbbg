@@ -5212,33 +5212,20 @@ function saveStockExplanationToCache(ticker, data) {
 
 // GET /api/stock-explanation-details
 app.get('/api/stock-explanation-details', async (req, res) => {
-  const { ticker, companyName, changePercent, stream } = req.query;
-  const isStream = stream === 'true';
+  const { ticker, companyName, changePercent } = req.query;
 
   if (!ticker || !companyName || !changePercent) {
-    if (isStream) {
-      initSSE(res);
-      sendSSE(res, { type: 'error', message: 'Missing required parameters: ticker, companyName, changePercent' });
-      return res.end();
-    }
     return res.status(400).json({ error: 'Missing required parameters: ticker, companyName, changePercent' });
   }
 
   // Check cache first
   const cached = getCachedStockExplanation(ticker);
   if (cached) {
-    if (isStream) {
-      initSSE(res);
-      sendSSE(res, { type: 'done', analysis: cached.analysis, cached: true });
-      return res.end();
-    }
     return res.json({ ...cached, cached: true });
   }
 
   try {
     console.log(`Generating detailed stock explanation for ${ticker} (${changePercent})`);
-
-    if (isStream) initSSE(res);
 
     const direction = parseFloat(changePercent) >= 0 ? 'up' : 'down';
     const absChange = Math.abs(parseFloat(changePercent)).toFixed(1);
@@ -5277,8 +5264,6 @@ Search for "${ticker} stock", "${companyName} news".
 
 List every relevant key fact you find.`;
 
-    if (isStream) sendSSE(res, { type: 'status', message: 'Searching for latest news...' });
-
     console.log(`[Stock Details] Web searching for ${ticker}... (time context: ${timeContext})`);
     const searchResponse = await client.responses.create({
       model: 'gpt-4o',
@@ -5311,77 +5296,28 @@ STYLE RULES:
 - Wrap the single most important sentence in each paragraph with **bold** markdown.
 - Just four tight paragraphs, no headers.`;
 
-    if (isStream) {
-      sendSSE(res, { type: 'status', message: 'Generating analysis...' });
+    const response = await client.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [{ role: 'user', content: analysisPrompt }]
+    });
+    logTokenUsage('stock-details', response.usage);
 
-      const streamResponse = await client.chat.completions.create({
-        model: 'gpt-4o',
-        stream: true,
-        messages: [{ role: 'user', content: analysisPrompt }]
-      }, { timeout: 45000 });
+    const analysis = response.choices[0].message.content.trim();
 
-      let fullText = '';
-      let clientDisconnected = false;
-      for await (const chunk of streamResponse) {
-        const content = chunk.choices[0]?.delta?.content;
-        if (content) {
-          fullText += content;
-          try { sendSSE(res, { type: 'chunk', text: content }); } catch (e) { clientDisconnected = true; break; }
-        }
-      }
+    const result = {
+      ticker,
+      companyName,
+      changePercent,
+      analysis,
+      generatedAt: new Date().toISOString()
+    };
 
-      const analysis = fullText.trim();
-      const result = {
-        ticker,
-        companyName,
-        changePercent,
-        analysis,
-        generatedAt: new Date().toISOString()
-      };
+    // Cache the result
+    saveStockExplanationToCache(ticker, result);
 
-      // Cache the result even if client disconnected
-      if (analysis) saveStockExplanationToCache(ticker, result);
-
-      if (!clientDisconnected) {
-        try {
-          sendSSE(res, { type: 'done', analysis, cached: false });
-          res.end();
-        } catch (e) { /* client disconnected */ }
-      }
-    } else {
-      const response = await client.chat.completions.create({
-        model: 'gpt-4o',
-        messages: [{ role: 'user', content: analysisPrompt }]
-      });
-      logTokenUsage('stock-details', response.usage);
-
-      const analysis = response.choices[0].message.content.trim();
-
-      const result = {
-        ticker,
-        companyName,
-        changePercent,
-        analysis,
-        generatedAt: new Date().toISOString()
-      };
-
-      // Cache the result
-      saveStockExplanationToCache(ticker, result);
-
-      res.json({ ...result, cached: false });
-    }
+    res.json({ ...result, cached: false });
   } catch (error) {
     console.error('Stock explanation API error:', error.message || error);
-
-    if (isStream) {
-      try {
-        if (!res.headersSent) initSSE(res);
-        const isQuota = error.code === 'insufficient_quota' || error.status === 429;
-        sendSSE(res, { type: 'error', message: isQuota ? 'API quota exceeded' : 'Failed to generate analysis', isQuotaError: isQuota });
-      } catch (e) { /* client disconnected */ }
-      try { res.end(); } catch (e) { /* ignore */ }
-      return;
-    }
 
     // Check for specific error types
     if (error.code === 'insufficient_quota' || error.status === 429) {

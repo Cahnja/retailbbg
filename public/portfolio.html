@@ -1244,49 +1244,22 @@
 
     async function fetchStockExplanation(ticker, companyName, changePercent) {
       try {
-        const params = new URLSearchParams({
-          ticker,
-          companyName,
-          changePercent,
-          stream: 'true'
-        });
+        panelContent.innerHTML = `
+          <div class="panel-status">
+            <div class="spinner"></div>
+            <span>Generating analysis...</span>
+          </div>
+        `;
+
+        const params = new URLSearchParams({ ticker, companyName, changePercent });
         const response = await fetch(`/api/stock-explanation-details?${params}`);
+        const data = await response.json();
 
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-        let fullText = '';
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop(); // keep incomplete line in buffer
-
-          for (const line of lines) {
-            if (!line.startsWith('data: ')) continue;
-            let event;
-            try { event = JSON.parse(line.slice(6)); } catch { continue; }
-
-            if (event.type === 'status') {
-              panelContent.innerHTML = `
-                <div class="panel-status">
-                  <div class="spinner"></div>
-                  <span>${event.message}</span>
-                </div>
-              `;
-            } else if (event.type === 'chunk') {
-              fullText += event.text;
-              panelContent.innerHTML = renderAnalysis(fullText);
-            } else if (event.type === 'done') {
-              panelContent.innerHTML = renderAnalysis(event.analysis);
-            } else if (event.type === 'error') {
-              throw new Error(event.isQuotaError ? 'quota' : event.message);
-            }
-          }
+        if (!response.ok) {
+          throw new Error(data.isQuotaError ? 'quota' : (data.error || 'Failed to load analysis'));
         }
+
+        panelContent.innerHTML = renderAnalysis(data.analysis);
       } catch (error) {
         console.error('Error fetching stock explanation:', error);
         let errorMsg = 'Unable to load detailed analysis. Please try again.';
