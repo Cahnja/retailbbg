@@ -5,28 +5,61 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Initiation of Coverage Report Generator</title>
   <style>
+    /* ===== Reset & Base ===== */
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Times New Roman', Georgia, serif;
-      background: #fafafa;
-      color: #1a1a1a;
-      line-height: 1.7;
+
+    :root {
+      /* Brand */
+      --brand-dark: #1e3a5f;
+      --brand-mid: #2d5a87;
+      --brand-light: #e8f0f7;
+
+      /* Positive / Negative */
+      --positive: #137333;
+      --positive-bg: #e6f4ea;
+      --negative: #c5221f;
+      --negative-bg: #fce8e6;
+
+      /* Neutrals */
+      --text-primary: #1a1d21;
+      --text-secondary: #5f6368;
+      --text-tertiary: #80868b;
+      --text-faint: #9aa0a6;
+
+      --bg-page: #f5f6f8;
+      --bg-card: #ffffff;
+      --bg-subtle: #f8f9fa;
+
+      --border: #e2e5e9;
+
+      /* Sizing */
+      --radius-card: 10px;
+      --radius-sm: 6px;
+      --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08);
+      --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.12);
     }
 
-    /* Navigation Banner - V4: Compact Data-Focused */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== Navigation Banner ===== */
     .nav-strip {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      height: 44px;
-      background: #ffffff;
-      border-bottom: 1px solid #eaecef;
+      height: 48px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
-      padding: 0 20px;
+      padding: 0 24px;
       z-index: 1000;
-      gap: 0;
     }
 
     .brand {
@@ -34,7 +67,7 @@
       align-items: center;
       gap: 8px;
       text-decoration: none;
-      color: #0b0e11;
+      color: var(--text-primary);
       margin-right: 24px;
       flex-shrink: 0;
     }
@@ -42,30 +75,29 @@
     .brand-ic {
       font-size: 16px;
       font-weight: 800;
-      color: #1e3a5f;
+      color: var(--brand-dark);
       letter-spacing: -1px;
     }
 
     .brand-sep {
       width: 1px;
-      height: 18px;
-      background: #eaecef;
+      height: 20px;
+      background: var(--border);
     }
 
     .nav-tabs {
       display: flex;
       align-items: stretch;
-      height: 44px;
+      height: 48px;
       gap: 0;
-      flex-shrink: 0;
     }
 
     .nav-tab {
       text-decoration: none;
       font-size: 13px;
       font-weight: 500;
-      color: #848e9c;
-      padding: 0 14px;
+      color: var(--text-tertiary);
+      padding: 0 16px;
       display: flex;
       align-items: center;
       border-bottom: 2px solid transparent;
@@ -74,12 +106,12 @@
     }
 
     .nav-tab:hover {
-      color: #474d57;
+      color: var(--text-secondary);
     }
 
     .nav-tab.active {
-      color: #1e3a5f;
-      border-bottom-color: #1e3a5f;
+      color: var(--brand-dark);
+      border-bottom-color: var(--brand-dark);
       font-weight: 600;
     }
 
@@ -105,7 +137,7 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: #00205b;
+      background: var(--brand-dark);
       z-index: 1000;
       padding-bottom: env(safe-area-inset-bottom);
       box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
@@ -163,7 +195,7 @@
       }
     }
 
-    /* Landing Page */
+    /* ===== Landing Page ===== */
     .landing {
       min-height: 100vh;
       display: flex;
@@ -172,17 +204,16 @@
       align-items: center;
       padding: 20px;
       padding-top: 76px;
-      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+      background: linear-gradient(135deg, var(--bg-page) 0%, var(--border) 100%);
     }
     .landing-content {
       text-align: center;
       margin-top: -80px;
     }
     .logo {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-size: 42px;
       font-weight: 700;
-      color: #1a1a2e;
+      color: var(--brand-dark);
       margin-bottom: 40px;
       letter-spacing: -1px;
     }
@@ -194,15 +225,14 @@
       padding: 8px 8px 8px 24px;
       border: none;
       border-radius: 32px;
-      background: #fff;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      background: var(--bg-card);
+      box-shadow: var(--shadow-hover);
       margin: 0 auto;
     }
     .search-box input {
       flex: 1;
       border: none;
       outline: none;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-size: 18px;
       text-transform: uppercase;
       font-weight: 500;
@@ -211,38 +241,37 @@
     }
     .search-box input::placeholder {
       text-transform: none;
-      color: #aaa;
+      color: var(--text-faint);
       font-weight: 400;
       letter-spacing: 0;
     }
     .search-box button {
-      background: #1a1a2e;
+      background: var(--brand-dark);
       border: none;
       cursor: pointer;
       padding: 14px 28px;
       color: white;
       border-radius: 24px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-size: 16px;
       font-weight: 600;
       transition: transform 0.2s, background 0.2s;
     }
     .search-box button:hover {
-      background: #2d2d4a;
+      background: var(--brand-mid);
       transform: scale(1.02);
     }
     .search-box button:disabled {
-      background: #999;
+      background: var(--text-faint);
       transform: none;
       cursor: not-allowed;
     }
     .subtitle {
       margin-top: 28px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-size: 15px;
-      color: #666;
+      color: var(--text-secondary);
     }
-    /* Report Wrapper */
+
+    /* ===== Report Wrapper ===== */
     .report-wrapper {
       display: none;
       max-width: 900px;
@@ -265,17 +294,15 @@
       gap: 16px;
     }
     .regenerate-link {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-size: 14px;
-      color: #00205b;
+      color: var(--brand-dark);
       text-decoration: none;
     }
     .regenerate-link:hover {
       text-decoration: underline;
     }
     .back-link {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      color: #00205b;
+      color: var(--brand-dark);
       text-decoration: none;
       font-size: 14px;
       display: inline-flex;
@@ -286,12 +313,11 @@
       text-decoration: underline;
     }
     .download-pdf-btn {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #00205b;
+      background: var(--brand-dark);
       color: white;
       border: none;
       padding: 10px 18px;
-      border-radius: 6px;
+      border-radius: var(--radius-sm);
       font-size: 14px;
       font-weight: 500;
       cursor: pointer;
@@ -301,10 +327,10 @@
       transition: background 0.2s;
     }
     .download-pdf-btn:hover {
-      background: #003087;
+      background: var(--brand-mid);
     }
     .download-pdf-btn:disabled {
-      background: #999;
+      background: var(--text-faint);
       cursor: not-allowed;
     }
     .download-pdf-btn svg {
@@ -316,18 +342,18 @@
       to { transform: rotate(360deg); }
     }
 
-    /* Loading */
+    /* ===== Loading ===== */
     .loading-container {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       text-align: center;
       padding: 100px 20px;
-      background: white;
-      box-shadow: 0 0 40px rgba(0,0,0,0.08);
+      background: var(--bg-card);
+      box-shadow: var(--shadow-card);
+      border-radius: var(--radius-card);
     }
     .loading-title {
       font-size: 18px;
       margin-bottom: 30px;
-      color: #333;
+      color: var(--text-primary);
     }
     .loading-steps {
       display: flex;
@@ -339,45 +365,45 @@
       padding: 8px 16px;
       border-radius: 20px;
       font-size: 13px;
-      background: #eee;
-      color: #999;
+      background: var(--bg-subtle);
+      color: var(--text-faint);
       transition: background 0.3s, color 0.3s;
     }
     .loading-step.active {
-      background: #00205b;
+      background: var(--brand-dark);
       color: white;
     }
     .progress-bar {
       width: 100%;
       max-width: 400px;
       height: 6px;
-      background: #eee;
+      background: var(--border);
       border-radius: 3px;
       margin: 0 auto 20px;
       overflow: hidden;
     }
     .progress-fill {
       height: 100%;
-      background: #00205b;
+      background: var(--brand-dark);
       border-radius: 3px;
       transition: width 1s ease-out;
     }
     .loading-time {
       font-size: 14px;
-      color: #888;
+      color: var(--text-faint);
     }
     .error {
-      color: #c0392b;
+      color: var(--negative);
       text-align: center;
       padding: 40px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
-    /* Report Page - Exact Goldman Style from Mockup */
+    /* ===== Report Page ===== */
     .page {
-      background: white;
+      background: var(--bg-card);
       padding: 48px 56px;
-      box-shadow: 0 0 40px rgba(0,0,0,0.08);
+      box-shadow: var(--shadow-card);
+      border-radius: var(--radius-card);
     }
 
     /* Header */
@@ -385,7 +411,7 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      border-bottom: 3px solid #00205b;
+      border-bottom: 3px solid var(--brand-dark);
       padding-bottom: 20px;
       margin-bottom: 28px;
     }
@@ -393,51 +419,51 @@
       flex: 1;
     }
     .report-type {
-      font-family: Arial, sans-serif;
       font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 2px;
-      color: #00205b;
+      color: var(--brand-dark);
       margin-bottom: 10px;
       font-weight: 600;
     }
     .company-name {
       font-size: 38px;
       font-weight: bold;
-      color: #00205b;
+      color: var(--brand-dark);
       margin-bottom: 4px;
     }
     .ticker-info {
-      font-family: Arial, sans-serif;
       font-size: 13px;
-      color: #666;
+      color: var(--text-secondary);
     }
     .header-right {
       text-align: right;
-      font-family: Arial, sans-serif;
     }
     .price {
       font-size: 32px;
       font-weight: bold;
-      color: #1a1a1a;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
     }
     .rating-badge {
       display: inline-block;
-      background: #00205b;
+      background: var(--brand-dark);
       color: white;
       padding: 6px 16px;
       font-size: 12px;
       font-weight: 600;
       letter-spacing: 1px;
       margin-top: 8px;
+      border-radius: var(--radius-sm);
     }
 
     /* Investment Thesis Box */
     .thesis-box {
-      background: #00205b;
+      background: var(--brand-dark);
       color: white;
       padding: 24px 28px;
       margin-bottom: 32px;
+      border-radius: var(--radius-sm);
     }
     .thesis-header {
       display: flex;
@@ -448,17 +474,15 @@
       width: 26px;
       height: 26px;
       background: white;
-      color: #00205b;
+      color: var(--brand-dark);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: bold;
       font-size: 15px;
       margin-right: 12px;
-      font-family: Arial, sans-serif;
     }
     .thesis-label {
-      font-family: Arial, sans-serif;
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 2px;
@@ -474,12 +498,11 @@
 
     /* Section Headers */
     .page h2 {
-      font-family: Arial, sans-serif;
       font-size: 13px;
       text-transform: uppercase;
       letter-spacing: 1.5px;
-      color: #00205b;
-      border-bottom: 1px solid #ddd;
+      color: var(--brand-dark);
+      border-bottom: 1px solid var(--border);
       padding-bottom: 8px;
       margin-top: 40px;
       margin-bottom: 18px;
@@ -487,10 +510,9 @@
 
     /* Sub-section Headers */
     .page h3 {
-      font-family: Arial, sans-serif;
       font-size: 16px;
       font-weight: 600;
-      color: #00205b;
+      color: var(--brand-dark);
       margin-top: 28px;
       margin-bottom: 12px;
     }
@@ -498,7 +520,7 @@
       display: inline-block;
       width: 28px;
       height: 28px;
-      background: #00205b;
+      background: var(--brand-dark);
       color: white;
       border-radius: 50%;
       text-align: center;
@@ -508,10 +530,9 @@
     }
 
     .page h4 {
-      font-family: Arial, sans-serif;
       font-size: 13px;
       font-weight: 600;
-      color: #444;
+      color: var(--text-secondary);
       margin-top: 20px;
       margin-bottom: 10px;
     }
@@ -520,15 +541,15 @@
     .page .qa-item {
       margin: 16px 0;
       padding-left: 16px;
-      border-left: 3px solid #e0e0e0;
+      border-left: 3px solid var(--border);
     }
     .page .qa-question {
       font-weight: 600;
-      color: #00205b;
+      color: var(--brand-dark);
       margin-bottom: 8px;
     }
     .page .qa-answer {
-      color: #444;
+      color: var(--text-secondary);
     }
 
     /* Body Text */
@@ -538,25 +559,25 @@
       font-size: 15px;
     }
 
-    /* Key Insight Box (light blue) */
+    /* Key Insight Box */
     .insight-box {
-      background: #f0f4f8;
-      border-left: 4px solid #00205b;
+      background: var(--brand-light);
+      border-left: 4px solid var(--brand-dark);
       padding: 16px 20px;
       margin: 24px 0;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
     }
     .insight-label {
-      font-family: Arial, sans-serif;
       font-size: 9px;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: #00205b;
+      color: var(--brand-dark);
       font-weight: 600;
       margin-bottom: 8px;
     }
     .insight-text {
       font-style: italic;
-      color: #333;
+      color: var(--text-secondary);
       font-size: 15px;
     }
 
@@ -566,11 +587,10 @@
       border-left: 4px solid #2196f3;
       padding: 14px 18px;
       margin: 14px 0;
-      border-radius: 0 4px 4px 0;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
     }
     .customer-box strong {
       color: #1565c0;
-      font-family: Arial, sans-serif;
       font-size: 14px;
     }
     .customer-box p {
@@ -584,11 +604,10 @@
       border-left: 4px solid #ff9800;
       padding: 14px 18px;
       margin: 14px 0;
-      border-radius: 0 4px 4px 0;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
     }
     .competitor-box strong {
       color: #e65100;
-      font-family: Arial, sans-serif;
       font-size: 14px;
     }
     .competitor-box p {
@@ -598,109 +617,102 @@
 
     /* Key Debates */
     .debate-box {
-      background: #f5f5f5;
-      border-left: 4px solid #00205b;
+      background: var(--bg-subtle);
+      border-left: 4px solid var(--brand-dark);
       padding: 16px 20px;
       margin: 16px 0;
-      border-radius: 0 4px 4px 0;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
     }
     .debate-question {
-      font-family: Arial, sans-serif;
       font-size: 14px;
       font-weight: 600;
-      color: #00205b;
+      color: var(--brand-dark);
       margin-bottom: 12px;
     }
     .bull-case {
-      color: #2e7d32;
+      color: var(--positive);
       margin: 8px 0;
       font-size: 14px;
-    }
-    .bull-case strong {
-      font-family: Arial, sans-serif;
     }
     .bear-case {
-      color: #c62828;
+      color: var(--negative);
       margin: 8px 0;
       font-size: 14px;
     }
-    .bear-case strong {
-      font-family: Arial, sans-serif;
-    }
 
-    /* Data Table - Goldman Sachs Style */
+    /* Data Table */
     .table-container {
       margin: 20px 0;
     }
     .table-title {
       font-size: 11px;
       font-weight: bold;
-      color: #00205b;
+      color: var(--brand-dark);
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-bottom: 8px;
-      border-bottom: 2px solid #00205b;
+      border-bottom: 2px solid var(--brand-dark);
       padding-bottom: 4px;
     }
     .data-table {
       width: 100%;
       border-collapse: collapse;
       margin: 0;
-      font-family: 'Times New Roman', Georgia, serif;
       font-size: 12px;
+      font-variant-numeric: tabular-nums;
     }
     .data-table thead tr {
-      border-bottom: 2px solid #00205b;
+      border-bottom: 2px solid var(--brand-dark);
     }
     .data-table th {
       background: transparent;
-      color: #00205b;
+      color: var(--brand-dark);
       padding: 8px 12px;
       text-align: right;
       font-weight: bold;
       font-size: 11px;
-      border-bottom: 2px solid #00205b;
+      border-bottom: 2px solid var(--brand-dark);
     }
     .data-table th:first-child {
       text-align: left;
       width: 140px;
     }
     .data-table th.estimate {
-      color: #666;
+      color: var(--text-secondary);
       font-style: italic;
     }
     .data-table td {
       padding: 6px 12px;
-      border-bottom: 1px solid #e0e0e0;
+      border-bottom: 1px solid var(--border);
       text-align: right;
     }
     .data-table td:first-child {
       text-align: left;
       font-weight: 500;
-      color: #333;
+      color: var(--text-primary);
     }
     .data-table tr:hover {
-      background: #f8f9fa;
+      background: var(--bg-subtle);
     }
     .data-table .metric-indent {
       padding-left: 24px;
       font-size: 11px;
-      color: #555;
+      color: var(--text-secondary);
     }
     .data-table .negative {
-      color: #c00;
+      color: var(--negative);
     }
     .data-table .positive {
-      color: #006600;
+      color: var(--positive);
     }
     .data-table .estimate-col {
-      background: #fafafa;
-      color: #666;
+      background: var(--bg-subtle);
+      color: var(--text-secondary);
       font-style: italic;
     }
     .data-table tfoot td {
       font-size: 9px;
-      color: #888;
+      color: var(--text-faint);
       padding-top: 12px;
       border: none;
       text-align: left;
@@ -717,28 +729,26 @@
 
     /* Valuation Box */
     .valuation-summary {
-      background: #e8f5e9;
-      border: 1px solid #81c784;
+      background: var(--positive-bg);
+      border: 1px solid var(--positive);
       padding: 18px 22px;
       margin: 20px 0;
-      border-radius: 4px;
+      border-radius: var(--radius-sm);
     }
     .valuation-summary strong {
-      color: #2e7d32;
-      font-family: Arial, sans-serif;
+      color: var(--positive);
     }
 
     /* Risk Box */
     .risk-box {
-      background: #ffebee;
-      border-left: 4px solid #ef5350;
+      background: var(--negative-bg);
+      border-left: 4px solid var(--negative);
       padding: 14px 18px;
       margin: 14px 0;
-      border-radius: 0 4px 4px 0;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
     }
     .risk-box strong {
-      color: #c62828;
-      font-family: Arial, sans-serif;
+      color: var(--negative);
       font-size: 14px;
     }
     .risk-box p {
@@ -746,9 +756,8 @@
       font-size: 14px;
     }
 
-    /* Chat Widget */
+    /* ===== Chat Widget ===== */
     .chat-widget {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       position: fixed;
       bottom: 24px;
       right: 24px;
@@ -763,11 +772,11 @@
       height: 48px;
       padding: 0 20px;
       border-radius: 24px;
-      background: #00205b;
+      background: var(--brand-dark);
       color: white;
       border: none;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      box-shadow: var(--shadow-hover);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -776,7 +785,7 @@
       font-weight: 500;
     }
     .chat-button:hover {
-      background: #003087;
+      background: var(--brand-mid);
     }
     .chat-window {
       position: absolute;
@@ -784,9 +793,9 @@
       right: 0;
       width: 360px;
       height: 480px;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+      background: var(--bg-card);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-hover);
       display: none;
       flex-direction: column;
       overflow: hidden;
@@ -795,7 +804,7 @@
       display: flex;
     }
     .chat-header {
-      background: #00205b;
+      background: var(--brand-dark);
       color: white;
       padding: 12px 16px;
       font-weight: 600;
@@ -826,42 +835,42 @@
     .chat-message {
       max-width: 85%;
       padding: 10px 14px;
-      border-radius: 12px;
+      border-radius: var(--radius-card);
       font-size: 14px;
       line-height: 1.5;
     }
     .chat-message.user {
-      background: #e3f2fd;
+      background: var(--brand-light);
       align-self: flex-end;
       border-bottom-right-radius: 4px;
     }
     .chat-message.assistant {
-      background: #f5f5f5;
+      background: var(--bg-subtle);
       align-self: flex-start;
       border-bottom-left-radius: 4px;
     }
     .chat-input-area {
       padding: 12px;
-      border-top: 1px solid #eee;
+      border-top: 1px solid var(--border);
       display: flex;
       gap: 8px;
     }
     .chat-input {
       flex: 1;
       padding: 12px 16px;
-      border: 1px solid #ddd;
+      border: 1px solid var(--border);
       border-radius: 20px;
       font-size: 14px;
       outline: none;
     }
     .chat-input:focus {
-      border-color: #00205b;
+      border-color: var(--brand-dark);
     }
     .chat-send {
       width: 36px;
       height: 36px;
       border-radius: 50%;
-      background: #00205b;
+      background: var(--brand-dark);
       color: white;
       border: none;
       cursor: pointer;
@@ -870,10 +879,10 @@
       justify-content: center;
     }
     .chat-send:hover {
-      background: #003087;
+      background: var(--brand-mid);
     }
     .chat-send:disabled {
-      background: #ccc;
+      background: var(--border);
     }
   </style>
 </head>
