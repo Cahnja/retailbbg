@@ -5335,12 +5335,8 @@ app.get('/api/stock-explanation-details', async (req, res) => {
 
   const tickerUpper = ticker.toUpperCase();
 
-  // Determine asset type: bitcoin, market index, or regular stock
-  const isBitcoin = tickerUpper === 'BTC-USD';
-  const isMarketIndex = ['^GSPC', '^DJI', '^IXIC'].includes(tickerUpper);
-
   // Market indices share a common cache key so all three use the same analysis
-  const cacheKey = isMarketIndex ? 'MARKET' : tickerUpper;
+  const cacheKey = ['^GSPC', '^DJI', '^IXIC'].includes(tickerUpper) ? 'MARKET' : tickerUpper;
 
   // Check cache first
   const cached = getCachedStockExplanation(cacheKey);
@@ -5416,105 +5412,25 @@ app.get('/api/stock-explanation-details', async (req, res) => {
       dayReference = `today (${dateStr})`;
     }
 
-    let searchPrompt, analysisPrompt;
-
-    if (isBitcoin) {
-      // Bitcoin-specific prompts
-      searchPrompt = `Search for why Bitcoin price is moving today, latest Bitcoin news and catalysts. Search for "Bitcoin price today", "BTC news today", "why is Bitcoin ${direction} today". Find all relevant news, regulatory developments, institutional adoption, ETF flows, and macro factors affecting Bitcoin's price.`;
-
-      console.log(`[Stock Details] Web searching for Bitcoin... (time context: ${timeContext})`);
-      const searchResponse = await client.responses.create({
-        model: 'gpt-4o',
-        tools: [{ type: 'web_search' }],
-        input: searchPrompt
-      }, { timeout: 45000 });
-      if (searchResponse.usage) logTokenUsage('stock-details-bitcoin-search', searchResponse.usage);
-
-      const newsContext = searchResponse.output_text;
-      try { fs.writeFileSync(path.join(__dirname, 'cache', 'web-search-bitcoin.txt'), newsContext); } catch(e) {}
-
-      analysisPrompt = `You are a senior crypto and markets analyst. A user wants to understand why Bitcoin moved ${direction} ${absChange}% ${dayReference}.
-
-Note: This market data is from ${timeContext}.
-
-RESEARCH:
-${newsContext}
-
-Write 4 detailed paragraphs explaining why Bitcoin moved. Be extremely concise and direct — every sentence must deliver new information.
-
-If no specific catalyst for today's move can be identified from the research, instead provide a general news update covering the most important recent developments for Bitcoin and crypto over the past several weeks (ETF flows, regulatory changes, institutional adoption, macro drivers, on-chain metrics).
-
-STYLE RULES:
-- Do NOT repeat the Bitcoin price change or percentage move — jump straight into the WHY.
-- ONLY include facts from the RESEARCH above. Never invent numbers.
-- No throat-clearing ("Bitcoin surged today due to several catalysts that excited the market"). Start with the actual catalyst.
-- No generic advice, hedging, or obvious statements.
-- Short, punchy sentences. Cut any sentence that doesn't add a new fact.
-- Wrap the single most important sentence in each paragraph with **bold** markdown.
-- Just four tight paragraphs, no headers.
-- Do NOT mention trading volume, trading activity, or technical price action.
-- Focus only on the NEWS catalyst — what event, announcement, or development caused the move.
-- No references to "heavy trading", "high volume", "sell-off pressure", "trading momentum", or similar trading jargon.`;
-
-    } else if (isMarketIndex) {
-      // Market index prompts (shared for ^GSPC, ^DJI, ^IXIC)
-      searchPrompt = `Search for why the stock market is moving today, what is driving S&P 500 Nasdaq Dow Jones today. Search for "stock market today", "why is the market ${direction} today", "S&P 500 news today". Find all relevant economic data, Fed policy, earnings reports, geopolitical events, and sector moves driving the market.`;
-
-      console.log(`[Stock Details] Web searching for market indices... (time context: ${timeContext})`);
-      const searchResponse = await client.responses.create({
-        model: 'gpt-4o',
-        tools: [{ type: 'web_search' }],
-        input: searchPrompt
-      }, { timeout: 45000 });
-      if (searchResponse.usage) logTokenUsage('stock-details-market-search', searchResponse.usage);
-
-      const newsContext = searchResponse.output_text;
-      try { fs.writeFileSync(path.join(__dirname, 'cache', 'web-search-market.txt'), newsContext); } catch(e) {}
-
-      analysisPrompt = `You are a senior markets analyst. A user wants to understand what is driving the stock market ${dayReference}. The S&P 500 is ${direction} approximately ${absChange}%.
-
-Note: This market data is from ${timeContext}.
-
-RESEARCH:
-${newsContext}
-
-Write 4 detailed paragraphs explaining what is driving the stock market today. Be extremely concise and direct — every sentence must deliver new information.
-
-If no specific catalyst for today's move can be identified from the research, instead provide a general news update covering the most important recent market developments (Fed policy, economic data, earnings season, geopolitical events, sector rotation).
-
-STYLE RULES:
-- Do NOT repeat the market percentage move — jump straight into the WHY.
-- ONLY include facts from the RESEARCH above. Never invent numbers.
-- No throat-clearing ("The market surged today due to several catalysts"). Start with the actual catalyst.
-- No generic advice, hedging, or obvious statements.
-- Short, punchy sentences. Cut any sentence that doesn't add a new fact.
-- Wrap the single most important sentence in each paragraph with **bold** markdown.
-- Just four tight paragraphs, no headers.
-- Do NOT mention trading volume, trading activity, or technical price action.
-- Focus only on the NEWS catalyst — what event, announcement, or development caused the move.
-- No references to "heavy trading", "high volume", "sell-off pressure", "trading momentum", or similar trading jargon.`;
-
-    } else {
-      // Regular stock prompts
-      const catalystLine = catalyst ? `\nInitial report: "${catalyst}"\n` : '';
-      searchPrompt = `Search financial news sites for all recent news about ${companyName} (${tickerUpper}). The stock is ${direction} ${absChange}% ${dayReference}.
+    const catalystLine = catalyst ? `\nInitial report: "${catalyst}"\n` : '';
+    const searchPrompt = `Search financial news sites for all recent news about ${companyName} (${tickerUpper}). The stock is ${direction} ${absChange}% ${dayReference}.
 ${catalystLine}
 Search for "${tickerUpper} stock", "${companyName} news".
 
 List every relevant key fact you find.`;
 
-      console.log(`[Stock Details] Web searching for ${tickerUpper}... (time context: ${timeContext})`);
-      const searchResponse = await client.responses.create({
-        model: 'gpt-4o',
-        tools: [{ type: 'web_search' }],
-        input: searchPrompt
-      }, { timeout: 45000 });
-      if (searchResponse.usage) logTokenUsage('stock-details-search', searchResponse.usage);
+    console.log(`[Stock Details] Web searching for ${tickerUpper}... (time context: ${timeContext})`);
+    const searchResponse = await client.responses.create({
+      model: 'gpt-4o',
+      tools: [{ type: 'web_search' }],
+      input: searchPrompt
+    }, { timeout: 45000 });
+    if (searchResponse.usage) logTokenUsage('stock-details-search', searchResponse.usage);
 
-      const newsContext = searchResponse.output_text;
-      try { fs.writeFileSync(path.join(__dirname, 'cache', `web-search-${tickerUpper}.txt`), newsContext); } catch(e) {}
+    const newsContext = searchResponse.output_text;
+    try { fs.writeFileSync(path.join(__dirname, 'cache', `web-search-${cacheKey}.txt`), newsContext); } catch(e) {}
 
-      analysisPrompt = `You are a senior markets analyst. A user wants to understand why ${companyName} (${tickerUpper}) stock moved ${direction} ${absChange}% ${dayReference}.
+    const analysisPrompt = `You are a senior markets analyst. A user wants to understand why ${companyName} (${tickerUpper}) stock moved ${direction} ${absChange}% ${dayReference}.
 
 Note: This market data is from ${timeContext}.
 
@@ -5537,7 +5453,6 @@ STYLE RULES:
 - Focus only on the NEWS catalyst — what event, announcement, or development caused the move.
 - No references to "heavy trading", "high volume", "sell-off pressure", "trading momentum", or similar trading jargon.
 - Do NOT discuss institutional investor movements, fund stake changes, or portfolio reallocations. Focus on business news and catalysts only.`;
-    }
 
     const response = await client.chat.completions.create({
       model: 'gpt-4o',
