@@ -5316,7 +5316,6 @@ STYLE RULES:
 
       const streamResponse = await client.chat.completions.create({
         model: 'gpt-4o',
-        max_tokens: 800,
         stream: true,
         messages: [{ role: 'user', content: analysisPrompt }]
       }, { timeout: 45000 });
@@ -5352,7 +5351,6 @@ STYLE RULES:
     } else {
       const response = await client.chat.completions.create({
         model: 'gpt-4o',
-        max_tokens: 800,
         messages: [{ role: 'user', content: analysisPrompt }]
       });
       logTokenUsage('stock-details', response.usage);
