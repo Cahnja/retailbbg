@@ -1000,6 +1000,108 @@
       opacity: 1;
     }
 
+    /* Key Stats Grid (for chart panel) */
+    .key-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0;
+      border: 1px solid #e8eaed;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .stat-item {
+      padding: 12px 14px;
+      border-bottom: 1px solid #e8eaed;
+      border-right: 1px solid #e8eaed;
+    }
+
+    .stat-item:nth-child(3n) {
+      border-right: none;
+    }
+
+    .stat-item:nth-last-child(-n+3) {
+      border-bottom: none;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #5f6368;
+      margin-bottom: 2px;
+    }
+
+    .stat-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #202124;
+    }
+
+    /* Asset Analysis Section in Chart Panel */
+    .asset-analysis-section {
+      margin-top: 24px;
+    }
+
+    .asset-analysis-title {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #1e3a5f;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e8f0f7;
+    }
+
+    .asset-analysis-content {
+      font-family: 'Times New Roman', Georgia, serif;
+      color: #444;
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    .asset-analysis-content p {
+      margin-bottom: 12px;
+    }
+
+    .asset-analysis-content p:last-child {
+      margin-bottom: 0;
+    }
+
+    .asset-analysis-content strong {
+      color: #1e3a5f;
+      font-weight: 600;
+    }
+
+    .asset-analysis-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 20px 0;
+      color: #666;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+
+    .asset-analysis-status .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #e0e0e0;
+      border-top-color: #666;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 0;
+    }
+
+    .asset-analysis-error {
+      text-align: center;
+      padding: 20px;
+      color: #c62828;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+    }
+
     /* Fear & Greed Card */
     .fear-greed-card {
       background: #ffffff;
@@ -1336,6 +1438,10 @@
     const cacheBadge = document.getElementById('cache-badge');
     const refreshBtn = document.getElementById('refresh-btn');
 
+    // Store latest indices and bitcoin data globally for click handlers
+    let latestIndicesData = [];
+    let latestBitcoinData = null;
+
     function formatNumber(num) {
       return num.toLocaleString('en-US', {
         minimumFractionDigits: 2,
@@ -1430,6 +1536,10 @@
     };
 
     function renderIndices(indices, bitcoin) {
+      // Store globally for click handlers
+      latestIndicesData = indices;
+      latestBitcoinData = bitcoin;
+
       let cards = indices.map(index => {
         const isPositive = index.changePercent >= 0;
         const changeClass = isPositive ? 'positive' : 'negative';
@@ -1438,7 +1548,7 @@
         const safeName = index.name.replace(/&/g, '&amp;').replace(/'/g, "\\'");
 
         return `
-          <div class="index-card" onclick="openIndexChart('${ticker}', '${safeName}')">
+          <div class="index-card" onclick="openIndexChart('${ticker}', '${safeName}', ${index.changePercent})">
             <div class="index-name">${index.name}</div>
             <div class="index-change ${changeClass}">
               <span class="change-arrow">${arrow}</span>
@@ -1456,7 +1566,7 @@
         const arrow = isPositive ? '&#9650;' : '&#9660;';
 
         cards.push(`
-          <div class="index-card" id="bitcoin-card" onclick="openIndexChart('BTC-USD', 'Bitcoin')">
+          <div class="index-card" id="bitcoin-card" onclick="openIndexChart('BTC-USD', 'Bitcoin', ${bitcoin.changePercent})">
             <div class="index-name">Bitcoin</div>
             <div class="index-change ${changeClass}">
               <span class="change-arrow">${arrow}</span>
@@ -2031,7 +2141,7 @@
       });
     }
 
-    function openIndexChart(ticker, name) {
+    function openIndexChart(ticker, name, changePercent) {
       if (!ticker) return;
       chartPanelTicker = ticker;
       chartPanelRange = '1d';
@@ -2052,6 +2162,16 @@
         <div class="chart-container" id="chart-container">
           <div class="chart-loading"><div class="spinner"></div>Loading chart...</div>
         </div>
+        <div id="chart-stats-container"></div>
+        <div id="asset-analysis-container">
+          <div class="asset-analysis-section">
+            <h2 class="asset-analysis-title">${ticker === 'BTC-USD' ? 'Bitcoin Analysis' : 'Market Analysis'}</h2>
+            <div class="asset-analysis-status">
+              <div class="spinner"></div>
+              <span>Generating analysis...</span>
+            </div>
+          </div>
+        </div>
       `;
 
       chartPanelOverlay.classList.add('active');
@@ -2070,8 +2190,13 @@
         });
       });
 
-      // Fetch chart data
+      // Determine asset type for analysis API
+      const isBitcoin = ticker === 'BTC-USD';
+      const assetType = isBitcoin ? 'bitcoin' : 'market';
+
+      // Fetch chart data and analysis in parallel
       loadIndexChartData(ticker, '1d');
+      fetchAssetExplanation(assetType, changePercent);
     }
 
     async function loadIndexChartData(ticker, range) {
@@ -2290,6 +2415,58 @@
         dot.setAttribute('visibility', 'hidden');
         tooltip.classList.remove('visible');
       });
+    }
+
+    // ---- Asset Analysis Functions ----
+
+    function renderAssetAnalysis(analysisText, label) {
+      // Convert **bold** markdown to <strong> tags
+      const withBold = analysisText.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      // Split into paragraphs
+      const paragraphs = withBold.split('\n\n').filter(p => p.trim());
+
+      return `
+        <div class="asset-analysis-section">
+          <h2 class="asset-analysis-title">${label}</h2>
+          <div class="asset-analysis-content">
+            ${paragraphs.map(p => `<p>${p.trim()}</p>`).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    async function fetchAssetExplanation(assetType, changePercent) {
+      const analysisContainer = document.getElementById('asset-analysis-container');
+      if (!analysisContainer) return;
+
+      const label = assetType === 'bitcoin' ? 'Bitcoin Analysis' : 'Market Analysis';
+
+      try {
+        const params = new URLSearchParams({ type: assetType });
+        if (changePercent != null) params.set('changePercent', changePercent);
+        const response = await fetch(`/api/asset-explanation?${params}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.isQuotaError ? 'quota' : (data.error || 'Failed to load analysis'));
+        }
+
+        analysisContainer.innerHTML = renderAssetAnalysis(data.analysis, label);
+      } catch (error) {
+        console.error('Error fetching asset explanation:', error);
+        let errorMsg = 'Unable to load analysis. Please try again.';
+        if (error.message === 'quota') {
+          errorMsg = 'AI service quota exceeded. This feature will be available again soon.';
+        }
+        analysisContainer.innerHTML = `
+          <div class="asset-analysis-section">
+            <h2 class="asset-analysis-title">${label}</h2>
+            <div class="asset-analysis-error">
+              <p>${errorMsg}</p>
+            </div>
+          </div>
+        `;
+      }
     }
 
     function closeChartPanel() {

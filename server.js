@@ -5506,6 +5506,236 @@ STYLE RULES:
 });
 
 // ============================================
+// ASSET EXPLANATION (Bitcoin / Market indices)
+// ============================================
+
+const ASSET_EXPLANATION_CACHE_DIR = path.join(__dirname, 'cache', 'asset-explanations');
+const assetExplanationInFlight = new Map();
+
+if (!fs.existsSync(ASSET_EXPLANATION_CACHE_DIR)) {
+  fs.mkdirSync(ASSET_EXPLANATION_CACHE_DIR, { recursive: true });
+}
+
+function getAssetExplanationCachePath(type) {
+  const today = new Date().toISOString().split('T')[0];
+  return path.join(ASSET_EXPLANATION_CACHE_DIR, `${type}_${today}.json`);
+}
+
+function getCachedAssetExplanation(type) {
+  const cachePath = getAssetExplanationCachePath(type);
+  if (!fs.existsSync(cachePath)) return null;
+
+  try {
+    const cached = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
+    const ageMinutes = (Date.now() - cached.cachedAt) / (1000 * 60);
+    if (ageMinutes <= STOCK_EXPLANATION_CACHE_MAX_AGE_MINUTES) {
+      console.log(`Using cached asset explanation for ${type} (cached ${ageMinutes.toFixed(1)} minutes ago)`);
+      return cached.data;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error reading asset explanation cache:', error);
+    return null;
+  }
+}
+
+function saveAssetExplanationToCache(type, data) {
+  const cachePath = getAssetExplanationCachePath(type);
+  try {
+    fs.writeFileSync(cachePath, JSON.stringify({ type, data, cachedAt: Date.now() }, null, 2));
+    console.log(`Cached asset explanation for ${type}`);
+  } catch (error) {
+    console.error('Error writing asset explanation cache:', error);
+  }
+}
+
+// GET /api/asset-explanation
+app.get('/api/asset-explanation', async (req, res) => {
+  const { type, changePercent } = req.query;
+
+  if (!type || !['bitcoin', 'market'].includes(type)) {
+    return res.status(400).json({ error: 'Missing or invalid type parameter. Must be "bitcoin" or "market".' });
+  }
+
+  // Check cache first
+  const cached = getCachedAssetExplanation(type);
+  if (cached) {
+    return res.json({ ...cached, cached: true });
+  }
+
+  // Check if already in-flight
+  if (assetExplanationInFlight.has(type)) {
+    console.log(`[Asset Explanation] ${type} already in-flight, waiting for existing request...`);
+    try {
+      const result = await assetExplanationInFlight.get(type);
+      return res.json({ ...result, cached: true });
+    } catch (error) {
+      const cachedRetry = getCachedAssetExplanation(type);
+      if (cachedRetry) return res.json({ ...cachedRetry, cached: true });
+      console.error('Asset explanation API error (in-flight wait):', error.message || error);
+      if (error.code === 'insufficient_quota' || error.status === 429) {
+        return res.status(503).json({ error: 'API quota exceeded', message: 'OpenAI API quota has been exceeded. Please try again later.', isQuotaError: true });
+      }
+      return res.status(500).json({ error: 'Failed to generate asset explanation', message: error.message || 'An unexpected error occurred' });
+    }
+  }
+
+  const generatePromise = (async () => {
+    console.log(`Generating asset explanation for ${type}`);
+
+    const direction = parseFloat(changePercent || 0) >= 0 ? 'up' : 'down';
+    const absChange = Math.abs(parseFloat(changePercent || 0)).toFixed(1);
+
+    // Calculate time context (same logic as stock explanations)
+    const now = new Date();
+    const etTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+    const hour = etTime.getHours();
+    const minute = etTime.getMinutes();
+    const dayOfWeek = etTime.getDay();
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    const isBeforeOpen = hour < 9 || (hour === 9 && minute < 30);
+    const isMondayPreMarket = dayOfWeek === 1 && isBeforeOpen;
+    const isPreMarket = !isWeekend && isBeforeOpen;
+
+    const lastTradingDate = new Date(etTime);
+    let timeContext, dayReference;
+    if (isWeekend || isMondayPreMarket) {
+      const daysBack = dayOfWeek === 0 ? 2 : dayOfWeek === 1 ? 3 : 1;
+      lastTradingDate.setDate(lastTradingDate.getDate() - daysBack);
+      const dateStr = lastTradingDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      timeContext = `${dateStr} (the market hasn't opened since then)`;
+      dayReference = `on ${dateStr}`;
+    } else if (isPreMarket) {
+      lastTradingDate.setDate(lastTradingDate.getDate() - 1);
+      const dateStr = lastTradingDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      timeContext = `${dateStr} (the market hasn't opened yet today)`;
+      dayReference = `on ${dateStr}`;
+    } else {
+      const dateStr = lastTradingDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+      timeContext = `today, ${dateStr}`;
+      dayReference = `today (${dateStr})`;
+    }
+
+    let searchPrompt, analysisPrompt;
+
+    if (type === 'bitcoin') {
+      searchPrompt = `Search for why Bitcoin price is moving today, latest Bitcoin news and catalysts. Search for "Bitcoin price today", "BTC news today", "why is Bitcoin ${direction} today". Find all relevant news, regulatory developments, institutional adoption, ETF flows, and macro factors affecting Bitcoin's price.`;
+
+      const searchResponse = await client.responses.create({
+        model: 'gpt-4o',
+        tools: [{ type: 'web_search' }],
+        input: searchPrompt
+      }, { timeout: 45000 });
+      if (searchResponse.usage) logTokenUsage('asset-explanation-bitcoin-search', searchResponse.usage);
+
+      const newsContext = searchResponse.output_text;
+      try { fs.writeFileSync(path.join(__dirname, 'cache', 'web-search-bitcoin.txt'), newsContext); } catch(e) {}
+
+      analysisPrompt = `You are a senior crypto and markets analyst. A user wants to understand why Bitcoin moved ${direction} ${absChange}% ${dayReference}.
+
+Note: This market data is from ${timeContext}.
+
+RESEARCH:
+${newsContext}
+
+Write 4 detailed paragraphs explaining why Bitcoin moved. Be extremely concise and direct — every sentence must deliver new information.
+
+If no specific catalyst for today's move can be identified from the research, instead provide a general news update covering the most important recent developments for Bitcoin and crypto over the past several weeks (ETF flows, regulatory changes, institutional adoption, macro drivers, on-chain metrics).
+
+STYLE RULES:
+- Do NOT repeat the Bitcoin price change or percentage move — jump straight into the WHY.
+- ONLY include facts from the RESEARCH above. Never invent numbers.
+- No throat-clearing ("Bitcoin surged today due to several catalysts that excited the market"). Start with the actual catalyst.
+- No generic advice, hedging, or obvious statements.
+- Short, punchy sentences. Cut any sentence that doesn't add a new fact.
+- Wrap the single most important sentence in each paragraph with **bold** markdown.
+- Just four tight paragraphs, no headers.
+- Do NOT mention trading volume, trading activity, or technical price action.
+- Focus only on the NEWS catalyst — what event, announcement, or development caused the move.
+- No references to "heavy trading", "high volume", "sell-off pressure", "trading momentum", or similar trading jargon.`;
+
+      const response = await client.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [{ role: 'user', content: analysisPrompt }]
+      });
+      logTokenUsage('asset-explanation-bitcoin', response.usage);
+
+      return {
+        type: 'bitcoin',
+        analysis: response.choices[0].message.content.trim(),
+        generatedAt: new Date().toISOString()
+      };
+
+    } else {
+      // type === 'market'
+      searchPrompt = `Search for why the stock market is moving today, what is driving S&P 500 Nasdaq Dow Jones today. Search for "stock market today", "why is the market ${direction} today", "S&P 500 news today". Find all relevant economic data, Fed policy, earnings reports, geopolitical events, and sector moves driving the market.`;
+
+      const searchResponse = await client.responses.create({
+        model: 'gpt-4o',
+        tools: [{ type: 'web_search' }],
+        input: searchPrompt
+      }, { timeout: 45000 });
+      if (searchResponse.usage) logTokenUsage('asset-explanation-market-search', searchResponse.usage);
+
+      const newsContext = searchResponse.output_text;
+      try { fs.writeFileSync(path.join(__dirname, 'cache', 'web-search-market.txt'), newsContext); } catch(e) {}
+
+      analysisPrompt = `You are a senior markets analyst. A user wants to understand what is driving the stock market ${dayReference}. The S&P 500 is ${direction} approximately ${absChange}%.
+
+Note: This market data is from ${timeContext}.
+
+RESEARCH:
+${newsContext}
+
+Write 4 detailed paragraphs explaining what is driving the stock market today. Be extremely concise and direct — every sentence must deliver new information.
+
+If no specific catalyst for today's move can be identified from the research, instead provide a general news update covering the most important recent market developments (Fed policy, economic data, earnings season, geopolitical events, sector rotation).
+
+STYLE RULES:
+- Do NOT repeat the market percentage move — jump straight into the WHY.
+- ONLY include facts from the RESEARCH above. Never invent numbers.
+- No throat-clearing ("The market surged today due to several catalysts"). Start with the actual catalyst.
+- No generic advice, hedging, or obvious statements.
+- Short, punchy sentences. Cut any sentence that doesn't add a new fact.
+- Wrap the single most important sentence in each paragraph with **bold** markdown.
+- Just four tight paragraphs, no headers.
+- Do NOT mention trading volume, trading activity, or technical price action.
+- Focus only on the NEWS catalyst — what event, announcement, or development caused the move.
+- No references to "heavy trading", "high volume", "sell-off pressure", "trading momentum", or similar trading jargon.`;
+
+      const response = await client.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [{ role: 'user', content: analysisPrompt }]
+      });
+      logTokenUsage('asset-explanation-market', response.usage);
+
+      return {
+        type: 'market',
+        analysis: response.choices[0].message.content.trim(),
+        generatedAt: new Date().toISOString()
+      };
+    }
+  })();
+
+  assetExplanationInFlight.set(type, generatePromise);
+
+  try {
+    const result = await generatePromise;
+    saveAssetExplanationToCache(type, result);
+    res.json({ ...result, cached: false });
+  } catch (error) {
+    console.error('Asset explanation API error:', error.message || error);
+    if (error.code === 'insufficient_quota' || error.status === 429) {
+      res.status(503).json({ error: 'API quota exceeded', message: 'OpenAI API quota has been exceeded. Please try again later.', isQuotaError: true });
+    } else {
+      res.status(500).json({ error: 'Failed to generate asset explanation', message: error.message || 'An unexpected error occurred' });
+    }
+  } finally {
+    assetExplanationInFlight.delete(type);
+  }
+});
+
+// ============================================
 // STOCK EXPLANATION VIA EXA (side-by-side test)
 // ============================================
 
@@ -5591,30 +5821,61 @@ app.get('/api/stock-explanation-exa', async (req, res) => {
     }
 
     // --- Exa search instead of OpenAI web_search ---
-    // Calculate start date for search (yesterday or day before for weekends)
+    // Use 3-day lookback from last trading date for broader coverage
     const searchStartDate = new Date(lastTradingDate);
-    searchStartDate.setDate(searchStartDate.getDate() - 1);
+    searchStartDate.setDate(searchStartDate.getDate() - 3);
     const startPublishedDate = searchStartDate.toISOString().split('T')[0] + 'T00:00:00.000Z';
 
     console.log(`[Stock Details Exa] Searching Exa for ${tickerUpper}... (startDate: ${startPublishedDate})`);
 
-    const exaResults = await exa.searchAndContents(`${tickerUpper} stock news ${companyName}`, {
-      numResults: 5,
+    // Optimal config: category=news (filters out quote/data pages), no includeDomains
+    // (domain filtering causes Exa to return stock quote pages instead of articles),
+    // text+highlights (highlights extract key sentences even from bot-blocked pages)
+    const exaResults = await exa.searchAndContents(`${companyName} ${tickerUpper} stock earnings news`, {
+      numResults: 10,
       startPublishedDate,
-      includeDomains: [
-        'reuters.com', 'cnbc.com', 'bloomberg.com', 'seekingalpha.com',
-        'benzinga.com', 'businesswire.com', 'prnewswire.com',
-        'finance.yahoo.com', 'marketwatch.com', 'barrons.com'
-      ],
-      text: { maxCharacters: 3000 }
+      category: 'news',
+      text: { maxCharacters: 1500 },
+      highlights: { numSentences: 3, highlightsPerUrl: 2 }
     });
 
     // Format Exa results into newsContext string
+    // Use highlights as fallback when text is mostly boilerplate/bot-blocked
     let newsContext = '';
     if (exaResults.results && exaResults.results.length > 0) {
-      newsContext = exaResults.results.map((r, i) => {
+      // Filter out obvious non-article pages (stock quote pages, P/E ratio pages, etc.)
+      const articleResults = exaResults.results.filter(r => {
+        const url = r.url.toLowerCase();
+        const isQuotePage = url.includes('/quote/') || url.includes('/quotes/') ||
+                           url.includes('/pe-ratio') || url.includes('/market-cap') ||
+                           url.includes('/after-hours') || url.includes('/pre-market') ||
+                           (url.includes('/stocks/') && !url.includes('/news') && !url.includes('/article'));
+        return !isQuotePage;
+      });
+
+      const resultsToFormat = articleResults.length > 0 ? articleResults : exaResults.results;
+
+      newsContext = resultsToFormat.map((r, i) => {
         const publishDate = r.publishedDate ? new Date(r.publishedDate).toLocaleDateString('en-US') : 'Unknown date';
-        return `[${i + 1}] ${r.title || 'No title'}\nURL: ${r.url}\nPublished: ${publishDate}\n${r.text || 'No content available'}\n`;
+
+        // Check if text is bot-blocked or mostly boilerplate
+        const textContent = r.text || '';
+        const isBotBlocked = textContent.includes('Pardon Our Interruption') ||
+                            textContent.includes('Please verify you are a human') ||
+                            textContent.includes('Access Denied') ||
+                            textContent.includes('Enable JavaScript') ||
+                            textContent.includes('checking your browser');
+
+        // Use highlights as primary content if text is bot-blocked, or combine both
+        let content = '';
+        if (r.highlights && r.highlights.length > 0) {
+          content += 'Key excerpts:\n' + r.highlights.map(h => `- ${h}`).join('\n') + '\n';
+        }
+        if (!isBotBlocked && textContent.length > 100) {
+          content += '\n' + textContent;
+        }
+
+        return `[${i + 1}] ${r.title || 'No title'}\nURL: ${r.url}\nPublished: ${publishDate}\n${content || 'No content available'}\n`;
       }).join('\n---\n\n');
     } else {
       newsContext = `No recent news articles found for ${companyName} (${tickerUpper}) from major financial news sources.`;
