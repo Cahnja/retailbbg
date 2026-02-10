@@ -227,13 +227,72 @@ const GENERIC_HEADLINE_PATTERNS = [
   /today's\s+session.*top/i,
   /gapping\s+in\s+today's\s+session/i,
   /unusual\s+volume\s+in\s+today's\s+session/i,
+  // Generic market updates
+  /u\.?s\.?\s+stock\s+market\s+today/i,
+  /stock\s+market\s+today/i,
+  /s&p\s*500\s+futures/i,
+  /dow\s+jones\s+futures/i,
+  /nasdaq\s+futures/i,
+  /futures\s+(edge|inch|move|tick)\s+(higher|lower)/i,
+  /premarket:\s+/i,
+  // Generic market commentary
+  /stocks\s+are\s+being\s+trounced/i,
+  /market\s+(rally|rallies|selloff|sell-off|rout|plunge|crash|correction)/i,
+  /wall\s+street.*wrap/i,
+  /market\s+wrap/i,
+  /weekly\s+market\s+(recap|review|roundup)/i,
+  /markets?\s+(close|open)\s+(higher|lower|mixed)/i,
+  /play\s+it\s+like\s+buffett/i,
+  // Correction prefix articles
+  /^correction:/i,
+  /^corrected\s*[-–—]/i,
+  // Broad market/index roundups
+  /here'?s?\s+what'?s?\s+happening\s+in\s+the\s+stock\s+market/i,
+  /stocks?\s+to\s+watch\s+(this\s+week|today|tomorrow)/i,
+  /biggest\s+(stock\s+)?movers\s+(before|after)\s+(the\s+)?(bell|open|close)/i,
+  /midday\s+(market|trading)\s+(update|report|roundup)/i,
 ];
 
 function isGenericHeadline(headline) {
   return GENERIC_HEADLINE_PATTERNS.some(pattern => pattern.test(headline));
 }
 
-async function getFinnhubNews(ticker) {
+// Check if a headline is relevant to the specific ticker/company
+// Returns true if headline mentions the ticker or a recognizable part of the company name
+function isRelevantHeadline(headline, ticker, companyName) {
+  if (!headline || !ticker) return true; // If we can't check, let it through
+  const headlineLower = headline.toLowerCase();
+  const tickerLower = ticker.toLowerCase();
+
+  // Check if headline contains the ticker as a whole word (avoid matching partial words)
+  // e.g., "WTW" should match but not match inside another word
+  const tickerRegex = new RegExp(`\\b${tickerLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+  if (tickerRegex.test(headline)) return true;
+
+  // Check company name relevance
+  if (companyName) {
+    const nameLower = companyName.toLowerCase();
+
+    // Try the full company name first
+    if (headlineLower.includes(nameLower)) return true;
+
+    // Extract meaningful name words (skip generic suffixes like Inc, Corp, Ltd, etc.)
+    const skipWords = new Set(['inc', 'inc.', 'corp', 'corp.', 'ltd', 'ltd.', 'llc', 'plc',
+      'co', 'co.', 'company', 'companies', 'group', 'holdings', 'holding',
+      'the', 'and', '&', 'of', 'international', 'intl', 'global', 'services',
+      'n.v.', 'n.v', 's.a.', 's.a', 's.p.a.', 's.p.a', 'se', 'ag', 'nv', 'sa']);
+    const nameWords = nameLower.split(/[\s,]+/).filter(w => w.length > 1 && !skipWords.has(w));
+
+    // Check if any significant name word (3+ chars) appears in the headline
+    for (const word of nameWords) {
+      if (word.length >= 3 && headlineLower.includes(word)) return true;
+    }
+  }
+
+  return false;
+}
+
+async function getFinnhubNews(ticker, companyName) {
   if (!FINNHUB_API_KEY) {
     console.log('[Finnhub] No API key configured');
     return null;
@@ -259,15 +318,18 @@ async function getFinnhubNews(ticker) {
     const news = await response.json();
 
     if (news && news.length > 0) {
-      // Filter out generic market roundup headlines
-      const filtered = news.filter(item => !isGenericHeadline(item.headline));
+      // Filter out generic market roundup headlines, then filter for relevance
+      const filtered = news.filter(item =>
+        !isGenericHeadline(item.headline) &&
+        isRelevantHeadline(item.headline, ticker, companyName)
+      );
 
       // Send all filtered headlines (up to 15 to avoid prompt bloat)
       const relevant = filtered.slice(0, 15);
 
       if (relevant.length > 0) {
         const headlines = relevant.map(item => item.headline).join('\n');
-        console.log(`[Finnhub] Found ${relevant.length} relevant headlines for ${ticker} (filtered ${news.length - filtered.length} generic)`);
+        console.log(`[Finnhub] Found ${relevant.length} relevant headlines for ${ticker} (filtered ${news.length - filtered.length} generic/irrelevant)`);
         return headlines;
       }
     }
@@ -280,17 +342,17 @@ async function getFinnhubNews(ticker) {
   }
 }
 
-async function getYahooNews(ticker) {
+async function getYahooNews(ticker, companyName) {
   try {
     const result = await yahooFinance.search(ticker, { newsCount: 10, quotesCount: 0 });
 
     if (result && result.news && result.news.length > 0) {
       const filtered = result.news
         .map(item => item.title)
-        .filter(title => title && !isGenericHeadline(title));
+        .filter(title => title && !isGenericHeadline(title) && isRelevantHeadline(title, ticker, companyName));
 
       if (filtered.length > 0) {
-        console.log(`[Yahoo] Found ${filtered.length} relevant headlines for ${ticker} (filtered ${result.news.length - filtered.length} generic)`);
+        console.log(`[Yahoo] Found ${filtered.length} relevant headlines for ${ticker} (filtered ${result.news.length - filtered.length} generic/irrelevant)`);
         return filtered;
       }
     }
@@ -3766,8 +3828,8 @@ async function generateStockExplanation(ticker, companyName, changePercent) {
 
     // Get news headlines from Finnhub + Yahoo Finance in parallel
     const [finnhubHeadlines, yahooHeadlines] = await Promise.all([
-      getFinnhubNews(ticker),
-      getYahooNews(ticker)
+      getFinnhubNews(ticker, name),
+      getYahooNews(ticker, name)
     ]);
 
     // Combine and deduplicate headlines from both sources
