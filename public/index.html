@@ -8,6 +8,13 @@
     /* ===== Reset & Base ===== */
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* iOS WKWebView scroll fix */
+    html {
+      height: auto;
+      overflow-y: scroll;
+      -webkit-overflow-scrolling: touch;
+    }
+
     :root {
       /* Brand */
       --brand-dark: #1a3353;
@@ -46,6 +53,7 @@
       color: var(--text-primary);
       line-height: 1.7;
       -webkit-font-smoothing: antialiased;
+      -webkit-overflow-scrolling: touch;
     }
 
     /* Override to sans-serif for UI elements */
@@ -972,6 +980,13 @@
       <span>Chat</span>
     </button>
   </div>
+
+  <!-- iOS scroll safety: reset overflow if stuck from panel -->
+  <script>
+    window.addEventListener('pageshow', function() {
+      document.body.style.overflow = '';
+    });
+  </script>
 
   <!-- Bottom Tab Bar (Mobile) -->
   <nav class="bottom-tab-bar">
