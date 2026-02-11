@@ -1084,11 +1084,13 @@
       width: 100%;
       height: 200px;
       margin: 8px 0 16px 0;
+      touch-action: pan-y;
     }
 
     .chart-container svg {
       width: 100%;
       height: 100%;
+      touch-action: pan-y;
     }
 
     .chart-loading {
@@ -2567,6 +2569,10 @@
     function unlockScroll() {
       document.documentElement.classList.remove('panel-scroll-lock');
       document.body.style.top = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      document.body.style.overflow = '';
       window.scrollTo(0, savedScrollY);
     }
 
@@ -2811,7 +2817,7 @@
           ${xLabels}
           <line id="panel-chart-crosshair" x1="0" y1="${padTop}" x2="0" y2="${padTop + chartH}" stroke="#e0dcd5" stroke-width="1" visibility="hidden"/>
           <circle id="panel-chart-dot" cx="0" cy="0" r="3.5" fill="${lineColor}" stroke="white" stroke-width="1.5" visibility="hidden"/>
-          <rect id="panel-chart-hover" x="${padLeft}" y="${padTop}" width="${chartW}" height="${chartH}" fill="transparent" cursor="crosshair"/>
+          <rect id="panel-chart-hover" x="${padLeft}" y="${padTop}" width="${chartW}" height="${chartH}" fill="transparent" cursor="crosshair" style="touch-action: pan-y;"/>
         </svg>
         <div class="chart-tooltip" id="${tooltipId}"></div>
       `;
@@ -2967,7 +2973,25 @@
       document.documentElement.classList.remove('panel-scroll-lock');
       document.body.style.top = '';
       document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
     });
+
+    // Safety interval: auto-unlock scroll if no panel is actually open
+    setInterval(function() {
+      if (document.documentElement.classList.contains('panel-scroll-lock')) {
+        var anyPanelOpen = document.querySelector('.side-panel.active');
+        if (!anyPanelOpen) {
+          document.documentElement.classList.remove('panel-scroll-lock');
+          document.body.style.top = '';
+          document.body.style.overflow = '';
+          document.body.style.position = '';
+          document.body.style.width = '';
+          document.body.style.height = '';
+        }
+      }
+    }, 1000);
   </script>
 
   <!-- Watchlist horizontal scroll hint -->

@@ -1190,11 +1190,13 @@
       width: 100%;
       height: 240px;
       margin: 8px 0 20px 0;
+      touch-action: pan-y;
     }
 
     .chart-container svg {
       width: 100%;
       height: 100%;
+      touch-action: pan-y;
     }
 
     .chart-loading {
@@ -1959,6 +1961,10 @@
     function unlockScroll() {
       document.documentElement.classList.remove('panel-scroll-lock');
       document.body.style.top = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
+      document.body.style.overflow = '';
       window.scrollTo(0, savedScrollY);
     }
 
@@ -2561,7 +2567,7 @@
           ${xLabels}
           <line id="index-chart-crosshair" x1="0" y1="${padTop}" x2="0" y2="${padTop + chartH}" stroke="#dadce0" stroke-width="1" visibility="hidden"/>
           <circle id="index-chart-dot" cx="0" cy="0" r="4" fill="${lineColor}" stroke="white" stroke-width="2" visibility="hidden"/>
-          <rect id="index-chart-hover-area" x="${padLeft}" y="${padTop}" width="${chartW}" height="${chartH}" fill="transparent" cursor="crosshair"/>
+          <rect id="index-chart-hover-area" x="${padLeft}" y="${padTop}" width="${chartW}" height="${chartH}" fill="transparent" cursor="crosshair" style="touch-action: pan-y;"/>
         </svg>
         <div class="chart-tooltip" id="${tooltipId}"></div>
       `;
@@ -2851,7 +2857,7 @@
           ${xLabels}
           <line id="fg-chart-crosshair" x1="0" y1="${padTop}" x2="0" y2="${padTop + chartH}" stroke="#dadce0" stroke-width="1" visibility="hidden"/>
           <circle id="fg-chart-dot" cx="0" cy="0" r="4" fill="#202124" stroke="white" stroke-width="2" visibility="hidden"/>
-          <rect id="fg-chart-hover-area" x="${padLeft}" y="${padTop}" width="${chartW}" height="${chartH}" fill="transparent" cursor="crosshair"/>
+          <rect id="fg-chart-hover-area" x="${padLeft}" y="${padTop}" width="${chartW}" height="${chartH}" fill="transparent" cursor="crosshair" style="touch-action: pan-y;"/>
         </svg>
         <div class="chart-tooltip" id="${tooltipId}"></div>
       `;
@@ -2904,17 +2910,27 @@
         tooltip.classList.remove('visible');
       });
 
-      // Touch support for mobile
+      // Touch support for mobile - use passive listeners to avoid blocking scroll
+      let fgTouchActive = false;
+      hoverArea.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          fgTouchActive = true;
+          const touch = e.touches[0];
+          handleFgHover({ clientX: touch.clientX, clientY: touch.clientY });
+        }
+      }, { passive: true });
       hoverArea.addEventListener('touchmove', (e) => {
-        e.preventDefault();
-        const touch = e.touches[0];
-        handleFgHover({ clientX: touch.clientX, clientY: touch.clientY });
-      }, { passive: false });
+        if (fgTouchActive && e.touches.length === 1) {
+          const touch = e.touches[0];
+          handleFgHover({ clientX: touch.clientX, clientY: touch.clientY });
+        }
+      }, { passive: true });
       hoverArea.addEventListener('touchend', () => {
+        fgTouchActive = false;
         crosshair.setAttribute('visibility', 'hidden');
         dot.setAttribute('visibility', 'hidden');
         tooltip.classList.remove('visible');
-      });
+      }, { passive: true });
     }
   </script>
 
@@ -2924,7 +2940,25 @@
       document.documentElement.classList.remove('panel-scroll-lock');
       document.body.style.top = '';
       document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
     });
+
+    // Safety interval: auto-unlock scroll if no panel is actually open
+    setInterval(function() {
+      if (document.documentElement.classList.contains('panel-scroll-lock')) {
+        var anyPanelOpen = document.querySelector('.side-panel.active, .chart-side-panel.active');
+        if (!anyPanelOpen) {
+          document.documentElement.classList.remove('panel-scroll-lock');
+          document.body.style.top = '';
+          document.body.style.overflow = '';
+          document.body.style.position = '';
+          document.body.style.width = '';
+          document.body.style.height = '';
+        }
+      }
+    }, 1000);
   </script>
 
   <!-- Bottom Tab Bar (Mobile) -->

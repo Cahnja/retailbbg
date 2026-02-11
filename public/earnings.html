@@ -614,7 +614,12 @@
   <!-- iOS scroll safety: reset overflow if stuck from panel -->
   <script>
     window.addEventListener('pageshow', function() {
+      document.documentElement.classList.remove('panel-scroll-lock');
+      document.body.style.top = '';
       document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.height = '';
     });
   </script>
 
