@@ -368,7 +368,18 @@
       border-radius: 8px;
       border: 1px solid var(--border);
       box-shadow: var(--shadow-card);
+      position: relative;
+    }
+
+    /* Scrollable table wrapper */
+    .watchlist-scroll-wrapper {
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x pan-y;
+    }
+
+    .watchlist-scroll-wrapper > #watchlist-container {
+      min-width: 620px;
     }
 
     .watchlist-header {
@@ -829,6 +840,26 @@
 
       .stock-change {
         font-size: 11px;
+      }
+
+      /* Mobile scroll hint - fade on right edge */
+      .watchlist-section::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 24px;
+        background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.85));
+        pointer-events: none;
+        z-index: 1;
+        border-radius: 0 8px 8px 0;
+        transition: opacity 0.3s;
+      }
+
+      /* Hide scroll hint when scrolled to end */
+      .watchlist-section.scrolled-end::after {
+        opacity: 0;
       }
 
     }
@@ -1391,7 +1422,7 @@
       </form>
     </div>
 
-    <div class="watchlist-section">
+    <div class="watchlist-section" id="watchlist-section">
       <div class="watchlist-header">
         <span class="watchlist-title" id="watchlist-title-label">Popular Stocks</span>
         <div class="refresh-info">
@@ -1399,8 +1430,10 @@
           <button class="refresh-btn" id="refresh-btn">Refresh</button>
         </div>
       </div>
-      <div id="watchlist-container">
-        <!-- Watchlist items will be rendered here -->
+      <div class="watchlist-scroll-wrapper" id="watchlist-scroll-wrapper">
+        <div id="watchlist-container">
+          <!-- Watchlist items will be rendered here -->
+        </div>
       </div>
     </div>
   </main>
@@ -2935,6 +2968,33 @@
       document.body.style.top = '';
       document.body.style.overflow = '';
     });
+  </script>
+
+  <!-- Watchlist horizontal scroll hint -->
+  <script>
+    (function() {
+      const scrollWrapper = document.getElementById('watchlist-scroll-wrapper');
+      const section = document.getElementById('watchlist-section');
+      if (!scrollWrapper || !section) return;
+
+      function checkScrollEnd() {
+        const atEnd = scrollWrapper.scrollLeft + scrollWrapper.clientWidth >= scrollWrapper.scrollWidth - 4;
+        if (atEnd) {
+          section.classList.add('scrolled-end');
+        } else {
+          section.classList.remove('scrolled-end');
+        }
+      }
+
+      scrollWrapper.addEventListener('scroll', checkScrollEnd, { passive: true });
+
+      // Re-check after content renders
+      const observer = new MutationObserver(checkScrollEnd);
+      observer.observe(document.getElementById('watchlist-container'), { childList: true, subtree: true });
+
+      // Initial check
+      setTimeout(checkScrollEnd, 500);
+    })();
   </script>
 
   <!-- Bottom Tab Bar (Mobile) -->
