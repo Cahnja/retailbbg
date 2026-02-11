@@ -21,6 +21,17 @@
       -webkit-overflow-scrolling: touch;
     }
 
+    /* Panel scroll lock - applied via JS for reliable iOS scroll prevention */
+    html.panel-scroll-lock,
+    html.panel-scroll-lock body {
+      overflow: hidden !important;
+      height: 100% !important;
+    }
+    html.panel-scroll-lock body {
+      position: fixed !important;
+      width: 100% !important;
+    }
+
     :root {
       /* Brand */
       --brand-dark: #1a3353;
@@ -1938,6 +1949,19 @@
       }).join('');
     }
 
+    // Robust scroll lock/unlock for iOS WKWebView (Capacitor)
+    let savedScrollY = 0;
+    function lockScroll() {
+      savedScrollY = window.scrollY;
+      document.documentElement.classList.add('panel-scroll-lock');
+      document.body.style.top = `-${savedScrollY}px`;
+    }
+    function unlockScroll() {
+      document.documentElement.classList.remove('panel-scroll-lock');
+      document.body.style.top = '';
+      window.scrollTo(0, savedScrollY);
+    }
+
     // Side Panel functions
     const panelOverlay = document.getElementById('panel-overlay');
     const sidePanel = document.getElementById('side-panel');
@@ -2028,7 +2052,7 @@
       // Show the panel
       panelOverlay.classList.add('active');
       sidePanel.classList.add('active');
-      document.body.style.overflow = 'hidden';
+      lockScroll();
 
       // Fetch the detailed analysis
       fetchDriverDetails(bulletText);
@@ -2037,7 +2061,7 @@
     function closePanel() {
       panelOverlay.classList.remove('active');
       sidePanel.classList.remove('active');
-      document.body.style.overflow = '';
+      unlockScroll();
     }
 
     // Close panel when clicking overlay
@@ -2356,7 +2380,7 @@
 
       chartPanelOverlay.classList.add('active');
       chartSidePanel.classList.add('active');
-      document.body.style.overflow = 'hidden';
+      lockScroll();
 
       // Attach tab click handlers
       document.querySelectorAll('#chart-tabs .chart-tab').forEach(tab => {
@@ -2652,7 +2676,7 @@
     function closeChartPanel() {
       chartPanelOverlay.classList.remove('active');
       chartSidePanel.classList.remove('active');
-      document.body.style.overflow = '';
+      unlockScroll();
       chartPanelTicker = null;
     }
 
@@ -2716,7 +2740,7 @@
 
       chartPanelOverlay.classList.add('active');
       chartSidePanel.classList.add('active');
-      document.body.style.overflow = 'hidden';
+      lockScroll();
 
       // Render the chart after the DOM is ready
       setTimeout(() => renderFearGreedSVGChart(points), 0);
@@ -2897,6 +2921,8 @@
   <!-- iOS scroll safety: reset overflow if stuck from panel -->
   <script>
     window.addEventListener('pageshow', function() {
+      document.documentElement.classList.remove('panel-scroll-lock');
+      document.body.style.top = '';
       document.body.style.overflow = '';
     });
   </script>
