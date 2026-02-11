@@ -910,6 +910,11 @@ app.get('/', (req, res) => {
   res.redirect('/market.html');
 });
 
+// Privacy policy page
+app.get('/privacy', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'privacy.html'));
+});
+
 // Clean URLs for earnings reviews: /pltr-earnings, /aapl-earnings, etc.
 app.get('/:tickerEarnings', (req, res, next) => {
   const param = req.params.tickerEarnings.toLowerCase();
@@ -925,7 +930,7 @@ app.get('/:tickerEarnings', (req, res, next) => {
 app.get('/:ticker', (req, res, next) => {
   const ticker = req.params.ticker.toUpperCase();
   // Skip if it looks like a file request or known route
-  if (ticker.includes('.') || ['API', 'MARKET', 'PORTFOLIO', 'THEMATIC', 'EARNINGS', 'IDEAGENERATION', 'WATCHLIST', 'TOP-MOVERS'].includes(ticker)) {
+  if (ticker.includes('.') || ['API', 'MARKET', 'PORTFOLIO', 'THEMATIC', 'EARNINGS', 'IDEAGENERATION', 'WATCHLIST', 'TOP-MOVERS', 'PRIVACY'].includes(ticker)) {
     return next();
   }
   // Serve index.html - client will read ticker from URL

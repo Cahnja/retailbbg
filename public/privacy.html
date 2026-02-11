@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Privacy Policy - Initiate Coverage</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1a3353">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Initiate Coverage">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <style>
+    /* ===== Reset & Base ===== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      height: auto;
+      overflow-y: scroll;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    :root {
+      /* Brand */
+      --brand-dark: #1a3353;
+      --brand-mid: #2a4f7a;
+      --brand-light: #eae4d9;
+
+      /* Positive / Negative */
+      --positive: #0d7377;
+      --positive-bg: #e0f2f1;
+      --negative: #c0392b;
+      --negative-bg: #fbeae8;
+
+      /* Neutrals */
+      --text-primary: #2c2c2c;
+      --text-secondary: #5c5c5c;
+      --text-tertiary: #8a8580;
+      --text-faint: #a8a29e;
+
+      --bg-page: #faf8f5;
+      --bg-card: #ffffff;
+      --bg-subtle: #f5f2ed;
+
+      --border: #e0dcd5;
+      --border-light: #ebe7e0;
+
+      /* Sizing */
+      --radius-card: 10px;
+      --radius-sm: 6px;
+      --shadow-card: 0 1px 3px rgba(120, 100, 70, 0.08);
+      --shadow-hover: 0 4px 14px rgba(120, 100, 70, 0.14);
+    }
+
+    body {
+      font-family: 'Georgia', 'Times New Roman', -apple-system, BlinkMacSystemFont, 'Segoe UI', serif;
+      background: var(--bg-page);
+      color: var(--text-primary);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Override to sans-serif for UI elements */
+    .nav-strip, .nav-tab, .brand-ic,
+    .bottom-tab-bar, .page-date, .page-subtitle {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    /* ===== Navigation Banner ===== */
+    .nav-strip {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 48px;
+      background: var(--brand-dark);
+      border-bottom: none;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      z-index: 1000;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: #fff;
+      margin-right: 24px;
+      flex-shrink: 0;
+    }
+
+    .brand-ic {
+      font-size: 16px;
+      font-weight: 800;
+      color: #f0e6d3;
+      letter-spacing: -1px;
+    }
+
+    .brand-sep {
+      width: 1px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .nav-tabs {
+      display: flex;
+      align-items: stretch;
+      height: 48px;
+      gap: 0;
+    }
+
+    .nav-tab {
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.55);
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .nav-tab:hover {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .nav-tab.active {
+      color: #fff;
+      border-bottom-color: #f0e6d3;
+      font-weight: 600;
+    }
+
+    /* ===== Main Content ===== */
+    .main-content {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 32px;
+      padding-top: 80px;
+    }
+
+    /* ===== Page Header ===== */
+    .page-header {
+      margin-bottom: 32px;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--brand-dark);
+      letter-spacing: -0.3px;
+      margin-bottom: 4px;
+      font-family: 'Georgia', 'Times New Roman', serif;
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    .page-date {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      font-weight: 400;
+      margin-top: 2px;
+    }
+
+    /* ===== Privacy Policy Content ===== */
+    .policy-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-card);
+      padding: 32px 36px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-card);
+      margin-bottom: 24px;
+    }
+
+    .policy-card h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--brand-dark);
+      margin-bottom: 16px;
+      margin-top: 32px;
+      font-family: 'Georgia', 'Times New Roman', serif;
+      letter-spacing: -0.2px;
+    }
+
+    .policy-card h2:first-child {
+      margin-top: 0;
+    }
+
+    .policy-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+      margin-top: 24px;
+      font-family: 'Georgia', 'Times New Roman', serif;
+    }
+
+    .policy-card p {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-primary);
+      margin-bottom: 14px;
+    }
+
+    .policy-card ul {
+      margin: 10px 0 16px 24px;
+      padding: 0;
+    }
+
+    .policy-card li {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .policy-card li strong {
+      color: var(--brand-dark);
+    }
+
+    .policy-card a {
+      color: var(--brand-mid);
+      text-decoration: underline;
+    }
+
+    .policy-card a:hover {
+      color: var(--brand-dark);
+    }
+
+    .disclaimer-box {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      margin-top: 24px;
+      margin-bottom: 16px;
+    }
+
+    .disclaimer-box h3 {
+      margin-top: 0;
+      font-size: 15px;
+      color: var(--brand-dark);
+    }
+
+    .disclaimer-box p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 0;
+    }
+
+    .last-updated {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      font-style: italic;
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    /* ===== Bottom Tab Bar (Mobile) ===== */
+    .bottom-tab-bar {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--brand-dark);
+      z-index: 1000;
+      padding-bottom: env(safe-area-inset-bottom);
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .bottom-tab-bar .tab-items {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 56px;
+    }
+
+    .bottom-tab-bar .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 9px;
+      font-weight: 500;
+      gap: 3px;
+      padding: 6px 4px;
+      min-width: 0;
+      flex: 1;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      transition: color 0.2s;
+    }
+
+    .bottom-tab-bar .tab-item.active {
+      color: #f0e6d3;
+    }
+
+    .bottom-tab-bar .tab-item svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .bottom-tab-bar .tab-label {
+      line-height: 1;
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 900px) {
+      .nav-tab {
+        padding: 0 10px;
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 20px 16px;
+        padding-top: 24px;
+      }
+
+      .nav-strip {
+        display: none;
+      }
+
+      .bottom-tab-bar {
+        display: block;
+      }
+
+      body {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: calc(56px + env(safe-area-inset-bottom));
+      }
+
+      .main-content {
+        padding-top: calc(24px + env(safe-area-inset-top));
+      }
+
+      .page-title {
+        font-size: 22px;
+      }
+
+      .page-subtitle {
+        font-size: 13px;
+      }
+
+      .policy-card {
+        padding: 24px 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .nav-tab {
+        padding: 0 7px;
+        font-size: 11px;
+      }
+      .brand-sep { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav-strip">
+    <a href="/market" class="brand">
+      <span class="brand-ic">IC</span>
+    </a>
+    <div class="brand-sep"></div>
+    <div class="nav-tabs">
+      <a href="/market" class="nav-tab">Market Update</a>
+      <a href="/top-movers" class="nav-tab">Top Movers</a>
+      <a href="/portfolio" class="nav-tab">Portfolio</a>
+      <a href="/ideageneration" class="nav-tab">Idea Generation</a>
+      <a href="/index.html" class="nav-tab">Initiation</a>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1 class="page-title">Privacy Policy</h1>
+      <p class="page-subtitle">Initiate Coverage iOS App</p>
+      <p class="page-date">Last updated: February 2026</p>
+    </div>
+
+    <div class="policy-card">
+      <h2>Introduction</h2>
+      <p>Initiate Coverage ("we," "our," or "the app") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our iOS application and website at <a href="https://initiatecoverage.com">initiatecoverage.com</a>.</p>
+      <p>By using Initiate Coverage, you agree to the collection and use of information in accordance with this policy.</p>
+
+      <h2>Information We Collect</h2>
+
+      <h3>Account Information</h3>
+      <ul>
+        <li><strong>Email address</strong> and <strong>Google account information</strong> (name, email, profile identifier) when you sign in using email or Google Sign-In</li>
+        <li>Account credentials are used solely for authentication and syncing your data across devices</li>
+      </ul>
+
+      <h3>Watchlist and Portfolio Data</h3>
+      <ul>
+        <li>Stock tickers you add to your watchlists and portfolios</li>
+        <li>Watchlist names and organization preferences</li>
+        <li>This data is stored to provide personalized portfolio tracking across your devices</li>
+      </ul>
+
+      <h3>Search and Query Data</h3>
+      <ul>
+        <li>Stock tickers you enter to generate research reports or look up market data</li>
+        <li>Search queries are used to retrieve relevant financial data and generate AI-powered analysis</li>
+      </ul>
+
+      <h3>Usage Data</h3>
+      <ul>
+        <li>Pages visited and features used within the app</li>
+        <li>General interaction patterns to help us improve the app experience</li>
+        <li>Device type and operating system version for compatibility purposes</li>
+      </ul>
+
+      <h2>How We Use Your Information</h2>
+      <p>We use the information we collect to:</p>
+      <ul>
+        <li>Provide and maintain the app's core functionality, including personalized watchlists and portfolio tracking</li>
+        <li>Generate AI-powered stock research reports and market analysis tailored to the tickers you request</li>
+        <li>Sync your watchlists and preferences across devices when you are signed in</li>
+        <li>Improve the app experience, fix bugs, and develop new features</li>
+        <li>Retrieve real-time market data, news, and financial information relevant to your interests</li>
+      </ul>
+
+      <h2>Third-Party Services</h2>
+      <p>Initiate Coverage relies on the following third-party services to deliver its functionality. When you use the app, certain data may be shared with these providers as described below:</p>
+
+      <h3>OpenAI</h3>
+      <p>We use OpenAI's API to generate AI-powered research reports, market analysis, and stock explanations. When you request a report or analysis, the relevant stock ticker(s) and query context are sent to OpenAI's servers for processing. OpenAI's usage policies and privacy practices apply to data processed through their service.</p>
+
+      <h3>Exa AI</h3>
+      <p>We use Exa AI for intelligent news search. Stock tickers and related search queries may be sent to Exa's servers to retrieve relevant news articles and information.</p>
+
+      <h3>Yahoo Finance</h3>
+      <p>We retrieve real-time and historical stock prices, company financials, and market data from Yahoo Finance. Stock tickers you search or add to your watchlist are sent to Yahoo Finance to fetch the corresponding data.</p>
+
+      <h3>CNN</h3>
+      <p>We retrieve Fear &amp; Greed Index data from CNN to display market sentiment information. No personal user data is shared with CNN.</p>
+
+      <h3>Google Sign-In</h3>
+      <p>If you choose to sign in with Google, we use Google's OAuth 2.0 authentication service. We receive your name, email address, and a unique account identifier from Google. We do not access your Google contacts, calendar, or any other Google services beyond authentication.</p>
+
+      <h2>Data Storage and Security</h2>
+      <p>Your data is stored on secure servers. We implement reasonable technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.</p>
+      <p>When you are signed in, your watchlists and portfolio data are synced across your devices through our servers. If you use the app without signing in, your data is stored locally on your device.</p>
+
+      <h2>Data Sharing</h2>
+      <p>We do not sell, trade, or rent your personal information to third parties. Your data is shared with third-party services only as necessary to provide the app's core functionality, as described in the "Third-Party Services" section above.</p>
+      <p>We may disclose your information if required to do so by law or in response to valid legal requests by public authorities.</p>
+
+      <h2>Data Retention and Deletion</h2>
+      <p>Your account data, including watchlists and portfolio information, is retained for as long as your account remains active. Cached research reports may be retained for up to 30 days to improve performance and reduce redundant processing.</p>
+      <p>You may request deletion of your account and all associated data at any time by contacting us at <a href="mailto:privacy@initiatecoverage.com">privacy@initiatecoverage.com</a>. Upon receiving a verified deletion request, we will remove your personal data from our servers within 30 days.</p>
+
+      <h2>Children's Privacy</h2>
+      <p>Initiate Coverage is not directed at children under the age of 13. We do not knowingly collect personal information from children under 13. If we become aware that we have inadvertently collected such information, we will take steps to delete it promptly. If you believe a child under 13 has provided us with personal information, please contact us at <a href="mailto:privacy@initiatecoverage.com">privacy@initiatecoverage.com</a>.</p>
+
+      <h2>Your Rights</h2>
+      <p>Depending on your jurisdiction, you may have the right to:</p>
+      <ul>
+        <li>Access the personal data we hold about you</li>
+        <li>Request correction of inaccurate data</li>
+        <li>Request deletion of your data</li>
+        <li>Object to or restrict certain processing of your data</li>
+        <li>Request a portable copy of your data</li>
+      </ul>
+      <p>To exercise any of these rights, please contact us at <a href="mailto:privacy@initiatecoverage.com">privacy@initiatecoverage.com</a>.</p>
+
+      <h2>Changes to This Policy</h2>
+      <p>We may update this Privacy Policy from time to time. When we make changes, we will update the "Last updated" date at the top of this page. We encourage you to review this policy periodically. Continued use of the app after changes are posted constitutes your acceptance of the updated policy.</p>
+
+      <div class="disclaimer-box">
+        <h3>Financial Disclaimer</h3>
+        <p>Initiate Coverage provides AI-generated financial research and analysis for informational purposes only. Nothing in this app constitutes investment advice, financial advice, trading advice, or a recommendation to buy, sell, or hold any security. AI-generated content may contain errors or inaccuracies. Always conduct your own research and consult a licensed financial advisor before making any investment decisions. Past performance is not indicative of future results.</p>
+      </div>
+
+      <h2>Contact Us</h2>
+      <p>If you have any questions or concerns about this Privacy Policy or our data practices, please contact us at:</p>
+      <p><a href="mailto:privacy@initiatecoverage.com">privacy@initiatecoverage.com</a></p>
+
+      <p class="last-updated">This privacy policy was last updated in February 2026 and is effective immediately.</p>
+    </div>
+  </main>
+
+  <!-- Bottom Tab Bar (Mobile) -->
+  <nav class="bottom-tab-bar">
+    <div class="tab-items">
+      <a href="/market" class="tab-item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+        <span class="tab-label">Market</span>
+      </a>
+      <a href="/top-movers" class="tab-item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+        <span class="tab-label">Top Movers</span>
+      </a>
+      <a href="/portfolio" class="tab-item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+        <span class="tab-label">Portfolio</span>
+      </a>
+      <a href="/ideageneration" class="tab-item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        <span class="tab-label">Ideas</span>
+      </a>
+      <a href="/index.html" class="tab-item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <span class="tab-label">Initiation</span>
+      </a>
+    </div>
+  </nav>
+</body>
+</html>
