@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Splash Screen Mockups - Initiate Coverage</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand-dark: #1a3353;
+      --brand-mid: #2a4f7a;
+      --brand-light: #eae4d9;
+      --brand-cream: #f0e6d3;
+      --brand-warm: #8b7355;
+      --bg-page: #faf8f5;
+    }
+
+    body {
+      background: #0d0d0d;
+      color: #fff;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding: 60px 40px;
+    }
+
+    .page-title {
+      text-align: center;
+      margin-bottom: 12px;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 36px;
+      font-weight: 300;
+      letter-spacing: 2px;
+      color: var(--brand-cream);
+    }
+
+    .page-subtitle {
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 60px;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+    }
+
+    .mockups-row {
+      display: flex;
+      justify-content: center;
+      gap: 80px;
+      flex-wrap: wrap;
+    }
+
+    .mockup-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .mockup-label {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #555;
+    }
+
+    .mockup-description {
+      font-size: 12px;
+      color: #444;
+      max-width: 260px;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    /* ===== Phone Frame ===== */
+    .phone-frame {
+      width: 280px;
+      height: 570px;
+      border-radius: 40px;
+      border: 3px solid #333;
+      overflow: hidden;
+      position: relative;
+      box-shadow:
+        0 0 0 1px #1a1a1a,
+        0 20px 60px rgba(0,0,0,0.5),
+        inset 0 0 0 1px rgba(255,255,255,0.05);
+    }
+
+    /* Notch */
+    .phone-frame::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 28px;
+      background: #111;
+      border-radius: 0 0 18px 18px;
+      z-index: 10;
+    }
+
+    /* Home indicator */
+    .phone-frame::after {
+      content: "";
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 4px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 2px;
+      z-index: 10;
+    }
+
+    .splash-screen {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ============================================
+       VARIATION 1: Clean & Minimal
+       ============================================ */
+    .splash-v1 {
+      background: linear-gradient(165deg, #1e3a5f 0%, #1a3353 35%, #142842 100%);
+    }
+
+    /* Subtle vignette */
+    .splash-v1::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.3) 100%);
+    }
+
+    .v1-monogram {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 88px;
+      font-weight: 600;
+      color: var(--brand-cream);
+      letter-spacing: 6px;
+      position: relative;
+      z-index: 2;
+      line-height: 1;
+    }
+
+    .v1-divider {
+      width: 40px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--brand-cream), transparent);
+      margin: 24px 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    .v1-brand-name {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: rgba(240, 230, 211, 0.7);
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Subtle corner accents */
+    .v1-corner {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      z-index: 2;
+    }
+    .v1-corner--tl { top: 60px; left: 30px; border-top: 1px solid rgba(240,230,211,0.15); border-left: 1px solid rgba(240,230,211,0.15); }
+    .v1-corner--tr { top: 60px; right: 30px; border-top: 1px solid rgba(240,230,211,0.15); border-right: 1px solid rgba(240,230,211,0.15); }
+    .v1-corner--bl { bottom: 40px; left: 30px; border-bottom: 1px solid rgba(240,230,211,0.15); border-left: 1px solid rgba(240,230,211,0.15); }
+    .v1-corner--br { bottom: 40px; right: 30px; border-bottom: 1px solid rgba(240,230,211,0.15); border-right: 1px solid rgba(240,230,211,0.15); }
+
+
+    /* ============================================
+       VARIATION 2: Elegant / Geometric
+       ============================================ */
+    .splash-v2 {
+      background: linear-gradient(175deg, #1e3d5f 0%, #1a3353 40%, #152a44 100%);
+    }
+
+    /* SVG chart-line pattern overlay */
+    .v2-pattern {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      opacity: 0.06;
+    }
+
+    .v2-glow {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(42,79,122,0.5) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+    }
+
+    .v2-brand-lockup {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+    }
+
+    .v2-mono-container {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 80px;
+      height: 80px;
+      border: 1px solid rgba(240,230,211,0.25);
+      border-radius: 16px;
+      margin-bottom: 28px;
+      position: relative;
+    }
+
+    .v2-mono-container::before {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border: 1px solid rgba(240,230,211,0.08);
+      border-radius: 20px;
+    }
+
+    .v2-monogram {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 36px;
+      font-weight: 600;
+      color: var(--brand-cream);
+      letter-spacing: 2px;
+    }
+
+    .v2-brand-name {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 24px;
+      font-weight: 400;
+      letter-spacing: 3px;
+      color: var(--brand-cream);
+      margin-bottom: 8px;
+    }
+
+    .v2-brand-line {
+      width: 50px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(240,230,211,0.4), transparent);
+      margin: 12px auto;
+    }
+
+    .v2-tagline {
+      font-family: 'Inter', sans-serif;
+      font-size: 9px;
+      font-weight: 400;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: rgba(240,230,211,0.4);
+    }
+
+    /* Horizontal grid lines */
+    .v2-gridlines {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    .v2-gridline {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: rgba(240,230,211,0.03);
+    }
+
+
+    /* ============================================
+       VARIATION 3: Bold Typography
+       ============================================ */
+    .splash-v3 {
+      background: linear-gradient(170deg, #22416a 0%, #1a3353 30%, #0f1f33 100%);
+    }
+
+    .v3-bg-text {
+      position: absolute;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 220px;
+      font-weight: 700;
+      color: rgba(240,230,211,0.025);
+      letter-spacing: -5px;
+      z-index: 1;
+      line-height: 0.85;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      white-space: nowrap;
+    }
+
+    .v3-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+    }
+
+    .v3-top-rule {
+      width: 24px;
+      height: 2px;
+      background: var(--brand-cream);
+      margin: 0 auto 32px;
+    }
+
+    .v3-initiate {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 38px;
+      font-weight: 300;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--brand-cream);
+      line-height: 1.2;
+      margin-bottom: 2px;
+    }
+
+    .v3-coverage {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 38px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--brand-cream);
+      line-height: 1.2;
+    }
+
+    .v3-bottom-rule {
+      width: 60px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--brand-warm), transparent);
+      margin: 24px auto;
+    }
+
+    .v3-tagline {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: rgba(139, 115, 85, 0.8);
+    }
+
+    /* Animated gradient bar at bottom */
+    .v3-gradient-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--brand-dark), var(--brand-warm), var(--brand-cream), var(--brand-warm), var(--brand-dark));
+      background-size: 200% 100%;
+      animation: shimmer 3s ease-in-out infinite;
+      z-index: 2;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    /* Pulse animation for loading feel */
+    @keyframes pulse {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+
+    .v1-brand-name { animation: pulse 2.5s ease-in-out infinite; }
+    .v2-tagline { animation: pulse 3s ease-in-out infinite; }
+    .v3-tagline { animation: pulse 2.5s ease-in-out infinite; }
+
+    /* ===== Color Swatch Reference ===== */
+    .swatches {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 60px;
+      flex-wrap: wrap;
+    }
+
+    .swatch {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .swatch-color {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .swatch-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .swatch-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: #888;
+    }
+
+    .swatch-hex {
+      font-size: 11px;
+      color: #555;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    /* ===== Actual Splash Image Preview ===== */
+    .actual-splash-section {
+      margin-top: 80px;
+      text-align: center;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #555;
+      margin-bottom: 8px;
+    }
+
+    .section-desc {
+      font-size: 12px;
+      color: #444;
+      margin-bottom: 40px;
+    }
+
+    .actual-row {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .actual-preview {
+      width: 320px;
+      height: 320px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #333;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    }
+
+    .actual-splash {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .actual-label {
+      font-size: 11px;
+      color: #555;
+      margin-top: 12px;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1 class="page-title">Initiate Coverage</h1>
+  <p class="page-subtitle">Splash Screen Concepts &mdash; iOS App Launch Screen</p>
+
+  <div class="mockups-row">
+
+    <!-- ===== VARIATION 1: Clean & Minimal ===== -->
+    <div class="mockup-col">
+      <div class="mockup-label">Option 1 &mdash; Clean & Minimal</div>
+      <div class="phone-frame">
+        <div class="splash-screen splash-v1">
+          <div class="v1-corner v1-corner--tl"></div>
+          <div class="v1-corner v1-corner--tr"></div>
+          <div class="v1-corner v1-corner--bl"></div>
+          <div class="v1-corner v1-corner--br"></div>
+          <div class="v1-monogram">IC</div>
+          <div class="v1-divider"></div>
+          <div class="v1-brand-name">Initiate Coverage</div>
+        </div>
+      </div>
+      <p class="mockup-description">
+        Refined monogram with a single hairline divider. Quiet confidence.
+        Corner accents frame the composition.
+      </p>
+    </div>
+
+    <!-- ===== VARIATION 2: Elegant / Geometric ===== -->
+    <div class="mockup-col">
+      <div class="mockup-label">Option 2 &mdash; Elegant</div>
+      <div class="phone-frame">
+        <div class="splash-screen splash-v2">
+          <!-- Geometric chart-line pattern -->
+          <svg class="v2-pattern" viewBox="0 0 280 570" preserveAspectRatio="none">
+            <!-- Horizontal grid -->
+            <line x1="0" y1="100" x2="280" y2="100" stroke="#f0e6d3" stroke-width="0.5"/>
+            <line x1="0" y1="170" x2="280" y2="170" stroke="#f0e6d3" stroke-width="0.5"/>
+            <line x1="0" y1="240" x2="280" y2="240" stroke="#f0e6d3" stroke-width="0.5"/>
+            <line x1="0" y1="310" x2="280" y2="310" stroke="#f0e6d3" stroke-width="0.5"/>
+            <line x1="0" y1="380" x2="280" y2="380" stroke="#f0e6d3" stroke-width="0.5"/>
+            <line x1="0" y1="450" x2="280" y2="450" stroke="#f0e6d3" stroke-width="0.5"/>
+            <!-- Vertical grid -->
+            <line x1="46" y1="0" x2="46" y2="570" stroke="#f0e6d3" stroke-width="0.3"/>
+            <line x1="93" y1="0" x2="93" y2="570" stroke="#f0e6d3" stroke-width="0.3"/>
+            <line x1="140" y1="0" x2="140" y2="570" stroke="#f0e6d3" stroke-width="0.3"/>
+            <line x1="187" y1="0" x2="187" y2="570" stroke="#f0e6d3" stroke-width="0.3"/>
+            <line x1="234" y1="0" x2="234" y2="570" stroke="#f0e6d3" stroke-width="0.3"/>
+            <!-- Chart line -->
+            <polyline
+              points="0,380 30,370 60,355 90,360 120,330 140,310 160,280 180,290 200,260 220,250 240,240 260,220 280,200"
+              fill="none" stroke="#f0e6d3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Area fill under chart -->
+            <polygon
+              points="0,380 30,370 60,355 90,360 120,330 140,310 160,280 180,290 200,260 220,250 240,240 260,220 280,200 280,570 0,570"
+              fill="url(#areaGrad)" opacity="0.3"/>
+            <defs>
+              <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f0e6d3" stop-opacity="0.15"/>
+                <stop offset="100%" stop-color="#f0e6d3" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+          </svg>
+
+          <div class="v2-glow"></div>
+
+          <div class="v2-brand-lockup">
+            <div class="v2-mono-container">
+              <span class="v2-monogram">IC</span>
+            </div>
+            <div class="v2-brand-name">Initiate Coverage</div>
+            <div class="v2-brand-line"></div>
+            <div class="v2-tagline">Financial Intelligence</div>
+          </div>
+        </div>
+      </div>
+      <p class="mockup-description">
+        Subtle chart grid and ascending line suggest market data.
+        Rounded icon container adds an app-like quality.
+      </p>
+    </div>
+
+    <!-- ===== VARIATION 3: Bold Typography ===== -->
+    <div class="mockup-col">
+      <div class="mockup-label">Option 3 &mdash; Bold</div>
+      <div class="phone-frame">
+        <div class="splash-screen splash-v3">
+          <div class="v3-bg-text">IC</div>
+          <div class="v3-content">
+            <div class="v3-top-rule"></div>
+            <div class="v3-initiate">Initiate</div>
+            <div class="v3-coverage">Coverage</div>
+            <div class="v3-bottom-rule"></div>
+            <div class="v3-tagline">Market Intelligence</div>
+          </div>
+          <div class="v3-gradient-bar"></div>
+        </div>
+      </div>
+      <p class="mockup-description">
+        Full brand name in large stacked typography. Warm gold accent bar
+        at the bottom with a subtle shimmer animation.
+      </p>
+    </div>
+
+  </div>
+
+  <!-- Color Reference -->
+  <div class="swatches">
+    <div class="swatch">
+      <div class="swatch-color" style="background: #1a3353;"></div>
+      <div class="swatch-info">
+        <span class="swatch-name">Brand Dark</span>
+        <span class="swatch-hex">#1a3353</span>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #2a4f7a;"></div>
+      <div class="swatch-info">
+        <span class="swatch-name">Brand Mid</span>
+        <span class="swatch-hex">#2a4f7a</span>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #eae4d9;"></div>
+      <div class="swatch-info">
+        <span class="swatch-name">Brand Light</span>
+        <span class="swatch-hex">#eae4d9</span>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #f0e6d3;"></div>
+      <div class="swatch-info">
+        <span class="swatch-name">Brand Cream</span>
+        <span class="swatch-hex">#f0e6d3</span>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: #8b7355;"></div>
+      <div class="swatch-info">
+        <span class="swatch-name">Brand Warm</span>
+        <span class="swatch-hex">#8b7355</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actual 1:1 Splash Previews (for 2732x2732 reference) -->
+  <div class="actual-splash-section">
+    <div class="section-title">Square Preview (2732x2732 reference)</div>
+    <div class="section-desc">How each design looks in the actual 1:1 splash image ratio used by Apple</div>
+
+    <div class="actual-row">
+
+      <!-- Square V1 -->
+      <div class="mockup-col">
+        <div class="actual-preview">
+          <div class="actual-splash splash-v1">
+            <div class="v1-monogram" style="font-size: 72px;">IC</div>
+            <div class="v1-divider"></div>
+            <div class="v1-brand-name">Initiate Coverage</div>
+          </div>
+        </div>
+        <div class="actual-label">Option 1</div>
+      </div>
+
+      <!-- Square V2 -->
+      <div class="mockup-col">
+        <div class="actual-preview">
+          <div class="actual-splash splash-v2" style="position: relative;">
+            <svg class="v2-pattern" viewBox="0 0 320 320" preserveAspectRatio="none">
+              <line x1="0" y1="80" x2="320" y2="80" stroke="#f0e6d3" stroke-width="0.5"/>
+              <line x1="0" y1="140" x2="320" y2="140" stroke="#f0e6d3" stroke-width="0.5"/>
+              <line x1="0" y1="200" x2="320" y2="200" stroke="#f0e6d3" stroke-width="0.5"/>
+              <line x1="0" y1="260" x2="320" y2="260" stroke="#f0e6d3" stroke-width="0.5"/>
+              <polyline
+                points="0,260 50,250 100,230 140,235 180,210 210,190 240,175 270,165 320,140"
+                fill="none" stroke="#f0e6d3" stroke-width="1.5" stroke-linecap="round"/>
+              <polygon
+                points="0,260 50,250 100,230 140,235 180,210 210,190 240,175 270,165 320,140 320,320 0,320"
+                fill="url(#areaGrad2)" opacity="0.3"/>
+              <defs>
+                <linearGradient id="areaGrad2" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#f0e6d3" stop-opacity="0.15"/>
+                  <stop offset="100%" stop-color="#f0e6d3" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="v2-glow"></div>
+            <div class="v2-brand-lockup">
+              <div class="v2-mono-container">
+                <span class="v2-monogram">IC</span>
+              </div>
+              <div class="v2-brand-name" style="font-size: 20px;">Initiate Coverage</div>
+              <div class="v2-brand-line"></div>
+              <div class="v2-tagline">Financial Intelligence</div>
+            </div>
+          </div>
+        </div>
+        <div class="actual-label">Option 2</div>
+      </div>
+
+      <!-- Square V3 -->
+      <div class="mockup-col">
+        <div class="actual-preview">
+          <div class="actual-splash splash-v3">
+            <div class="v3-bg-text" style="font-size: 160px;">IC</div>
+            <div class="v3-content">
+              <div class="v3-top-rule"></div>
+              <div class="v3-initiate" style="font-size: 30px;">Initiate</div>
+              <div class="v3-coverage" style="font-size: 30px;">Coverage</div>
+              <div class="v3-bottom-rule"></div>
+              <div class="v3-tagline">Market Intelligence</div>
+            </div>
+            <div class="v3-gradient-bar"></div>
+          </div>
+        </div>
+        <div class="actual-label">Option 3</div>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

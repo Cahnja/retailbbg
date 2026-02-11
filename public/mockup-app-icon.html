@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App Icon Mockups - Initiate Coverage</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d0d0d;
+      color: #ccc;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      padding: 60px 40px;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      color: #f0e6d3;
+      font-size: 36px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #888;
+      font-size: 15px;
+      margin-bottom: 60px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 60px 80px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .icon-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .icon-container {
+      width: 512px;
+      height: 512px;
+      border-radius: 112px; /* iOS icon radius ratio: ~22.37% of size */
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);
+    }
+
+    .icon-label {
+      margin-top: 20px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #aaa;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .icon-desc {
+      margin-top: 6px;
+      font-size: 13px;
+      color: #666;
+      text-align: center;
+      max-width: 400px;
+      line-height: 1.5;
+    }
+
+    /* ============================================================
+       ICON 1: Clean IC Monogram with Dark Gradient
+       ============================================================ */
+    .icon-1 {
+      background: linear-gradient(145deg, #1a3353 0%, #0f1f33 40%, #0a1628 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .icon-1::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(ellipse at 30% 20%, rgba(42, 79, 122, 0.3) 0%, transparent 60%);
+    }
+
+    .icon-1::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 40%;
+      background: linear-gradient(to top, rgba(240, 230, 211, 0.04) 0%, transparent 100%);
+    }
+
+    .icon-1 .monogram {
+      position: relative;
+      z-index: 1;
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-size: 200px;
+      font-weight: 700;
+      color: #f0e6d3;
+      letter-spacing: -8px;
+      text-shadow: 0 2px 20px rgba(240, 230, 211, 0.15);
+    }
+
+    .icon-1 .monogram-accent {
+      position: absolute;
+      bottom: 140px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #f0e6d3, transparent);
+      opacity: 0.4;
+      z-index: 1;
+    }
+
+    /* ============================================================
+       ICON 2: Stylized Chart + IC Letters
+       ============================================================ */
+    .icon-2 {
+      background: linear-gradient(160deg, #1a3353 0%, #152a45 50%, #0f1f33 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .icon-2 .chart-bg {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 100%;
+    }
+
+    .icon-2 .ic-text {
+      position: relative;
+      z-index: 2;
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-size: 160px;
+      font-weight: 700;
+      color: #f0e6d3;
+      letter-spacing: -6px;
+      margin-top: -40px;
+    }
+
+    /* ============================================================
+       ICON 3: Minimal Elegant Serif
+       ============================================================ */
+    .icon-3 {
+      background: #f0e6d3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .icon-3::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(234,228,217,0) 40%);
+    }
+
+    .icon-3 .serif-ic {
+      position: relative;
+      z-index: 1;
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-size: 220px;
+      font-weight: 400;
+      color: #1a3353;
+      letter-spacing: -4px;
+      font-style: italic;
+    }
+
+    .icon-3 .border-frame {
+      position: absolute;
+      top: 40px; left: 40px; right: 40px; bottom: 40px;
+      border: 1.5px solid rgba(26, 51, 83, 0.15);
+      border-radius: 8px;
+      z-index: 1;
+    }
+
+    /* ============================================================
+       ICON 4: Bold Geometric
+       ============================================================ */
+    .icon-4 {
+      background: #1a3353;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .icon-4 .geo-bg {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+    }
+
+    .icon-4 .geo-text {
+      position: relative;
+      z-index: 2;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      font-size: 200px;
+      font-weight: 800;
+      color: #f0e6d3;
+      letter-spacing: -12px;
+    }
+
+    /* ============================================================
+       Full-size section for screenshotting
+       ============================================================ */
+    .fullsize-section {
+      margin-top: 100px;
+      padding-top: 60px;
+      border-top: 1px solid #222;
+    }
+
+    .fullsize-section h2 {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      color: #f0e6d3;
+      font-size: 24px;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .fullsize-section .subtitle {
+      margin-bottom: 50px;
+    }
+
+    .fullsize-grid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+    }
+
+    .fullsize-icon {
+      width: 1024px;
+      height: 1024px;
+      border-radius: 224px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);
+    }
+
+    .fullsize-label {
+      font-size: 14px;
+      color: #666;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Initiate Coverage</h1>
+  <p class="subtitle">App Icon Concepts &mdash; 512px Preview</p>
+
+  <div class="grid">
+
+    <!-- ICON 1: Clean IC Monogram -->
+    <div class="icon-wrapper">
+      <div class="icon-container icon-1">
+        <span class="monogram">IC</span>
+        <div class="monogram-accent"></div>
+      </div>
+      <div class="icon-label">Option 1: Monogram</div>
+      <div class="icon-desc">Clean "IC" monogram on dark navy gradient. Warm gold lettering with subtle light bloom. Classic and understated.</div>
+    </div>
+
+    <!-- ICON 2: Chart + IC -->
+    <div class="icon-wrapper">
+      <div class="icon-container icon-2">
+        <svg class="chart-bg" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+          <!-- Grid lines -->
+          <line x1="0" y1="380" x2="512" y2="380" stroke="rgba(240,230,211,0.04)" stroke-width="1"/>
+          <line x1="0" y1="310" x2="512" y2="310" stroke="rgba(240,230,211,0.04)" stroke-width="1"/>
+          <line x1="0" y1="240" x2="512" y2="240" stroke="rgba(240,230,211,0.04)" stroke-width="1"/>
+          <line x1="0" y1="170" x2="512" y2="170" stroke="rgba(240,230,211,0.04)" stroke-width="1"/>
+
+          <!-- Chart area fill -->
+          <defs>
+            <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="rgba(13,115,119,0.25)"/>
+              <stop offset="100%" stop-color="rgba(13,115,119,0)"/>
+            </linearGradient>
+            <linearGradient id="chartLine" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="rgba(13,115,119,0.4)"/>
+              <stop offset="100%" stop-color="#0d7377"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Area under curve -->
+          <path d="M0 420 Q60 400, 80 390 Q120 370, 160 360 Q200 340, 220 320 Q260 290, 300 270 Q340 250, 360 220 Q400 180, 430 160 Q470 130, 512 100 L512 512 L0 512 Z"
+                fill="url(#chartFill)" />
+
+          <!-- Chart line -->
+          <path d="M0 420 Q60 400, 80 390 Q120 370, 160 360 Q200 340, 220 320 Q260 290, 300 270 Q340 250, 360 220 Q400 180, 430 160 Q470 130, 512 100"
+                fill="none" stroke="url(#chartLine)" stroke-width="2.5" stroke-linecap="round"/>
+
+          <!-- Small upward arrow at end -->
+          <polygon points="490,80 512,100 502,100 502,130 478,130 478,100 468,100"
+                   fill="rgba(13,115,119,0.6)"/>
+        </svg>
+        <span class="ic-text">IC</span>
+      </div>
+      <div class="icon-label">Option 2: Chart + Monogram</div>
+      <div class="icon-desc">Rising chart line with teal gradient fills behind the IC monogram. Communicates growth and market analysis.</div>
+    </div>
+
+    <!-- ICON 3: Minimal Serif -->
+    <div class="icon-wrapper">
+      <div class="icon-container icon-3">
+        <div class="border-frame"></div>
+        <span class="serif-ic">IC</span>
+      </div>
+      <div class="icon-label">Option 3: Elegant Serif</div>
+      <div class="icon-desc">Light warm cream background with italic serif letterforms in navy. Thin border frame evokes editorial quality.</div>
+    </div>
+
+    <!-- ICON 4: Bold Geometric -->
+    <div class="icon-wrapper">
+      <div class="icon-container icon-4">
+        <svg class="geo-bg" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+          <!-- Diagonal geometric shapes -->
+          <rect x="-50" y="300" width="250" height="250" transform="rotate(-25, 75, 425)"
+                fill="rgba(42,79,122,0.3)"/>
+          <rect x="280" y="-30" width="300" height="300" transform="rotate(15, 430, 120)"
+                fill="rgba(42,79,122,0.2)"/>
+          <rect x="150" y="200" width="200" height="200" transform="rotate(-10, 250, 300)"
+                fill="rgba(42,79,122,0.15)"/>
+
+          <!-- Accent lines -->
+          <line x1="0" y1="460" x2="512" y2="340" stroke="rgba(240,230,211,0.06)" stroke-width="1"/>
+          <line x1="0" y1="400" x2="512" y2="280" stroke="rgba(240,230,211,0.04)" stroke-width="1"/>
+          <line x1="0" y1="180" x2="512" y2="60" stroke="rgba(240,230,211,0.04)" stroke-width="1"/>
+
+          <!-- Teal accent bar -->
+          <rect x="60" y="430" width="80" height="4" rx="2" fill="rgba(13,115,119,0.6)"/>
+          <rect x="160" y="430" width="40" height="4" rx="2" fill="rgba(13,115,119,0.3)"/>
+        </svg>
+        <span class="geo-text">IC</span>
+      </div>
+      <div class="icon-label">Option 4: Bold Geometric</div>
+      <div class="icon-desc">Overlapping geometric planes in varying navy opacities. Bold sans-serif IC with strong presence. Modern and confident.</div>
+    </div>
+
+  </div>
+
+  <!-- Full-size 1024x1024 versions for screenshotting -->
+  <div class="fullsize-section">
+    <h2>Full Size (1024 x 1024)</h2>
+    <p class="subtitle">Scroll down and screenshot each icon individually at App Store resolution</p>
+
+    <div class="fullsize-grid">
+
+      <!-- Full-size ICON 1 -->
+      <div class="fullsize-label">Option 1: Monogram &mdash; 1024x1024</div>
+      <div class="fullsize-icon icon-1" style="font-size: 0;">
+        <span class="monogram" style="font-size: 400px; line-height: 1024px; display: block; text-align: center;">IC</span>
+      </div>
+
+      <!-- Full-size ICON 2 -->
+      <div class="fullsize-label">Option 2: Chart + Monogram &mdash; 1024x1024</div>
+      <div class="fullsize-icon icon-2">
+        <svg class="chart-bg" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" style="position:absolute;top:0;left:0;width:100%;height:100%;">
+          <line x1="0" y1="760" x2="1024" y2="760" stroke="rgba(240,230,211,0.04)" stroke-width="1"/>
+          <line x1="0" y1="620" x2="1024" y2="620" stroke="rgba(240,230,211,0.04)" stroke-width="1"/>
+          <line x1="0" y1="480" x2="1024" y2="480" stroke="rgba(240,230,211,0.04)" stroke-width="1"/>
+          <line x1="0" y1="340" x2="1024" y2="340" stroke="rgba(240,230,211,0.04)" stroke-width="1"/>
+          <defs>
+            <linearGradient id="chartFill2" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="rgba(13,115,119,0.25)"/>
+              <stop offset="100%" stop-color="rgba(13,115,119,0)"/>
+            </linearGradient>
+            <linearGradient id="chartLine2" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="rgba(13,115,119,0.4)"/>
+              <stop offset="100%" stop-color="#0d7377"/>
+            </linearGradient>
+          </defs>
+          <path d="M0 840 Q120 800, 160 780 Q240 740, 320 720 Q400 680, 440 640 Q520 580, 600 540 Q680 500, 720 440 Q800 360, 860 320 Q940 260, 1024 200 L1024 1024 L0 1024 Z"
+                fill="url(#chartFill2)" />
+          <path d="M0 840 Q120 800, 160 780 Q240 740, 320 720 Q400 680, 440 640 Q520 580, 600 540 Q680 500, 720 440 Q800 360, 860 320 Q940 260, 1024 200"
+                fill="none" stroke="url(#chartLine2)" stroke-width="3" stroke-linecap="round"/>
+          <polygon points="980,160 1024,200 1004,200 1004,260 956,260 956,200 936,200"
+                   fill="rgba(13,115,119,0.6)"/>
+        </svg>
+        <span class="ic-text" style="font-size: 320px; position: relative; z-index: 2; margin-top: -80px;">IC</span>
+      </div>
+
+      <!-- Full-size ICON 3 -->
+      <div class="fullsize-label">Option 3: Elegant Serif &mdash; 1024x1024</div>
+      <div class="fullsize-icon icon-3">
+        <div class="border-frame" style="top: 80px; left: 80px; right: 80px; bottom: 80px;"></div>
+        <span class="serif-ic" style="font-size: 440px;">IC</span>
+      </div>
+
+      <!-- Full-size ICON 4 -->
+      <div class="fullsize-label">Option 4: Bold Geometric &mdash; 1024x1024</div>
+      <div class="fullsize-icon icon-4">
+        <svg class="geo-bg" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" style="position:absolute;top:0;left:0;width:100%;height:100%;">
+          <rect x="-100" y="600" width="500" height="500" transform="rotate(-25, 150, 850)"
+                fill="rgba(42,79,122,0.3)"/>
+          <rect x="560" y="-60" width="600" height="600" transform="rotate(15, 860, 240)"
+                fill="rgba(42,79,122,0.2)"/>
+          <rect x="300" y="400" width="400" height="400" transform="rotate(-10, 500, 600)"
+                fill="rgba(42,79,122,0.15)"/>
+          <line x1="0" y1="920" x2="1024" y2="680" stroke="rgba(240,230,211,0.06)" stroke-width="1"/>
+          <line x1="0" y1="800" x2="1024" y2="560" stroke="rgba(240,230,211,0.04)" stroke-width="1"/>
+          <line x1="0" y1="360" x2="1024" y2="120" stroke="rgba(240,230,211,0.04)" stroke-width="1"/>
+          <rect x="120" y="860" width="160" height="6" rx="3" fill="rgba(13,115,119,0.6)"/>
+          <rect x="320" y="860" width="80" height="6" rx="3" fill="rgba(13,115,119,0.3)"/>
+        </svg>
+        <span class="geo-text" style="font-size: 400px; position: relative; z-index: 2;">IC</span>
+      </div>
+
+    </div>
+  </div>
+
+  <div style="height: 100px;"></div>
+
+</body>
+</html>
